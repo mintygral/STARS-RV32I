@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-06-17T19:44:20.787Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="weV1uwO19CR3TT9ANKpD" version="24.5.5" type="github">
+<mxfile host="app.diagrams.net" modified="2024-06-17T19:46:35.058Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="oAf53_F8w5cmXXpD4e1t" version="24.5.5" type="github">
   <diagram name="Page-1" id="md8SmpztBAXeXUs2XrLH">
-    <mxGraphModel dx="802" dy="803" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="241" dy="98" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,7 +10,7 @@
         <mxCell id="D04FGHXcS4jqbybdASdp-25" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#67AB9F;" vertex="1" parent="1">
           <mxGeometry x="160" y="250" width="380" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="D04FGHXcS4jqbybdASdp-26" value="Comb&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22%26lt%3Bp%20style%3D%26quot%3Bline-height%3A%20120%25%3B%26quot%3B%26gt%3BRead%20or%20write%20data%26lt%3B%2Fp%26gt%3B%22%20style%3D%22text%3Bhtml%3D1%3Balign%3Dcenter%3BverticalAlign%3Dmiddle%3BwhiteSpace%3Dwrap%3Brounded%3D0%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22460%22%20y%3D%22490%22%20width%3D%2270%22%20height%3D%2230%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;&amp;nbsp;logic" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="D04FGHXcS4jqbybdASdp-26" value="Next state logic" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="190" y="280" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="D04FGHXcS4jqbybdASdp-27" value="Flip flop" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -150,6 +150,12 @@
         </mxCell>
         <mxCell id="D04FGHXcS4jqbybdASdp-59" value="MemToReg" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="770" y="190" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="D04FGHXcS4jqbybdASdp-60" value="Write Address" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="70" y="295" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="D04FGHXcS4jqbybdASdp-62" value="Read Address" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="70" y="330" width="60" height="10" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
