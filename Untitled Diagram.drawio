@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-06-17T18:54:53.047Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="txWhTQJO3We0aa_y5_cE" version="24.5.5" type="github">
+<mxfile host="app.diagrams.net" modified="2024-06-17T18:55:32.952Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="de48UHRbDHZLSo52E7G4" version="24.5.5" type="github">
   <diagram name="Page-1" id="md8SmpztBAXeXUs2XrLH">
-    <mxGraphModel dx="573" dy="232" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="717" dy="290" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,14 +10,14 @@
         <mxCell id="S8ehygpVV9xDFGkFOboY-1" value="FSM" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="160" y="520" width="110" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="S8ehygpVV9xDFGkFOboY-2" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+        <mxCell id="S8ehygpVV9xDFGkFOboY-2" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" edge="1" source="S8ehygpVV9xDFGkFOboY-3">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="110" y="560" as="sourcePoint" />
             <mxPoint x="160" y="560" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="S8ehygpVV9xDFGkFOboY-3" value="&lt;p style=&quot;line-height: 120%;&quot;&gt;Write data&lt;/p&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="70" y="545" width="40" height="30" as="geometry" />
+          <mxGeometry x="20" y="545" width="40" height="30" as="geometry" />
         </mxCell>
         <mxCell id="D04FGHXcS4jqbybdASdp-1" value="&lt;div&gt;Comb&lt;/div&gt;&lt;div&gt;logic&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="370" y="480" width="60" height="80" as="geometry" />
@@ -87,6 +87,15 @@
         </mxCell>
         <mxCell id="D04FGHXcS4jqbybdASdp-20" value="ALU_Op[1]" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="90" y="770" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="D04FGHXcS4jqbybdASdp-21" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="S8ehygpVV9xDFGkFOboY-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="40" y="440" as="sourcePoint" />
+            <mxPoint x="90" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="D04FGHXcS4jqbybdASdp-22" value="Reg[Read Data 2]" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="10" y="410" width="60" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
