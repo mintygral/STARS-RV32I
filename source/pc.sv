@@ -1,6 +1,6 @@
 
 module PC(
-    input logic clk, clr, load, inc, ALU_out
+    input logic clk, clr, load, inc, ALU_out, Disable,
     input logic [31:0] data, immediate_value, 
     output logic [31:0] pc_val 
 );
@@ -26,7 +26,7 @@ module PC(
         
     // Register 
     always_ff @(posedge clk, negedge clr) begin
-	if (disable) begin 
+	    if (Disable) begin 
 		pc_val <= pc_val 
 	end
 
