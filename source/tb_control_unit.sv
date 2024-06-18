@@ -14,6 +14,8 @@ module tb_control_unit;
         $dumpvars(0, tb_control_unit);
 
         add_r1_r2_r3;
+        sub_r11_r21_r31;
+        xori_r4_r5;
 
     end
 
@@ -26,6 +28,28 @@ module tb_control_unit;
         check_registers(5'b00001, 5'b00010, 5'b00011);
         check_imm(20'b0);
     endtask
+
+    task sub_r11_r21_r31;
+        instruction = 32'b0100000_01011_10100_000_11111_0110011;
+        #5;
+        check_opcode(7'b0110011);
+        check_funct7(7'b0100000);
+        check_funct3(3'b0);
+        check_registers(5'b01011, 5'b10100, 5'b11111);
+        check_imm(20'b0);
+    endtask
+
+    task xori_r4_r5;
+        instruction = 32'b000000010000_00100_100_00101_0010011;
+        #5;
+        check_opcode(7'b0010011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b0);
+        check_registers(5'b00100, 5'b00000, 5'b00101);
+        check_imm(20'b000000010000);
+    endtask
+
+    
 
     task check_opcode(input [6:0] exp_opcode)
         if(opcode != exp_opcode) $display("Incorrect opcode. Expected opcode: %b, actual opcode: %b", exp_opcode, opcode);
