@@ -19,8 +19,6 @@ module mem_manager(
     );
 
     state_t next_state, prev_state;
-    logic bus_empty;
-    assign bus_empty = (!bus_full);
 
     always_ff @(posedge clk || posedge rst) begin : startFSM
         if (rst) begin
