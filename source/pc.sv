@@ -21,6 +21,7 @@ module PC(
        else begin
             next_pc = data;
        end
+   end
 
         
     // Register 
@@ -42,4 +43,5 @@ module PC(
 		pc_val <= next_pc;
 	    end
         end
-endmodule
+    end
+ endmodule
