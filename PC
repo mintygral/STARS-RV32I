@@ -18,27 +18,28 @@ module PC(
        if (inc) begin
             next_pc= next_line_address;
        end
-        else begin
+       else begin
             next_pc = data;
-         end
+       end
 
         
     // Register 
     always_ff @(posedge clk, negedge clr) begin
 	if (disable) begin 
 		pc_val <= pc_val 
+	end
 
-	
         else if (clr) begin
             pc_val <= 32'd0;
         end
+
         else if (load) begin
-	If (branch_choice) begin
+            if (branch_choice) begin
 		pc_val <= jump_address;
-	end
+	    end
 	
-	else begin
+	    else begin
 		pc_val <= next_pc;
-	end
+	    end
         end
 endmodule
