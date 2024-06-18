@@ -41,3 +41,4 @@ module PC(
 		pc_val <= next_pc;
 	end
         end
+endmodule
