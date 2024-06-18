@@ -27,12 +27,12 @@ module mem_manager(
     always_comb begin : changeState
         next_state = state;
         case(state) 
-            INIT: if (!rst) begin next_state = IDLE; end 
-                  else begin next_state = INIT; end
+            INIT: if (!rst) next_state = IDLE;  
+                  else next_state = INIT; 
             
-            IDLE: if (memRead) begin next_state = Read_Request; prev_state = Read_Request; data_en = 1; end
-                  else if (memWrite) begin next_state = Write_Request; prev_state = Write_Request; data_en = 1; end
-                  else begin next_state = IDLE; end
+            IDLE: if (memRead) next_state = Read_Request; prev_state = Read_Request; data_en = 1;
+                  else if (memWrite) next_state = Write_Request; prev_state = Write_Request; data_en = 1;
+                  else next_state = IDLE; 
         endcase
     end
  endmodule
