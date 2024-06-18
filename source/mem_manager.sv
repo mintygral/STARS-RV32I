@@ -20,7 +20,7 @@ module mem_manager(
 
     state_t next_state, prev_state;
 
-    always_ff @(posedge clk || posedge rst) begin : startFSM
+    always_ff @(posedge clk, posedge rst) begin : startFSM
         if (rst) begin
             state <= INIT;
         end else begin
