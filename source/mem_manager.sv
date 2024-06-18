@@ -10,6 +10,7 @@ typedef enum logic [2:0] {
 
 module mem_manager(
     // inputs
+    // data_in_BUS and bus_full are the only inputs from the bus manager, so we need to figure those out on wednesday
     input logic [31:0] address_in, data_in_CPU, data_in_BUS,
     input logic data_en, instr_en, bus_full, memWrite, memRead,
     input logic clk, rst,
