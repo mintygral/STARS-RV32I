@@ -14,39 +14,97 @@ module tb_control_unit;
         $dumpvars(0, tb_control_unit);
 
         add_r1_r2_r3;
-        sub_r11_r21_r31;
+        sub_r11_r20_r31;
+        xor_r11_r20_r31;
+        or_r11_r20_r31;
+        and_r11_r12_r_14;
         xori_r4_r5;
+        beq_r1_r2_48;
 
     end
 
     task add_r1_r2_r3;
+        $info("add_r1_r2_r3");
         instruction = 32'b0000000_00001_00010_000_00011_0110011;
         #5;
         check_opcode(7'b0110011);
         check_funct7(7'b0);
         check_funct3(3'b0);
-        check_registers(5'b00001, 5'b00010, 5'b00011);
+        check_registers(5'b00010, 5'b00001, 5'b00011);
         check_imm(20'b0);
+        check_alu_source(1'b0);
     endtask
 
-    task sub_r11_r21_r31;
+    task sub_r11_r20_r31;
+        $info("sub_r11_r20_r31");
         instruction = 32'b0100000_01011_10100_000_11111_0110011;
         #5;
         check_opcode(7'b0110011);
         check_funct7(7'b0100000);
         check_funct3(3'b0);
-        check_registers(5'b01011, 5'b10100, 5'b11111);
+        check_registers(5'b10100, 5'b01011, 5'b11111);
         check_imm(20'b0);
+        check_alu_source(1'b0);
+    endtask
+
+    task xor_r11_r20_r31;
+        $info("xor_r11_r20_r31");
+        instruction = 32'b0100000_01011_10100_100_11111_0110011;
+        #5;
+        check_opcode(7'b0110011);
+        check_funct7(7'b0100000);
+        check_funct3(3'b100);
+        check_registers(5'b10100, 5'b01011, 5'b11111);
+        check_imm(20'b0);
+        check_alu_source(1'b0);
+    endtask
+
+    task or_r11_r20_r31;
+        $info("or_r11_r20_r31");
+        instruction = 32'b0100000_01011_10100_110_11111_0110011;
+        #5;
+        check_opcode(7'b0110011);
+        check_funct7(7'b0100000);
+        check_funct3(3'b110);
+        check_registers(5'b10100, 5'b01011, 5'b11111);
+        check_imm(20'b0);
+        check_alu_source(1'b0);
+    endtask
+
+    task and_r11_r12_r_14;
+        $info("and_r11_r12_r14");
+        instruction = 32'b0000000_01100_01011_111_01110_0110011;
+        #5;
+        check_opcode(7'b0110011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b111);
+        check_registers(5'b01011, 5'b01100, 5'b01110);
+        check_imm(20'b00000000000000000000000000);
+        check_alu_source(1'b0);
     endtask
 
     task xori_r4_r5;
+        $info("xori_r4_r5");
         instruction = 32'b000000010000_00100_100_00101_0010011;
         #5;
         check_opcode(7'b0010011);
         check_funct7(7'b0000000);
-        check_funct3(3'b0);
+        check_funct3(3'b100);
         check_registers(5'b00100, 5'b00000, 5'b00101);
         check_imm(20'b000000010000);
+        check_alu_source(1'b1);
+    endtask
+
+    task beq_r1_r2_48;
+        $info("beq_r1_r2_48");
+        instruction = 32'b0000011_00010_00001_000_00000_1100011;
+        #5;
+        check_opcode(7'b1100011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b000);
+        check_registers(5'b00001, 5'b00010, 5'b00000);
+        check_imm(20'b0000000000000000000110000);
+        check_alu_source(1'b1);
     endtask
 
     
@@ -71,6 +129,10 @@ module tb_control_unit;
 
     task check_imm(input [20:0] exp_imm);
         if(imm_20 != exp_imm) $display("Incorrect imm_20. Expected imm_20: %b, actual imm_20: %b", exp_imm, imm_20);
+    endtask
+
+    task check_alu_source(input exp_source);
+        if(ALU_source != exp_source) $display("Incorrect ALU_source. Expected ALU_source: %b, actual ALU_source: %b", exp_source, ALU_source);
     endtask
 
 endmodule
