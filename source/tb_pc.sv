@@ -85,17 +85,20 @@ module tb_PC();
         // Test 1: Fetch an instruction, verify that the counter has been incremented
         reset_dut();
         tb_inc = 1'b1;
+        @(posedge tb_clk);
         #(CLK_PERIOD);
         check_pc_value(32'd4); // Expected value after first increment
 
         // Test 2: Fetch an instruction, verify that the counter points to the address of the next instruction
         tb_inc = 1'b1;
+        @(posedge tb_clk);
         #(CLK_PERIOD);
         check_pc_value(32'd8); // Expected value after second increment
 
 
         // Test 3: Test asynchronous reset, verify reset
         tb_clr = 1'b0;
+        @(posedge tb_clk);
         #(CLK_PERIOD);
         check_pc_value(32'd0); // Expected value after reset
         tb_clr = 1'b1;
@@ -103,6 +106,7 @@ module tb_PC();
         // Test 4: Load a specific value and verify the counter points to that value
         tb_load = 1'b1;
         tb_data = 32'd20;
+        @(posedge tb_clk);
         #(CLK_PERIOD);
         tb_load = 1'b0;
         check_pc_value(32'd20); // Expected value after loading specific value
@@ -111,9 +115,18 @@ module tb_PC();
         tb_inc = 1'b0; // Disable increment
         tb_Disable = 1'b1; // Disable fetching
         tb_data = 32'd0;
+        @(posedge tb_clk);
         #(CLK_PERIOD * 5); // Wait for 5 clock cycles
         check_pc_value(32'd20); // Expected value should remain the same as no increment or fetch
 
+        // Test 6: Verify branch operation with immediate_value > 4 and ALU_out = 1 
+        tb_immediate_value = 32'd8;
+        tb_ALU_out = 1'b1; 
+        tb_load = 1'b1;
+        @(posedge tb_clk); 
+        #(CLK_PERIOD); 
+        tb_load = 1'b0; 
+        check_pc_value(32'd32); // Expected value after branch (20 + 8 + 4 = 32)
 
         $finish;
     end
