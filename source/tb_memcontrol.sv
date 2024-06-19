@@ -53,6 +53,7 @@ initial begin
     rst = 0; 
     toggle_rst();
     
+    // 
 end
 
 // task for toggling reset
@@ -62,6 +63,19 @@ task toggle_rst;
     rst = 0; #10;
 endtask
 
+// task for checking test outputs against actual expected values
+task check_outputs(
+    input state_t exp_state,
+    input logic [31:0] exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR
+);
+    begin 
+        @ (negedge clk);
+        if (exp_state != state) $error("Incorrect state. Tested: %s. Should be: %s", exp_state, state);
+        if (exp_add_out != address_out) $error("Incorrect address_out. Tested: %d. Should be: %d", exp_add_out, address_out);
+        if (exp_dout_CPU != data_out_CPU) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
+        if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
+    end
+endtask
 // task for sending in inputs to memcontrol
 task stream_data(
     input logic [31:0] add_in, d_in_CPU, d_in_BUS,
