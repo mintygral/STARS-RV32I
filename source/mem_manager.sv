@@ -1,11 +1,11 @@
 typedef enum logic [2:0] {
-    INIT = 3'b000,
-    IDLE = 3'b001,
-    Read_Request = 3'b010,
-    Write_Request = 3'b011,
-    Read = 3'b100,
-    Write = 3'b101,
-    Wait = 3'b110
+    INIT = 0,
+    IDLE = 1,
+    Read_Request = 2,
+    Write_Request = 3,
+    Read = 4,
+    Write = 5,
+    Wait = 6
 } state_t;
 
 module mem_manager(
@@ -30,7 +30,13 @@ module mem_manager(
     end
 
     always_comb begin : changeState
+        // garbage values for testing
+        address_out = 32'hABCD;
+        data_out_BUS = 32'hABCD;
+        data_out_CPU = 32'hABCD;
+        data_out_INSTR = 32'hABCD;
         next_state = state;
+        prev_state = state;
         case(state)
             INIT: begin 
                 if (!rst) next_state = IDLE;
