@@ -63,10 +63,12 @@ module tb_PC();
     begin
         #(CLK_PERIOD); // Wait for 1 clock period
         tb_pc_val_exp = expected_value;
-        if (tb_pc_val === tb_pc_val_exp)
+        if (tb_pc_val === tb_pc_val_exp) begin
             $display("PC Value Correct: %0d", tb_pc_val);
-        else
+        end
+        else begin
             $error("PC Value Incorrect: Actual: %0d, Expected: %0d", tb_pc_val, tb_pc_val_exp);
+        end
     end
     endtask
 
