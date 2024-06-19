@@ -57,22 +57,22 @@ task toggle_rst;
     rst = 0; #10;
 endtask
 
-task send_key;
-    input logic [4:0] keytosend;
-    begin 
-        @ (negedge clk);
-        // keyout = keytosend;
-        @ (posedge clk);
-        #10;
-    end
-endtask
+task stream_data(
+    input logic [31:0] add_in, d_in_CPU, d_in_BUS,
+    input logic data, instr, b_full, mWrite, mRead,
+    );
 
-task sendstream;
-    input logic [4:0] stream [];
     begin 
-        for (integer keynum = 0; keynum < stream.size(); keynum++) begin
-            send_key(stream[keynum]); end
-    end
+        address_in = add_in;
+        data_in_CPU = d_in_CPU;
+        data_in_BUS = d_in_BUS;
+        data_en = data;
+        instr_en = instr;
+        bus_full = b_full;
+        memWrite = mWrite;
+        memRead = mRead;
+    end 
+
 endtask
 
 endmodule
