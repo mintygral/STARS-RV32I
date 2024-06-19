@@ -20,17 +20,27 @@ state_t state;
 logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR;
 
 
-state_t next_state, prev_state;
+state_t next_state; 
+state_t prev_state;
 logic [8:0] test_data;
-memcontrol managemem(.address_in(address_in), 
-                        .data_in_CPU(data_in_CPU),
-                        .data_in_BUS(data_in_BUS)
-                        .data_en(data_en),
-                        .instr_en(instr_en),
-                        .bus_full(bus_full),
-                        .memWrite(memWrite),
-                        .memRead(memRead),
-                        .clk(clk), .rst(rst));
+memcontrol managemem (
+    .address_in(address_in), 
+    .data_in_CPU(data_in_CPU),
+    .data_in_BUS(data_in_BUS),
+    .data_en(data_en),
+    .instr_en(instr_en),
+    .bus_full(bus_full),
+    .memWrite(memWrite),
+    .memRead(memRead),
+    .clk(clk), 
+    .rst(rst),
+    // outputs
+    .state(state),
+    .address_out(address_out),
+    .data_out_CPU(data_out_CPU),
+    .data_out_BUS(data_out_BUS),
+    .data_out_INSTR(data_out_INSTR)
+    );
 
 initial begin 
     $dumpfile("sim.vcd");
