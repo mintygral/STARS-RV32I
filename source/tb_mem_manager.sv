@@ -22,7 +22,7 @@ logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR;
 
 state_t next_state, prev_state;
 logic [8:0] test_data;
-mem_manager memcontrol(.address_in(address_in), 
+memcontrol managemem(.address_in(address_in), 
                         .data_in_CPU(data_in_CPU),
                         .data_in_BUS(data_in_BUS)
                         .data_en(data_en),

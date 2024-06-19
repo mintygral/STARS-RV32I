@@ -8,7 +8,7 @@ typedef enum logic [2:0] {
     Wait = 6
 } state_t;
 
-module mem_manager(
+module memcontrol(
     // inputs
     // data_in_BUS and bus_full are the only inputs from the bus manager, so we need to figure those out on wednesday
     input logic [31:0] address_in, data_in_CPU, data_in_BUS,
