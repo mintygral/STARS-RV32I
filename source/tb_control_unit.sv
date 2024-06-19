@@ -4,10 +4,11 @@ module tb_control_unit;
     logic [6:0] opcode, funct7;
     logic [2:0] funct3;
     logic [4:0] rs1, rs2, rd;
-    logic [19:0] imm_20;
+    logic [31:0] imm_32;
     logic ALU_source; //0 means register, 1 means immediate
+    logic memToReg; //0 means write ALu output, 1 means write data output
 
-    control_unit cont(.instruction(instruction), .opcode(opcode), .funct7(funct7), .funct3(funct3), .rs1(rs1), .rs2(rs2), .rd(rd), .imm_20(imm_20), .ALU_source(ALU_source));
+    control_unit cont(.instruction(instruction), .opcode(opcode), .funct7(funct7), .funct3(funct3), .rs1(rs1), .rs2(rs2), .rd(rd), .imm_32(imm_32), .ALU_source(ALU_source), .memToReg(memToReg));
 
     initial begin
         $dumpfile("sim.vcd");
@@ -31,6 +32,8 @@ module tb_control_unit;
         blt_r1_r2_48;
         bgte_r1_r2_48;
 
+        $finish;
+
     end
 
     task add_r1_r2_r3;
@@ -41,8 +44,9 @@ module tb_control_unit;
         check_funct7(7'b0);
         check_funct3(3'b0);
         check_registers(5'b00010, 5'b00001, 5'b00011);
-        check_imm(20'b0);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task sub_r11_r20_r31;
@@ -53,8 +57,9 @@ module tb_control_unit;
         check_funct7(7'b0100000);
         check_funct3(3'b0);
         check_registers(5'b10100, 5'b01011, 5'b11111);
-        check_imm(20'b0);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task xor_r11_r20_r31;
@@ -65,8 +70,9 @@ module tb_control_unit;
         check_funct7(7'b0100000);
         check_funct3(3'b100);
         check_registers(5'b10100, 5'b01011, 5'b11111);
-        check_imm(20'b0);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task or_r11_r20_r31;
@@ -77,8 +83,9 @@ module tb_control_unit;
         check_funct7(7'b0100000);
         check_funct3(3'b110);
         check_registers(5'b10100, 5'b01011, 5'b11111);
-        check_imm(20'b0);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task and_r11_r12_r14;
@@ -89,8 +96,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b111);
         check_registers(5'b01011, 5'b01100, 5'b01110);
-        check_imm(20'b00000000000000000000000000);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task sll_r11_r12_r14;
@@ -101,8 +109,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b001);
         check_registers(5'b01011, 5'b01100, 5'b01110);
-        check_imm(20'b00000000000000000000000000);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task srl_r11_r12_r14;
@@ -113,8 +122,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b101);
         check_registers(5'b01011, 5'b01100, 5'b01110);
-        check_imm(20'b00000000000000000000000000);
+        check_imm(32'b0);
         check_alu_source(1'b0);
+        check_memToReg(1'b0);
     endtask
 
     task addi_r4_r5_16;
@@ -125,8 +135,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b000);
         check_registers(5'b00100, 5'b00000, 5'b00101);
-        check_imm(20'b000000010000);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task ori_r4_r5_16;
@@ -137,8 +148,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b110);
         check_registers(5'b00100, 5'b00000, 5'b00101);
-        check_imm(20'b000000010000);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task andi_r4_r5_16;
@@ -149,8 +161,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b111);
         check_registers(5'b00100, 5'b00000, 5'b00101);
-        check_imm(20'b000000010000);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task xori_r4_r5;
@@ -161,8 +174,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b100);
         check_registers(5'b00100, 5'b00000, 5'b00101);
-        check_imm(20'b000000010000);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task slli_r4_r5_16;
@@ -173,8 +187,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b001);
         check_registers(5'b00100, 5'b00000, 5'b00101);
-        check_imm(20'b000000010000);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task srli_r4_r5_16;
@@ -185,8 +200,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b101);
         check_registers(5'b00100, 5'b00000, 5'b00101);
-        check_imm(20'b000000010000);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task beq_r1_r2_48;
@@ -197,8 +213,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b000);
         check_registers(5'b00001, 5'b00010, 5'b00000);
-        check_imm(20'b0000000000000000000110000);
+        check_imm(32'h00000030);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task bneq_r1_r2_48;
@@ -209,8 +226,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b001);
         check_registers(5'b00001, 5'b00010, 5'b00000);
-        check_imm(20'b0000000000000000000110000);
+        check_imm(32'h00000030);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task blt_r1_r2_48;
@@ -221,8 +239,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b100);
         check_registers(5'b00001, 5'b00010, 5'b00000);
-        check_imm(20'b0000000000000000000110000);
+        check_imm(32'h00000030);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task bgte_r1_r2_48;
@@ -233,8 +252,9 @@ module tb_control_unit;
         check_funct7(7'b0000000);
         check_funct3(3'b101);
         check_registers(5'b00001, 5'b00010, 5'b00000);
-        check_imm(20'b0000000000000000000110000);
+        check_imm(32'h00000030);
         check_alu_source(1'b1);
+        check_memToReg(1'b0);
     endtask
 
     task check_opcode(input [6:0] exp_opcode);
@@ -256,11 +276,15 @@ module tb_control_unit;
     endtask
 
     task check_imm(input [20:0] exp_imm);
-        if(imm_20 != exp_imm) $display("Incorrect imm_20. Expected imm_20: %b, actual imm_20: %b", exp_imm, imm_20);
+        if(imm_32 != exp_imm) $display("Incorrect imm_32. Expected imm_32: %b, actual imm_32: %b", exp_imm, imm_32);
     endtask
 
     task check_alu_source(input exp_source);
         if(ALU_source != exp_source) $display("Incorrect ALU_source. Expected ALU_source: %b, actual ALU_source: %b", exp_source, ALU_source);
+    endtask
+
+    task check_memToReg(input exp_memToReg);
+        if(memToReg != exp_memToReg) $display("Incorrect memToReg. Expected memToReg: %b, actual memToReg: %b", exp_memToReg, memToReg);
     endtask
 
 endmodule
