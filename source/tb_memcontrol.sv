@@ -1,5 +1,5 @@
 `timescale 1ms/10ps
-module tb;
+module tb_memcontrol;
 
     // states logic
     typedef enum logic [2:0] {
@@ -37,11 +37,11 @@ module tb;
     state_t exp_state;
     logic [31:0] exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR;
 
-    // Signal Dump
-    initial begin
-        $dumpfile ("dump.vcd");
-        $dumpvars;
-    end
+    // // Signal Dump
+    // initial begin
+    //     $dumpfile ("sim.vcd");
+    //     $dumpvars(0, tb_memcontrol)
+    // end
 
     ////////////////////////
     // Testbenching tasks //
@@ -71,15 +71,15 @@ module tb;
     );
         begin 
             @ (negedge clk);
-            if (exp_state != state) $error("Incorrect state. Tested: %b. Should be: %b", exp_state, state);
-            else $display("Coorect state. ested: %b. Should be: %b", exp_state, state);
-            if (exp_add_out != address_out) $error("Incorrect address_out. Tested: %d. Should be: %d", exp_add_out, address_out);
-            else $display("Correct address_out. Tested: %d. Should be: %h", exp_add_out, address_out);
-            if (exp_dout_CPU != data_out_CPU) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
-            else $display("Correct data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
-            if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_BUS. Tested: %d. Should be: %d", exp_dout_BUS , data_out_BUS);
-            else $display("Correct data_out_BUS. Tested: %d. Should be: %d", exp_dout_BUS , data_out_BUS);;
-            if (exp_dout_INSTR != data_out_INSTR) $error("Incorrect data_out_INSTR. Tested: %d. Should be: %d", exp_dout_INSTR , data_out_INSTR);
+            if (exp_state != state) $error("Incorrect state. Expected %b. Actual: %b", exp_state, state);
+            else $display("Correct state Expected %b. Actual: %b", exp_state, state);
+            if (exp_add_out != address_out) $error("Incorrect address_out. Expected %d. Actual: %d", exp_add_out, address_out);
+            else $display("Correct address_out. Expected %d. Actual: %d", exp_add_out, address_out);
+            if (exp_dout_CPU != data_out_CPU) $error("Incorrect data_out_CPU. Expected %d. Actual: %d", exp_dout_CPU , data_out_CPU);
+            else $display("Correct data_out_CPU. Expected %d. Actual: %d", exp_dout_CPU , data_out_CPU);
+            if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_BUS. Expected %d. Actual: %d", exp_dout_BUS , data_out_BUS);
+            else $display("Correct data_out_BUS. Expected %d. Actual: %d", exp_dout_BUS , data_out_BUS);;
+            if (exp_dout_INSTR != data_out_INSTR) $error("Incorrect data_out_INSTR. Expected %d. Actual: %d", exp_dout_INSTR , data_out_INSTR);
             else $display("Correct.");
         end
     endtask
@@ -153,7 +153,7 @@ module tb;
 
     initial begin 
         $dumpfile("sim.vcd");
-        $dumpvars(0, tb);
+        $dumpvars(0, tb_memcontrol);
         
         // Initialize all test inputs
         tb_test_num = 0; // We haven't started testing yet
@@ -179,12 +179,16 @@ module tb;
         #(CLK_PERIOD * 2); // Wait 2 clock periods before proceeding
 
         // Check that outputs are reset
-        stream_outputs(INIT, 0, 0, 0, 0);
+        stream_outputs(INIT, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD); // In the INIT state these are all garbage values
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
         // Deactivate Reset
         rst = RESET_INACTIVE;
 
+        // Set inputs to non-reset values
+        stream_inputs(1, 1, 1, 1, 0, 0, 0, 1);
+        @(posedge clk);
+        #(CLK_PERIOD * 2); // wait one clock period to transition by one state
         stream_outputs(Read, 1, 1, 0, 0);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
         // NEED TO DO THIS FOR EVERY TEST CASEls
