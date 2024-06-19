@@ -1,5 +1,7 @@
-// states logic
+`timescale 1ms/10ps
+module tb;
 
+// states logic
 typedef enum logic [2:0] {
     INIT = 0,
     IDLE = 1,
@@ -59,7 +61,7 @@ task send_key;
     input logic [4:0] keytosend;
     begin 
         @ (negedge clk);
-        keyout = keytosend;
+        // keyout = keytosend;
         @ (posedge clk);
         #10;
     end
@@ -72,3 +74,5 @@ task sendstream;
             send_key(stream[keynum]); end
     end
 endtask
+
+endmodule
