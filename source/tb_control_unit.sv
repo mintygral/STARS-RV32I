@@ -17,9 +17,19 @@ module tb_control_unit;
         sub_r11_r20_r31;
         xor_r11_r20_r31;
         or_r11_r20_r31;
-        and_r11_r12_r_14;
+        and_r11_r12_r14;
+        sll_r11_r12_r14;
+        srl_r11_r12_r14;
+        addi_r4_r5_16;
+        ori_r4_r5_16;
+        andi_r4_r5_16;
+        slli_r4_r5_16;
+        srli_r4_r5_16;
         xori_r4_r5;
         beq_r1_r2_48;
+        bneq_r1_r2_48;
+        blt_r1_r2_48;
+        bgte_r1_r2_48;
 
     end
 
@@ -71,7 +81,7 @@ module tb_control_unit;
         check_alu_source(1'b0);
     endtask
 
-    task and_r11_r12_r_14;
+    task and_r11_r12_r14;
         $info("and_r11_r12_r14");
         instruction = 32'b0000000_01100_01011_111_01110_0110011;
         #5;
@@ -83,6 +93,66 @@ module tb_control_unit;
         check_alu_source(1'b0);
     endtask
 
+    task sll_r11_r12_r14;
+        $info("sll_r11_r12_r14");
+        instruction = 32'b0000000_01100_01011_001_01110_0110011;
+        #5;
+        check_opcode(7'b0110011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b001);
+        check_registers(5'b01011, 5'b01100, 5'b01110);
+        check_imm(20'b00000000000000000000000000);
+        check_alu_source(1'b0);
+    endtask
+
+    task srl_r11_r12_r14;
+        $info("srl_r11_r12_r14");
+        instruction = 32'b0000000_01100_01011_101_01110_0110011;
+        #5;
+        check_opcode(7'b0110011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b101);
+        check_registers(5'b01011, 5'b01100, 5'b01110);
+        check_imm(20'b00000000000000000000000000);
+        check_alu_source(1'b0);
+    endtask
+
+    task addi_r4_r5_16;
+        $info("addi_r4_r5_16");
+        instruction = 32'b000000010000_00100_000_00101_0010011;
+        #5;
+        check_opcode(7'b0010011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b000);
+        check_registers(5'b00100, 5'b00000, 5'b00101);
+        check_imm(20'b000000010000);
+        check_alu_source(1'b1);
+    endtask
+
+    task ori_r4_r5_16;
+        $info("ori_r4_r5_16");
+        instruction = 32'b000000010000_00100_110_00101_0010011;
+        #5;
+        check_opcode(7'b0010011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b110);
+        check_registers(5'b00100, 5'b00000, 5'b00101);
+        check_imm(20'b000000010000);
+        check_alu_source(1'b1);
+    endtask
+
+    task andi_r4_r5_16;
+        $info("andi_r4_r5_16");
+        instruction = 32'b000000010000_00100_111_00101_0010011;
+        #5;
+        check_opcode(7'b0010011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b111);
+        check_registers(5'b00100, 5'b00000, 5'b00101);
+        check_imm(20'b000000010000);
+        check_alu_source(1'b1);
+    endtask
+
     task xori_r4_r5;
         $info("xori_r4_r5");
         instruction = 32'b000000010000_00100_100_00101_0010011;
@@ -90,6 +160,30 @@ module tb_control_unit;
         check_opcode(7'b0010011);
         check_funct7(7'b0000000);
         check_funct3(3'b100);
+        check_registers(5'b00100, 5'b00000, 5'b00101);
+        check_imm(20'b000000010000);
+        check_alu_source(1'b1);
+    endtask
+
+    task slli_r4_r5_16;
+        $info("slli_r4_r5_16");
+        instruction = 32'b000000010000_00100_001_00101_0010011;
+        #5;
+        check_opcode(7'b0010011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b001);
+        check_registers(5'b00100, 5'b00000, 5'b00101);
+        check_imm(20'b000000010000);
+        check_alu_source(1'b1);
+    endtask
+
+    task srli_r4_r5_16;
+        $info("srli_r4_r5_16");
+        instruction = 32'b000000010000_00100_101_00101_0010011;
+        #5;
+        check_opcode(7'b0010011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b101);
         check_registers(5'b00100, 5'b00000, 5'b00101);
         check_imm(20'b000000010000);
         check_alu_source(1'b1);
@@ -107,7 +201,41 @@ module tb_control_unit;
         check_alu_source(1'b1);
     endtask
 
-    
+    task bneq_r1_r2_48;
+        $info("bneq_r1_r2_48");
+        instruction = 32'b0000011_00010_00001_001_00000_1100011;
+        #5;
+        check_opcode(7'b1100011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b001);
+        check_registers(5'b00001, 5'b00010, 5'b00000);
+        check_imm(20'b0000000000000000000110000);
+        check_alu_source(1'b1);
+    endtask
+
+    task blt_r1_r2_48;
+        $info("blt_r1_r2_48");
+        instruction = 32'b0000011_00010_00001_100_00000_1100011;
+        #5;
+        check_opcode(7'b1100011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b100);
+        check_registers(5'b00001, 5'b00010, 5'b00000);
+        check_imm(20'b0000000000000000000110000);
+        check_alu_source(1'b1);
+    endtask
+
+    task bgte_r1_r2_48;
+        $info("bgte_r1_r2_48");
+        instruction = 32'b0000011_00010_00001_101_00000_1100011;
+        #5;
+        check_opcode(7'b1100011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b101);
+        check_registers(5'b00001, 5'b00010, 5'b00000);
+        check_imm(20'b0000000000000000000110000);
+        check_alu_source(1'b1);
+    endtask
 
     task check_opcode(input [6:0] exp_opcode);
         if(opcode != exp_opcode) $display("Incorrect opcode. Expected opcode: %b, actual opcode: %b", exp_opcode, opcode);
