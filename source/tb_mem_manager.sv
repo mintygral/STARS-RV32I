@@ -32,4 +32,33 @@ mem_manager memcontrol(.address_in(address_in),
                         .memRead(memRead),
                         .clk(clk), .rst(rst));
 
+initial begin 
+    $dumpfile("sim.vcd");
+    $dumpvars(0, tb);
+    rst = 0; 
+    toggle_rst();
+end
 
+task toggle_rst; 
+    rst = 0; #10;
+    rst = 1; #10;
+    rst = 0; #10;
+endtask
+
+task send_key;
+    input logic [4:0] keytosend;
+    begin 
+        @ (negedge clk);
+        keyout = keytosend;
+        @ (posedge clk);
+        #10;
+    end
+endtask
+
+task sendstream;
+    input logic [4:0] stream [];
+    begin 
+        for (integer keynum = 0; keynum < stream.size(); keynum++) begin
+            send_key(stream[keynum]); end
+    end
+endtask
