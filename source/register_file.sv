@@ -48,7 +48,7 @@ module register_file (
         read2 <= register[outAddress2];
     end
 
-    always @ (posedge clk, negedge rst) begin //reset pos or neg or no reset
+    always @ (posedge clk) begin //reset pos or neg or no reset
         if (rst) begin
             for (integer i = 0; i <= 31; i++) begin
                 register[i] <= 0;
