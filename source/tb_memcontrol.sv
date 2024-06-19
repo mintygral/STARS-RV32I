@@ -17,8 +17,8 @@ module tb;
     /////////////////////
 
     localparam CLK_PERIOD = 10; // 100 MHz 
-    localparam RESET_ACTIVE = 0;
-    localparam RESET_INACTIVE = 1;
+    localparam RESET_ACTIVE = 1;
+    localparam RESET_INACTIVE = 0;
 
     // Testbench Signals
     integer tb_test_num;
@@ -32,6 +32,10 @@ module tb;
     // DUT outputs
     state_t state;
     logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR;
+
+    // Expected outputs
+    state_t exp_state;
+    logic [31:0] exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR;
 
     // Signal Dump
     initial begin
@@ -76,7 +80,7 @@ module tb;
     endtask
 
     // task for sending in inputs to memcontrol
-    task stream_data(
+    task stream_inputs(
         input logic [31:0] add_in, d_in_CPU, d_in_BUS,
         input logic data, instr, b_full, mWrite, mRead,
         );
@@ -90,6 +94,22 @@ module tb;
             bus_full = b_full;
             memWrite = mWrite;
             memRead = mRead;
+        end 
+
+    endtask
+
+    // task for assigning expected outputs
+    task stream_outputs(
+        input state_t test_exp_state,
+        input logic [31:0] test_exp_add_out, test_exp_dout_CPU, test_exp_dout_BUS, test_exp_dout_INSTR
+        );
+
+        begin
+            exp_state = test_exp_state;
+            exp_add_out = test_exp_add_out;
+            exp_dout_CPU = test_exp_dout_CPU;
+            exp_dout_BUS = test_exp_dout_BUS; 
+            exp_dout_INSTR = test_exp_dout_INSTR;
         end 
 
     endtask
@@ -130,7 +150,26 @@ module tb;
         $dumpfile("sim.vcd");
         $dumpvars(0, tb);
         
-        // 
+        // Initialize all test inputs
+        tb_test_num = 0; // We haven't started testing yet
+        tb_test_name = "Test Bench Initialization";
+        stream_inputs(0, 0, 0, 0, 0, 0, 0, 0); // total 8 inputs
+        #(0.5); // Wait some time before starting the first test case
+
+        ////////////////////////////
+        // Test 1: Power on reset //
+        ////////////////////////////
+        // NOTE: Do not use reset task during reset test case 
+        tb_test_num+=1;
+        tb_test_name = "Power on Reset";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+        // Set inputs to non-reset values
+        
+
+        // NEED TO DO THIS FOR EVERY TEST CASE
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        // stream_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR)
+        // check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
     end
 
 
