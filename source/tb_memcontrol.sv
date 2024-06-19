@@ -76,6 +76,7 @@ module tb;
             if (exp_dout_CPU != data_out_CPU) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
             if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_BUS , data_out_BUS);
             if (exp_dout_INSTR != data_out_INSTR) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_INSTR , data_out_INSTR);
+            else $display("Correct.");
         end
     endtask
 
@@ -180,6 +181,8 @@ module tb;
         // Deactivate Reset
         rst = RESET_INACTIVE;
 
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
         // NEED TO DO THIS FOR EVERY TEST CASE
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead) // 8
         // stream_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR) // 5
