@@ -12,55 +12,52 @@ module tb;
         Wait = 6
     } state_t;
 
-    // inputs
+    /////////////////////
+    // Testbench Setup //
+    /////////////////////
+
+    localparam CLK_PERIOD = 10; // 100 MHz 
+    localparam RESET_ACTIVE = 0;
+    localparam RESET_INACTIVE = 1;
+
+    // Testbench Signals
+    integer tb_test_num;
+    string tb_test_name; 
+
+    // DUT inputs
     logic [31:0] address_in, data_in_CPU, data_in_BUS;
     logic data_en, instr_en, bus_full, memWrite, memRead;
     logic clk, rst;
 
-    // outputs
+    // DUT outputs
     state_t state;
     logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR;
 
-
-    state_t next_state, prev_state;
-
-    // instantiate memcontrol module
-    memcontrol managemem (
-        .address_in(address_in), 
-        .data_in_CPU(data_in_CPU),
-        .data_in_BUS(data_in_BUS),
-        .data_en(data_en),
-        .instr_en(instr_en),
-        .bus_full(bus_full),
-        .memWrite(memWrite),
-        .memRead(memRead),
-        .clk(clk), 
-        .rst(rst),
-        // outputs
-        .state(state),
-        .address_out(address_out),
-        .data_out_CPU(data_out_CPU),
-        .data_out_BUS(data_out_BUS),
-        .data_out_INSTR(data_out_INSTR)
-        );
-
-    // toggle clock
-    always begin #10 clk = ~clk; end
-
-    initial begin 
-        $dumpfile("sim.vcd");
-        $dumpvars(0, tb);
-        rst = 0; 
-        toggle_rst();
-        
-        // 
+    // Signal Dump
+    initial begin
+        $dumpfile ("dump.vcd");
+        $dumpvars;
     end
 
-    // task for toggling reset
-    task toggle_rst; 
-        rst = 0; #10;
-        rst = 1; #10;
-        rst = 0; #10;
+    ////////////////////////
+    // Testbenching tasks //
+    ////////////////////////
+
+    // Quick reset for 2 clock cycles
+    task reset_dut;
+    begin
+        @(negedge clk); // synchronize to negedge edge so there are not hold or setup time violations
+        
+        // Activate reset
+        rst = RESET_ACTIVE;
+
+        // Wait 2 clock cycles
+        @(negedge clk);
+        @(negedge clk);
+
+        // Deactivate reset
+        rst = RESET_INACTIVE; 
+    end
     endtask
 
     // task for checking test outputs against actual expected values
@@ -73,9 +70,11 @@ module tb;
             if (exp_state != state) $error("Incorrect state. Tested: %s. Should be: %s", exp_state, state);
             if (exp_add_out != address_out) $error("Incorrect address_out. Tested: %d. Should be: %d", exp_add_out, address_out);
             if (exp_dout_CPU != data_out_CPU) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
-            if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_CPU , data_out_CPU);
+            if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_BUS , data_out_BUS);
+            if (exp_dout_INSTR != data_out_INSTR) $error("Incorrect data_out_CPU. Tested: %d. Should be: %d", exp_dout_INSTR , data_out_INSTR);
         end
     endtask
+
     // task for sending in inputs to memcontrol
     task stream_data(
         input logic [31:0] add_in, d_in_CPU, d_in_BUS,
@@ -94,5 +93,45 @@ module tb;
         end 
 
     endtask
+
+    //////////
+    // DUT //
+    //////////
+
+    // instantiate memcontrol module
+    memcontrol DUT (
+        .address_in(address_in), 
+        .data_in_CPU(data_in_CPU),
+        .data_in_BUS(data_in_BUS),
+        .data_en(data_en),
+        .instr_en(instr_en),
+        .bus_full(bus_full),
+        .memWrite(memWrite),
+        .memRead(memRead),
+        .clk(clk), 
+        .rst(rst),
+        // outputs
+        .state(state),
+        .address_out(address_out),
+        .data_out_CPU(data_out_CPU),
+        .data_out_BUS(data_out_BUS),
+        .data_out_INSTR(data_out_INSTR)
+        );
+
+    // Clock generation block
+    always begin
+        clk = 0; // set clock initially to be 0 so that they are no time violations at the rising edge 
+        #(CLK_PERIOD / 2);
+        clk = 1;
+        #(CLK_PERIOD / 2);
+    end
+
+    initial begin 
+        $dumpfile("sim.vcd");
+        $dumpvars(0, tb);
+        
+        // 
+    end
+
 
 endmodule
