@@ -159,16 +159,30 @@ module tb;
         ////////////////////////////
         // Test 1: Power on reset //
         ////////////////////////////
+
         // NOTE: Do not use reset task during reset test case 
         tb_test_num+=1;
         tb_test_name = "Power on Reset";
         $display("Test %d: %s", tb_test_num, tb_test_name);
+
         // Set inputs to non-reset values
-        
+        stream_inputs(1, 1, 1, 1, 0, 0, 0, 1);
+
+        // Activate reset
+        rst = RESET_ACTIVE;
+
+        #(CLK_PERIOD * 2); // Wait 2 clock periods before proceeding
+
+        // Check that outputs are reset
+        stream_outputs(INIT, 0, 0, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // Deactivate Reset
+        rst = RESET_INACTIVE;
 
         // NEED TO DO THIS FOR EVERY TEST CASE
-        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
-        // stream_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR)
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead) // 8
+        // stream_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR) // 5
         // check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
     end
 
