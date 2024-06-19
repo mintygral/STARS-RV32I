@@ -51,26 +51,26 @@ module tb_control_unit;
 
     
 
-    task check_opcode(input [6:0] exp_opcode)
+    task check_opcode(input [6:0] exp_opcode);
         if(opcode != exp_opcode) $display("Incorrect opcode. Expected opcode: %b, actual opcode: %b", exp_opcode, opcode);
     endtask
 
-    task check_funct7(input [6:0] exp_funct7)
+    task check_funct7(input [6:0] exp_funct7);
         if(funct7 != exp_funct7) $display("Incorrect funct7. Expected funct7: %b, actual funct7: %b", exp_funct7, funct7);
     endtask
 
-    task check_funct3(input [2:0] exp_funct3)
+    task check_funct3(input [2:0] exp_funct3);
         if(funct3 != exp_funct3) $display("Incorrect funct3. Expected funct3: %b, actual funct3: %b", exp_funct3, funct3);
     endtask
 
-    task check_registers(input [4:0] exp_rs1, exp_rs2, exp_rd)
-        if(rs1 != exp_rs1) $display("Incorrect rs1. Expected rs1: %b, actual rs1: %b", exp_rs1, rs1)
-        if(rs2 != exp_rs2) $display("Incorrect rs2. Expected rs2: %b, actual rs2: %b", exp_rs2, rs2)
-        if(rd != exp_rd) $display("Incorrect rd. Expected rd: %b, actual rd: %b", exp_rd, rd)
+    task check_registers(input [4:0] exp_rs1, exp_rs2, exp_rd);
+        if(rs1 != exp_rs1) $display("Incorrect rs1. Expected rs1: %b, actual rs1: %b", exp_rs1, rs1);
+        if(rs2 != exp_rs2) $display("Incorrect rs2. Expected rs2: %b, actual rs2: %b", exp_rs2, rs2);
+        if(rd != exp_rd) $display("Incorrect rd. Expected rd: %b, actual rd: %b", exp_rd, rd);
     endtask
 
-    task check_imm(input [20:0] exp_imm)
-        if(imm_20 != exp_imm) $display("Incorrect imm_20. Expected imm_20: %b, actual imm_20: %b", exp_imm, imm_20)
+    task check_imm(input [20:0] exp_imm);
+        if(imm_20 != exp_imm) $display("Incorrect imm_20. Expected imm_20: %b, actual imm_20: %b", exp_imm, imm_20);
     endtask
 
 endmodule

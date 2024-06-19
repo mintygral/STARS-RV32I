@@ -20,8 +20,8 @@ module control_unit(
                     imm_20 = 20'b0;
                     ALU_source = 1'b0;
                 end
-            7'b0010011: //i type instructions
-            7'b0000011:
+            7'b0010011, //i type instructions
+            7'b0000011,
             7'b1100111:
                 begin
                     funct3 = instruction[14:12];
@@ -71,6 +71,16 @@ module control_unit(
                     funct3 = 3'b0;
                     funct7 = 7'b0;
                     ALU_source = 1'b1;
+                end
+            default:
+                begin
+                    rd = 5'b0;
+                    imm_20 = 20'b0;
+                    rs1 = 5'b0;
+                    rs2 = 5'b0;
+                    funct3 = 3'b0;
+                    funct7 = 7'b0;
+                    ALU_source = 1'b0;
                 end
         endcase
     end
