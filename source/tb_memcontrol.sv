@@ -22,9 +22,9 @@ state_t state;
 logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR;
 
 
-state_t next_state; 
-state_t prev_state;
-logic [8:0] test_data;
+state_t next_state, prev_state;
+
+// instantiate memcontrol module
 memcontrol managemem (
     .address_in(address_in), 
     .data_in_CPU(data_in_CPU),
@@ -44,19 +44,25 @@ memcontrol managemem (
     .data_out_INSTR(data_out_INSTR)
     );
 
+// toggle clock
+always begin #10 clk = ~clk; end
+
 initial begin 
     $dumpfile("sim.vcd");
     $dumpvars(0, tb);
     rst = 0; 
     toggle_rst();
+    
 end
 
+// task for toggling reset
 task toggle_rst; 
     rst = 0; #10;
     rst = 1; #10;
     rst = 0; #10;
 endtask
 
+// task for sending in inputs to memcontrol
 task stream_data(
     input logic [31:0] add_in, d_in_CPU, d_in_BUS,
     input logic data, instr, b_full, mWrite, mRead,
