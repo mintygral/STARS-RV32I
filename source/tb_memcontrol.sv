@@ -287,6 +287,7 @@ module tb_memcontrol;
         tb_test_num+=1;
         tb_test_name = "Write with instr_en high";
         $display("Test %d: %s", tb_test_num, tb_test_name);
+        $finish;
     end
 
 
