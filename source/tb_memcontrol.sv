@@ -167,7 +167,7 @@ module tb_memcontrol;
 
         // NOTE: Do not use reset task during reset test case 
         tb_test_num+=1;
-        tb_test_name = "Power on Reset";
+        tb_test_name = "Power on Reset, then Reading (dmem high)";
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
         // Set inputs to non-reset values
@@ -191,11 +191,74 @@ module tb_memcontrol;
         #(CLK_PERIOD * 2); // wait one clock period to transition by one state
         stream_outputs(Read, 1, 1, 0, 0);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
-        // NEED TO DO THIS FOR EVERY TEST CASEls
 
+        // check if outputs are reset to garbage -- WORKS
+        #(CLK_PERIOD); // should move back to idle
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // Format for EVERY test case
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead) // 8
         // stream_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR) // 5
         // check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        ////////////////////////////
+        // Test 2: Check Write    //
+        ////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Write capabilities (dmem high)";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        stream_inputs(1, 1, 1, 1, 0, 0, 1, 0);
+
+        /////////////////////////////////////
+        // Test 3: Bus_Full remains high   //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Bus_Full remaining high";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        /////////////////////////////////////
+        // Test 4: Read vs. Write prec.    //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Read vs. Write precedence";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        /////////////////////////////////
+        // Test 5: Dmem precedence     //
+        /////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Dmem precedence";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        /////////////////////////////////////
+        // Test 6: MemWrite = MemRead = 0  //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check MemWrite and MemRead = 0";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        /////////////////////////////////////
+        // Test 7: Read with instr_en high //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Read with instr_en high";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        //////////////////////////////////////
+        // Test 8: Write with instr_en high //
+        //////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Write with instr_en high";
+        $display("Test %d: %s", tb_test_num, tb_test_name);
     end
 
 
