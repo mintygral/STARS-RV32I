@@ -6,7 +6,7 @@ module tb_register_file;
     reg[31:0] writeData;
     reg[4:0] writeReg, readReg1, readReg2;
     logic clk, rst, writeEnable;
-    logic [4:0] exp_read1, exp_read2;
+    logic [31:0] exp_read1, exp_read2;
     logic [31:0] regOut1, regOut2; //????
     integer tb_test_num;
     string tb_test_name;
@@ -50,19 +50,19 @@ module tb_register_file;
         readReg2 = 5'b1;
         writeEnable = 1'b0;
         
-        rst = 1'b0;
+        rst = 1'b1;
 
         #(CLK_PERIOD * 2);
 
-        exp_read1 = 5'b0;
-        exp_read2 = 5'b0;
+        exp_read1 = 32'b0;
+        exp_read2 = 32'b0;
         check_output(exp_read1, exp_read2);
 
-        rst = 1'b1;
+        rst = 1'b0;
 
         //What are the expected outputs when back on
-        exp_read1 = 5'b1; //???
-        exp_read2 = 5'b1; //???
+        exp_read1 = 32'b1; //???
+        exp_read2 = 32'b1; //???
         check_output(exp_read1, exp_read2);
 
         //////////////////////////
@@ -135,12 +135,12 @@ module tb_register_file;
         input logic [4:0] exp_read1, exp_read2;
     begin
         @(negedge clk);
-            if (exp_read1 == readReg1) begin
+            if (exp_read1 == regOut1) begin
                 $info("Correct exp_read1 value!");
             end else begin
                 $error("Incorrect exp_read1 value :(. Actual: %0d, Expected: %0d.", readReg1, exp_read1);
             end
-            if (exp_read2 == readReg2) begin
+            if (exp_read2 == regOut2) begin
                 $info("Correct exp_read2 value!");
             end else begin
                 $error("Incorrect exp_read2 value :(. Actual: %0d, Expected: %0d.", readReg2, exp_read2);
