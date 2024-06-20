@@ -209,8 +209,18 @@ module tb_memcontrol;
         tb_test_num+=1;
         tb_test_name = "Check Write capabilities (dmem high)";
         $display("Test %d: %s", tb_test_num, tb_test_name);
+        
+        // Check Idle state
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
         stream_inputs(1, 1, 1, 1, 0, 0, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write, 1, 0, 1, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
         /////////////////////////////////////
         // Test 3: Bus_Full remains high   //
