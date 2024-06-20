@@ -265,7 +265,7 @@ module tb_memcontrol;
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
         @(posedge clk);
-        #(CLK_PERIOD);
+        // #(CLK_PERIOD);
         stream_outputs(Read, 1, 1, 0, 0);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
@@ -277,8 +277,22 @@ module tb_memcontrol;
         tb_test_name = "Check Dmem precedence";
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
+        // This is the same as the previous test case except instr also = 1
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 1, 0, 1, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        // #(CLK_PERIOD);
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
         /////////////////////////////////////
-        // Test 6: MemWrite = MemRead = 0  //
+        // Test 7: MemWrite = MemRead = 0  //
         /////////////////////////////////////
         reset_dut();
         tb_test_num+=1;
@@ -286,7 +300,7 @@ module tb_memcontrol;
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
         /////////////////////////////////////
-        // Test 7: Read with instr_en high //
+        // Test 8: Read with instr_en high //
         /////////////////////////////////////
         reset_dut();
         tb_test_num+=1;
@@ -294,7 +308,7 @@ module tb_memcontrol;
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
         //////////////////////////////////////
-        // Test 8: Write with instr_en high //
+        // Test 9: Write with instr_en high //
         //////////////////////////////////////
         reset_dut();
         tb_test_num+=1;
