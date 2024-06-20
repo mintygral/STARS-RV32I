@@ -3,10 +3,19 @@
 module register_file (
     input logic [31:0] reg_write, 
     input logic [4:0] rd, rs1, rs2, //not sure about literally any bit amounts
-    input logic clk, rst, write, 
+    input logic clk, rst, write,
     output reg [31:0] reg1, reg2
 );
     reg[31:0] register [31:0]; //correct syntax for array
+    //logic write;
+
+    // always_comb begin
+    //     if (reg_write == 32'b0) begin
+    //         write = 1'b0;
+    //     end else begin
+    //         write = 1'b1;
+    //     end
+    // end
 
     always @ ( //or should I use initial
         rs1, 
