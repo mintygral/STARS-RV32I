@@ -320,6 +320,13 @@ module tb_memcontrol;
         tb_test_name = "Read with instr_en high";
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
+        // Set inputs to non-reset values
+        stream_inputs(1, 1, 1, 0, 1, 0, 0, 1);
+        @(posedge clk);
+        #(CLK_PERIOD * 2); // wait one clock period to transition by one state
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
         //////////////////////////////////////
         // Test 8: Write with instr_en high //
         //////////////////////////////////////
