@@ -220,7 +220,7 @@ module tb_memcontrol;
         @(posedge clk);
         #(CLK_PERIOD);
         stream_outputs(Write, 1, 0, 1, 0);
-        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR); // WORKS
 
         /////////////////////////////////////
         // Test 3: Bus_Full remains high   //
@@ -246,7 +246,7 @@ module tb_memcontrol;
         @(posedge clk);
         #(CLK_PERIOD);
         stream_outputs(Wait, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
-        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR); // WORKS
 
         /////////////////////////////////////
         // Test 4: Read vs. Write prec.    //
@@ -256,6 +256,19 @@ module tb_memcontrol;
         tb_test_name = "Check Read vs. Write precedence";
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 0, 0, 1, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        // #(CLK_PERIOD);
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
         /////////////////////////////////
         // Test 5: Dmem precedence     //
         /////////////////////////////////
@@ -264,6 +277,20 @@ module tb_memcontrol;
         tb_test_name = "Check Dmem precedence";
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
+        // This is the same as the previous test case except instr also = 1
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 1, 0, 1, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        // #(CLK_PERIOD);
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
         /////////////////////////////////////
         // Test 6: MemWrite = MemRead = 0  //
         /////////////////////////////////////
@@ -271,6 +298,19 @@ module tb_memcontrol;
         tb_test_num+=1;
         tb_test_name = "Check MemWrite and MemRead = 0";
         $display("Test %d: %s", tb_test_num, tb_test_name);
+
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 0, 0, 0, 1, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // make sure it stays in IDLE
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
         /////////////////////////////////////
         // Test 7: Read with instr_en high //
@@ -287,6 +327,7 @@ module tb_memcontrol;
         tb_test_num+=1;
         tb_test_name = "Write with instr_en high";
         $display("Test %d: %s", tb_test_num, tb_test_name);
+        $finish;
     end
 
 
