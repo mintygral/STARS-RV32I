@@ -292,7 +292,7 @@ module tb_memcontrol;
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
         /////////////////////////////////////
-        // Test 7: MemWrite = MemRead = 0  //
+        // Test 6: MemWrite = MemRead = 0  //
         /////////////////////////////////////
         reset_dut();
         tb_test_num+=1;
@@ -300,7 +300,7 @@ module tb_memcontrol;
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
         /////////////////////////////////////
-        // Test 8: Read with instr_en high //
+        // Test 7: Read with instr_en high //
         /////////////////////////////////////
         reset_dut();
         tb_test_num+=1;
@@ -308,7 +308,7 @@ module tb_memcontrol;
         $display("Test %d: %s", tb_test_num, tb_test_name);
 
         //////////////////////////////////////
-        // Test 9: Write with instr_en high //
+        // Test 8: Write with instr_en high //
         //////////////////////////////////////
         reset_dut();
         tb_test_num+=1;
