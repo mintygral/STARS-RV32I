@@ -43,7 +43,7 @@ module memcontrol(
                 else next_state = INIT;
             end
             
-            IDLE: begin 
+            IDLE: begin
                 if (memRead) begin
                     next_state = Read_Request;
                     prev_state = Read_Request;
