@@ -10,7 +10,7 @@ module tb_register_file;
     logic [31:0] regOut1, regOut2; //????
     integer tb_test_num;
     string tb_test_name;
-
+///
     register_file regFile(.reg_write(writeData), 
     .clk(clk), 
     .rst(rst), 
