@@ -2,33 +2,69 @@ module cpu_core(
 
 );
 
+    //Standard Signals
+    logic clk, rst;
 
-    //Control Unit Inputs/Outputs
+    //Instruction Memory -> Control Unit
     logic [31:0] instruction;
+
+    //Control Unit -> ALU
     logic [6:0] opcode, funct7;
     logic [2:0] funct3;
-    logic [4:0] rs1, rs2, rd;
-    logic [31:0] imm_32;
     logic ALU_source; //0 means register, 1 means immediate
-    logic memToReg; //0 means write ALu output, 1 means write data output
+    
+    //Control Unit -> ALU + Program Counter
+    logic [31:0] imm_32;
 
-    //register outputs
+    //Control Unit -> Registers
+    logic [4:0] rs1, rs2, rd;
+    
+    //Control Unit -> Data Memory
+    logic memToReg; //0 means use ALU output, 1 means use data from memory
+
+    //Control Unit -> Program Counter
+    logic load_pc; //0 means leave pc as is, 1 means need to load in data
+
+    //Data Memory -> Registers
     logic [31:0] reg_write;
-    logic clk, rst, write;
+
+    //Register Input (double check where its coming from)
+    logic write;
+
+    //Registers -> ALU
     logic [31:0] reg1, reg2;
 
-    //ALU outputs
-    logic [31:0] read_address;
-    logic [31:0] write_address;
-    logic [31:0] result;
+    //ALU -> Data Memory
+    logic [31:0] read_address, write_address, result;
+
+    //ALU -> Program Counter
     logic branch;
 
-    control_unit cont(.instruction(instruction), .opcode(opcode), .funct7(funct7), .funct3(funct3), .rs1(rs1), .rs2(rs2), .rd(rd), .imm_32(imm_32), .ALU_source(ALU_source), .memToReg(memToReg));
+    //Memcontrol
+    input logic [31:0] address_in, data_in_CPU, data_in_BUS,
+    input logic data_en, instr_en, bus_full, memWrite, memRead,
+    input logic clk, rst,
+    // outputs
+    output state_t state,
+    output logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR
+    
+    //
+    input logic inc, Disable,
 
-    register_file register(.reg_write(reg_write), .rs1(rs1), .rs2(rs2), .rd(rd), .clk(clk), .rst(rst), .write(write), .reg1(reg1), .reg2(reg2));
+    //(ALU or external reset) -> Program Counter 
+    logic [31:0] data, 
 
-    ALU math(.opcode(opcode), .funct3(funct3), .funct7(funct7), .ALU_source(ALU_source), .reg1(reg1), .reg2(reg2), .immediate(imm_32), .read_address(read_address), .write_address(write_address), .result(result), .branch(branch));
+    //Program Counter -> Instruction Memory
+    logic [31:0] pc_val;
 
+    //Memory Manager -> Instruction Memory
+    logic [31:0] instruction_i;
+    logic data_good;
+
+    //Instruction Memory -> Memory Manager
+    logic instr_fetch;
+    logic [31:0] instruction_adr_o; 
+    
     
 
 
