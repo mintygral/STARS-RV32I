@@ -35,19 +35,19 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
   wire [31:0] data_out_CPU;
   (* force_downto = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
-  wire [2:0] data_out_CPU_SB_LUT4_O_31_I3;
+  wire [3:0] data_out_CPU_SB_LUT4_O_6_I2;
+  (* force_downto = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
+  wire [1:0] data_out_CPU_SB_LUT4_O_6_I3;
+  (* force_downto = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
+  wire [3:0] data_out_CPU_SB_LUT4_O_9_I3;
   (* force_downto = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
   wire [3:0] data_out_CPU_SB_LUT4_O_I2;
   (* src = "memcontrol.sv:19.66-19.80" *)
   output [31:0] data_out_INSTR;
   wire [31:0] data_out_INSTR;
-  (* force_downto = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
-  wire [3:0] data_out_INSTR_SB_LUT4_O_I2;
-  (* force_downto = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
-  wire [1:0] data_out_INSTR_SB_LUT4_O_I3;
   (* src = "memcontrol.sv:15.26-15.34" *)
   input instr_en;
   wire instr_en;
@@ -493,7 +493,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[5]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[5])
   );
   (* module_not_derived = 32'd1 *)
@@ -504,7 +504,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[4]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[4])
   );
   (* module_not_derived = 32'd1 *)
@@ -515,7 +515,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[31]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[31])
   );
   (* module_not_derived = 32'd1 *)
@@ -526,7 +526,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[30]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[30])
   );
   (* module_not_derived = 32'd1 *)
@@ -537,7 +537,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[29]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[29])
   );
   (* module_not_derived = 32'd1 *)
@@ -548,7 +548,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[28]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[28])
   );
   (* module_not_derived = 32'd1 *)
@@ -559,7 +559,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[27]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[27])
   );
   (* module_not_derived = 32'd1 *)
@@ -570,7 +570,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[26]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[26])
   );
   (* module_not_derived = 32'd1 *)
@@ -581,7 +581,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[25]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[25])
   );
   (* module_not_derived = 32'd1 *)
@@ -592,7 +592,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[24]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[24])
   );
   (* module_not_derived = 32'd1 *)
@@ -614,7 +614,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[23]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[23])
   );
   (* module_not_derived = 32'd1 *)
@@ -625,7 +625,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[22]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[22])
   );
   (* module_not_derived = 32'd1 *)
@@ -636,7 +636,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[21]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[21])
   );
   (* module_not_derived = 32'd1 *)
@@ -647,7 +647,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[20]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[20])
   );
   (* module_not_derived = 32'd1 *)
@@ -658,7 +658,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[1]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[1])
   );
   (* module_not_derived = 32'd1 *)
@@ -669,7 +669,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[19]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[19])
   );
   (* module_not_derived = 32'd1 *)
@@ -680,7 +680,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[18]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[18])
   );
   (* module_not_derived = 32'd1 *)
@@ -691,7 +691,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[17]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[17])
   );
   (* module_not_derived = 32'd1 *)
@@ -702,7 +702,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[16]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[16])
   );
   (* module_not_derived = 32'd1 *)
@@ -713,7 +713,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[14]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[14])
   );
   (* module_not_derived = 32'd1 *)
@@ -735,7 +735,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[12]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[12])
   );
   (* module_not_derived = 32'd1 *)
@@ -746,7 +746,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I0(1'h0),
     .I1(1'h0),
     .I2(data_in_CPU[10]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_BUS[10])
   );
   (* module_not_derived = 32'd1 *)
@@ -838,114 +838,114 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .O(data_out_CPU[2])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
+    .LUT_INIT(16'hc000)
   ) data_out_CPU_SB_LUT4_O_10 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[5]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[5])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_11 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[4]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[4])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_12 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[31]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[31])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_13 (
-    .I0(instr_en),
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[30]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[30])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_14 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_11 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[29]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[29])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_15 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_12 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[28]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[28])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_16 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_13 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[27]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[27])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_17 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_14 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[26]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[26])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_18 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_15 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[25]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[25])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_19 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_16 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[24]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[24])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_17 (
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[23]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[23])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_18 (
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[22]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[22])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_19 (
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[21]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[21])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
@@ -959,114 +959,114 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .O(data_out_CPU[3])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
+    .LUT_INIT(16'hc000)
   ) data_out_CPU_SB_LUT4_O_20 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[23]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[23])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_21 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[22]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[22])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_22 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[21]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[21])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_23 (
-    .I0(instr_en),
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[20]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[20])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_24 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_21 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[1]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[1])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_25 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_22 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[19]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[19])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_26 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_23 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[18]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[18])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_27 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_24 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[17]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[17])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_28 (
-    .I0(instr_en),
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_25 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[16]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[16])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
-  ) data_out_CPU_SB_LUT4_O_29 (
-    .I0(instr_en),
+    .LUT_INIT(16'h008f)
+  ) data_out_CPU_SB_LUT4_O_26 (
+    .I0(data_en),
+    .I1(data_in_BUS[15]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
+    .O(data_out_CPU[15])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_27 (
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[14]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[14])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'h008f)
+  ) data_out_CPU_SB_LUT4_O_28 (
+    .I0(data_en),
+    .I1(data_in_BUS[13]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
+    .O(data_out_CPU[13])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'hc000)
+  ) data_out_CPU_SB_LUT4_O_29 (
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[12]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[12])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
@@ -1082,464 +1082,464 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
+    .LUT_INIT(16'h008f)
   ) data_out_CPU_SB_LUT4_O_30 (
-    .I0(instr_en),
-    .I1(data_en),
-    .I2(data_in_BUS[12]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
-    .O(data_out_CPU[12])
+    .I0(data_en),
+    .I1(data_in_BUS[11]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
+    .O(data_out_CPU[11])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h4000)
+    .LUT_INIT(16'hc000)
   ) data_out_CPU_SB_LUT4_O_31 (
-    .I0(instr_en),
+    .I0(1'h0),
     .I1(data_en),
     .I2(data_in_BUS[10]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_CPU[10])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hd0ff)
+    .LUT_INIT(16'h008f)
   ) data_out_CPU_SB_LUT4_O_4 (
     .I0(data_en),
-    .I1(data_in_BUS[7]),
-    .I2(data_out_CPU_SB_LUT4_O_I2[2]),
-    .I3(address_out_SB_LUT4_O_I3[1]),
-    .O(data_out_CPU[7])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'hd0ff)
-  ) data_out_CPU_SB_LUT4_O_5 (
-    .I0(data_en),
-    .I1(data_in_BUS[8]),
-    .I2(data_out_CPU_SB_LUT4_O_I2[2]),
-    .I3(address_out_SB_LUT4_O_I3[1]),
-    .O(data_out_CPU[8])
-  );
-  (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
-  SB_LUT4 #(
-    .LUT_INIT(16'hd0ff)
-  ) data_out_CPU_SB_LUT4_O_6 (
-    .I0(data_en),
     .I1(data_in_BUS[9]),
-    .I2(data_out_CPU_SB_LUT4_O_I2[2]),
-    .I3(address_out_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_CPU[9])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hd0ff)
+    .LUT_INIT(16'h008f)
+  ) data_out_CPU_SB_LUT4_O_5 (
+    .I0(data_en),
+    .I1(data_in_BUS[8]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
+    .O(data_out_CPU[8])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'h008f)
+  ) data_out_CPU_SB_LUT4_O_6 (
+    .I0(data_en),
+    .I1(data_in_BUS[7]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
+    .O(data_out_CPU[7])
+  );
+  (* module_not_derived = 32'd1 *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  SB_LUT4 #(
+    .LUT_INIT(16'hc000)
   ) data_out_CPU_SB_LUT4_O_7 (
-    .I0(data_en),
-    .I1(data_in_BUS[11]),
-    .I2(data_out_CPU_SB_LUT4_O_I2[2]),
-    .I3(address_out_SB_LUT4_O_I3[1]),
-    .O(data_out_CPU[11])
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[5]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[5])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hd0ff)
+    .LUT_INIT(16'hc000)
   ) data_out_CPU_SB_LUT4_O_8 (
-    .I0(data_en),
-    .I1(data_in_BUS[13]),
-    .I2(data_out_CPU_SB_LUT4_O_I2[2]),
-    .I3(address_out_SB_LUT4_O_I3[1]),
-    .O(data_out_CPU[13])
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[4]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[4])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hd0ff)
+    .LUT_INIT(16'hc000)
   ) data_out_CPU_SB_LUT4_O_9 (
-    .I0(data_en),
-    .I1(data_in_BUS[15]),
-    .I2(data_out_CPU_SB_LUT4_O_I2[2]),
-    .I3(address_out_SB_LUT4_O_I3[1]),
-    .O(data_out_CPU[15])
+    .I0(1'h0),
+    .I1(data_en),
+    .I2(data_in_BUS[31]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
+    .O(data_out_CPU[31])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:17.34-18.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h000f)
+    .LUT_INIT(16'h00f3)
   ) data_out_CPU_SB_LUT4_O_I2_SB_LUT4_O (
     .I0(1'h0),
-    .I1(1'h0),
-    .I2(instr_en),
+    .I1(instr_en),
+    .I2(data_en),
     .I3(state[0]),
     .O(data_out_CPU_SB_LUT4_O_I2[2])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[9]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[9])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_1 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[8]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[8])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_10 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[29]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[29])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_11 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[28]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[28])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_12 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[27]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[27])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_13 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[26]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[26])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_14 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[25]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[25])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_15 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[24]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[24])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_16 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[23]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[23])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_17 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[22]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[22])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_18 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[21]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[21])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_19 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[20]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[20])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_2 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[7]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[7])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_20 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[1]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[1])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_21 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[19]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[19])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_22 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[18]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[18])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_23 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[17]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[17])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_24 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[16]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[16])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_25 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[15]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[15])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_26 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[14]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[14])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_27 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[13]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[13])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_28 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[12]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[12])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_29 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[11]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[11])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_3 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[6]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[6])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_30 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[10]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[10])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_31 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[0]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[0])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_4 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[5]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[5])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_5 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[4]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[4])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_6 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[3]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[3])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_7 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[31]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[31])
   );
   (* module_not_derived = 32'd1 *)
-  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
+  (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'hc000)
+    .LUT_INIT(16'h2000)
   ) data_out_INSTR_SB_LUT4_O_8 (
-    .I0(1'h0),
-    .I1(instr_en),
+    .I0(instr_en),
+    .I1(data_en),
     .I2(data_in_BUS[30]),
-    .I3(data_out_CPU_SB_LUT4_O_31_I3[2]),
+    .I3(data_out_CPU_SB_LUT4_O_9_I3[3]),
     .O(data_out_INSTR[30])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
-    .LUT_INIT(16'h008f)
+    .LUT_INIT(16'h004f)
   ) data_out_INSTR_SB_LUT4_O_9 (
-    .I0(instr_en),
+    .I0(data_en),
     .I1(data_in_BUS[2]),
-    .I2(data_out_INSTR_SB_LUT4_O_I2[2]),
-    .I3(data_out_INSTR_SB_LUT4_O_I3[1]),
+    .I2(data_out_CPU_SB_LUT4_O_6_I2[2]),
+    .I3(data_out_CPU_SB_LUT4_O_6_I3[1]),
     .O(data_out_INSTR[2])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:26.33-27.52" *)
   SB_LUT4 #(
     .LUT_INIT(16'h0e00)
-  ) data_out_INSTR_SB_LUT4_O_I2_SB_LUT4_O (
+  ) instr_en_SB_LUT4_I0 (
     .I0(instr_en),
     .I1(data_en),
     .I2(state[1]),
     .I3(state[2]),
-    .O(data_out_INSTR_SB_LUT4_O_I2[2])
+    .O(data_out_CPU_SB_LUT4_O_6_I2[2])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
@@ -1550,7 +1550,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I1(memRead),
     .I2(state[1]),
     .I3(state[0]),
-    .O(rst_SB_LUT4_I0_O[1])
+    .O(rst_SB_LUT4_I0_O[0])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
@@ -1605,7 +1605,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I1(state[1]),
     .I2(state[0]),
     .I3(state[2]),
-    .O(rst_SB_LUT4_I0_O[0])
+    .O(rst_SB_LUT4_I0_O[1])
   );
   (* \always_ff  = 32'd1 *)
   (* module_not_derived = 32'd1 *)
@@ -1643,7 +1643,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I1(state[1]),
     .I2(state[0]),
     .I3(state[2]),
-    .O(data_out_INSTR_SB_LUT4_O_I3[1])
+    .O(data_out_CPU_SB_LUT4_O_6_I3[1])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:22.34-23.52" *)
@@ -1654,7 +1654,7 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I1(state[1]),
     .I2(state[0]),
     .I3(state[2]),
-    .O(data_out_CPU_SB_LUT4_O_31_I3[2])
+    .O(data_out_CPU_SB_LUT4_O_9_I3[3])
   );
   (* module_not_derived = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:17.34-18.52" *)
@@ -1667,10 +1667,10 @@ module memcontrol(address_in, data_in_CPU, data_in_BUS, data_en, instr_en, bus_f
     .I3(state[2]),
     .O(address_out_SB_LUT4_O_I3[1])
   );
-  assign address_out_SB_LUT4_O_I3[0] = address_in[2];
-  assign { data_out_INSTR_SB_LUT4_O_I2[3], data_out_INSTR_SB_LUT4_O_I2[1:0] } = { data_out_INSTR_SB_LUT4_O_I3[1], data_in_BUS[8], instr_en };
+  assign { data_out_CPU_SB_LUT4_O_6_I2[3], data_out_CPU_SB_LUT4_O_6_I2[1:0] } = { data_out_CPU_SB_LUT4_O_6_I3[1], data_in_BUS[13], data_en };
   assign { data_out_CPU_SB_LUT4_O_I2[3], data_out_CPU_SB_LUT4_O_I2[1:0] } = { address_out_SB_LUT4_O_I3[1], data_in_BUS[0], data_en };
   assign next_state_SB_LUT4_O_1_I2[1:0] = { memWrite, memRead };
-  assign data_out_INSTR_SB_LUT4_O_I3[0] = data_in_CPU[26];
-  assign data_out_CPU_SB_LUT4_O_31_I3[1:0] = { data_in_BUS[27], instr_en };
+  assign data_out_CPU_SB_LUT4_O_6_I3[0] = data_in_CPU[25];
+  assign data_out_CPU_SB_LUT4_O_9_I3[2:0] = { data_in_BUS[21], data_en, instr_en };
+  assign address_out_SB_LUT4_O_I3[0] = address_in[2];
 endmodule

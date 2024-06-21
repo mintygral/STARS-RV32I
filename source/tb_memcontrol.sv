@@ -168,7 +168,7 @@ module tb_memcontrol;
         // NOTE: Do not use reset task during reset test case 
         tb_test_num+=1;
         tb_test_name = "Power on Reset, then Reading (dmem high)";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // Set inputs to non-reset values
         stream_inputs(1, 1, 1, 1, 0, 0, 0, 1);
@@ -208,7 +208,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Check Write capabilities (dmem high)";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         
         // Check Idle state
         stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
@@ -228,7 +228,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Check Bus_Full remaining high";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // Send in inputs
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
@@ -254,7 +254,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Check Read vs. Write precedence";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // Send in inputs
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
@@ -275,7 +275,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Check Dmem precedence";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // This is the same as the previous test case except instr also = 1
         // Send in inputs
@@ -297,7 +297,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Check MemWrite and MemRead = 0";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
         stream_inputs(1, 1, 1, 0, 0, 0, 1, 1);
@@ -318,7 +318,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Read with instr_en high";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // Set inputs to non-reset values
         stream_inputs(1, 1, 1, 0, 1, 0, 0, 1);
@@ -333,7 +333,7 @@ module tb_memcontrol;
         reset_dut();
         tb_test_num+=1;
         tb_test_name = "Write with instr_en high";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         $finish;
     end
 
