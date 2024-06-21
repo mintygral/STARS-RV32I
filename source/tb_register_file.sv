@@ -20,7 +20,7 @@ module tb_register_file;
     .rs2(readReg2), 
     .reg1(regOut1), 
     .reg2(regOut2));
-
+//////
     //Toggle clock
     always begin
         clk = 0;
