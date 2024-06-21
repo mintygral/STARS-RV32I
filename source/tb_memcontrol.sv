@@ -348,6 +348,44 @@ module tb_memcontrol;
         stream_outputs(Write, 1, 0, 1, 0);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
         $finish;
+
+        /////////////////////////////////////////////////////
+        // Test 9: Test Bus_Full then empty with instr_en  //
+        /////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////
+        // Test 10: Test mRead then mWrite  (dMem)  //
+        /////////////////////////////////////////////
+
+        //////////////////////////////////////////////
+        // Test 11: Test mRead then mWrite  (iMem) //
+        /////////////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Read then write with instr_en high";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 0, 1, 0, 0, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Read, 1, 0, 0, 1);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_inputs(1, 1, 1, 0, 1, 0, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Write, 1, 0, 1, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+        $finish;
+
+        
     end
 
 
