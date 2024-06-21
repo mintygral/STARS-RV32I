@@ -1,16 +1,25 @@
 `default_nettype none
 
 module register_file (
-    input logic [31:0] in, 
-    input logic [4:0] inAddress, outAddress1, outAddress2, //not sure about literally any bit amounts
-    input logic clk, rst, write, 
-    output reg [31:0] read1, read2
+    input logic [31:0] reg_write, 
+    input logic [4:0] rd, rs1, rs2, //not sure about literally any bit amounts
+    input logic clk, rst, write,
+    output reg [31:0] reg1, reg2
 );
     reg[31:0] register [31:0]; //correct syntax for array
+    //logic write;
+
+    // always_comb begin
+    //     if (reg_write == 32'b0) begin
+    //         write = 1'b0;
+    //     end else begin
+    //         write = 1'b1;
+    //     end
+    // end
 
     always @ ( //or should I use initial
-        outAddress1, 
-        outAddress2, 
+        rs1, 
+        rs2, 
         register[0], 
         register[1], 
         register[2], 
@@ -44,11 +53,11 @@ module register_file (
         register[30],
         register[31]
     ) begin
-        read1 <= register[outAddress1];
-        read2 <= register[outAddress2];
+        reg1 <= register[rs1];
+        reg2 <= register[rs2];
     end
 
-    always @ (posedge clk, negedge rst) begin //reset pos or neg or no reset
+    always @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
         if (rst) begin
             for (integer i = 0; i <= 31; i++) begin
                 register[i] <= 0;
@@ -56,7 +65,7 @@ module register_file (
         end
         else begin
             if (write) begin
-                register[inAddress] <= in;
+                register[rd] <= reg_write;
             end
         end
     end

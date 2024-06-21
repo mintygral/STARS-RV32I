@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module tb_PC();
+module tb_pc();
 
     // Parameters
     localparam CLK_PERIOD = 10; // 100 MHz clock period
@@ -23,12 +23,12 @@ module tb_PC();
 
      // Signal Dump
     initial begin
-        $dumpfile("dump.vcd");
-        $dumpvars;
+        $dumpfile("sim.vcd");
+        $dumpvars(0, tb_pc);
     end
 
     // DUT Instance
-    PC dut (
+    pc dut (
         .clk(tb_clk),
         .clr(tb_clr),
         .load(tb_load),
@@ -36,7 +36,7 @@ module tb_PC();
         .ALU_out(tb_ALU_out),
         .Disable(tb_Disable),
         .data(tb_data),
-        .immediate_value(tb_immediate_value),
+        .imm_val(tb_immediate_value),
         .pc_val(tb_pc_val)
     );
 
@@ -74,7 +74,7 @@ module tb_PC();
 
     initial begin
         // Initialize inputs
-        tb_clr = 1'b1;
+        tb_clr = 1'b0;
         tb_load = 1'b0;
         tb_inc = 1'b0;
         tb_ALU_out = 1'b0;
@@ -86,7 +86,7 @@ module tb_PC();
         reset_dut();
         tb_inc = 1'b1;
         @(posedge tb_clk);
-        #(CLK_PERIOD);
+        //#(CLK_PERIOD);
         check_pc_value(32'd4); // Expected value after first increment
 
         // Test 2: Fetch an instruction, verify that the counter points to the address of the next instruction
