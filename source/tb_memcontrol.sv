@@ -80,7 +80,7 @@ module tb_memcontrol;
             if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_BUS. Expected %d. Actual: %d", exp_dout_BUS , data_out_BUS);
             else $display("Correct data_out_BUS. Expected %d. Actual: %d", exp_dout_BUS , data_out_BUS);;
             if (exp_dout_INSTR != data_out_INSTR) $error("Incorrect data_out_INSTR. Expected %d. Actual: %d", exp_dout_INSTR , data_out_INSTR);
-            else $display("Correct.");
+            else $display("Correct data_out_INSTR. Expected %d. Actual: %d", exp_dout_INSTR , data_out_INSTR);
         end
     endtask
 
@@ -323,7 +323,10 @@ module tb_memcontrol;
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
         stream_inputs(1, 1, 1, 0, 1, 0, 0, 1);
         @(posedge clk);
-        #(CLK_PERIOD * 2); // wait one clock period to transition by one state
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
         stream_outputs(Read, 1, 0, 0, 1);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
 
@@ -338,7 +341,10 @@ module tb_memcontrol;
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
         stream_inputs(1, 1, 1, 0, 1, 0, 1, 0);
         @(posedge clk);
-        #(CLK_PERIOD * 2); // wait one clock period to transition by one state
+        #(CLK_PERIOD);
+        stream_outputs(Write_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
         stream_outputs(Write, 1, 0, 1, 0);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
         $finish;
