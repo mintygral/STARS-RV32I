@@ -5,7 +5,8 @@ module control_unit(
     output logic [4:0] rs1, rs2, rd,
     output logic [31:0] imm_32,
     output logic ALU_source, //0 means register, 1 means immediate
-    output logic memToReg //0 means use ALU output, 1 means use data from memory
+    output logic memToReg, //0 means use ALU output, 1 means use data from memory
+    output logic load_pc //0 means leave pc as is, 1 means need to load in data
 );
 
     always_comb begin
@@ -21,6 +22,7 @@ module control_unit(
                     imm_32 = 32'b0;
                     ALU_source = 1'b0;
                     memToReg = 1'b0;
+                    load = 1'b0;
                 end
             7'b0010011, //i type instructions
             7'b0000011,
@@ -34,6 +36,7 @@ module control_unit(
                     rs2 = 5'b0;
                     ALU_source = 1'b1;
                     memToReg = (opcode == 7'b0000011) ? 1'b1 : 1'b0;
+                    load = (opcode == 7'b1100111) ? 1'b1 : 1'b0;
                 end
             7'b0100011: //s type instructions
                 begin
@@ -45,6 +48,7 @@ module control_unit(
                     rd = 5'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
+                    load = 1'b0;
                 end
             7'b1100011: //b type instruction
                 begin
@@ -56,6 +60,7 @@ module control_unit(
                     rd = 5'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
+                    load = 1'b0;
                 end
             7'b1101111: //j type instruction
                 begin
@@ -67,6 +72,7 @@ module control_unit(
                     funct7 = 7'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
+                    load = 1'b0;
                 end
             7'b0110111: //u type instruction
                 begin
@@ -78,6 +84,7 @@ module control_unit(
                     funct7 = 7'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
+                    load = 1'b0;
                 end
             default:
                 begin
@@ -89,6 +96,7 @@ module control_unit(
                     funct7 = 7'b0;
                     ALU_source = 1'b0;
                     memToReg = 1'b0;
+                    load = 1'b0;
                 end
         endcase
     end
