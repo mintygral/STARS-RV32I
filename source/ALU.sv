@@ -11,7 +11,6 @@ module ALU(
 logic [31:0] val2, rd;
 
 
-
 always_comb begin
     if (ALU_source) begin
         val2 = immediate;
