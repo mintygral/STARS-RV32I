@@ -14,8 +14,8 @@ module register_file (
 
     always_comb begin
         next_register = register;
-        if (~rd == 0) begin
-            if (write) begin
+        if (write) begin
+            if (rd != 0) begin
                 next_register[rd] = reg_write;
             end
         end
