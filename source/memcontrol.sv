@@ -78,7 +78,7 @@ module memcontrol(
                     data_out_CPU = data_in_BUS;
                     data_out_INSTR = 32'b0; // going to MUX
                 end
-                if (instr_en) begin
+                else if (instr_en) begin
                     data_out_CPU = 32'b0;
                     data_out_INSTR = data_in_BUS; // going to CU
                 end
