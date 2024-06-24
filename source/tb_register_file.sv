@@ -185,7 +185,7 @@ module tb_register_file;
 
         #(CLK_PERIOD * 1);
 
-        //OUYpUYS
+        // OUTPUTS
         exp_read1 = 32'b0;
         exp_read2 = 32'b0;
         @(posedge clk)

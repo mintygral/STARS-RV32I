@@ -49,8 +49,8 @@ module tb_ALU_reg;
         .funct3(funct3),
         .immediate(immediate),
         //output
-        .regfile1(regfile1),
-        .regfile2(regfile2),
+        .regfile1(regALU1),
+        .regfile2(regALU2),
         .regALU1(regALU1),
         .regALU2(regALU2),
         .read_address(read_address),
