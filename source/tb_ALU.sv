@@ -123,6 +123,18 @@ module tb_ALU;
         tb_test_name = "Branch greater than or equal to test";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         branch_r1_geq;
+
+        // Test 19: Jump link
+        tb_test_num++;
+        tb_test_name = "Jump link test";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        jump_link;
+
+        // Test 20: Branch greater than or equal to
+        tb_test_num++;
+        tb_test_name = "Lui";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        lui;
         
         $finish;
     end
@@ -412,6 +424,34 @@ module tb_ALU;
         reg2 = 32'hFFFFFFFF;
         #5;
         ck_branch(1'b0);
+    endtask
+
+    task jump_link;
+        // 7'bb1101111
+        src = 0;
+        opc = 7'b1101111;
+        #5;
+        ck_branch(1'b1);
+
+        // 7'b1100111
+        src = 0;
+        opc = 7'b1100111;
+        #5;
+        ck_branch(1'b1);
+    endtask
+
+    task lui;
+        src = 0;
+        opc = 7'b0110111;
+        reg2 = 32'hFFFFFFFF;
+        #5;
+        ck_shift(32'hFFFFF000);
+
+        src = 1;
+        imm = 32'hFFFFFFFF;
+        #5;
+        ck_shift(32'hFFFFF000);
+
     endtask
 
 
