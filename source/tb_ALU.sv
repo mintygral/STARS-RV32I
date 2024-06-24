@@ -259,7 +259,7 @@ module tb_ALU;
         rst_r2R;
         reg2=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'hFFFFFFFE);
+        ck_shift(32'hFFFFFFFE); // one 0 at the end
     endtask
 
     task ck_srl_r2;
@@ -277,24 +277,25 @@ module tb_ALU;
         rst_r2R;
         reg2=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'h0FFFFFFF);
+        ck_shift(32'h7FFFFFFF); // one 0 in the beginning 
     endtask
 
     task ck_sll_imm;
         // $info("sll_imm");
+        reg1 = 32'hFFFFFFFF;
         rst_immR;
-        imm=32'd32; //full bit shift
+        imm=32'd31; //full bit shift
         f3=3'b001; 
         #5;
-        ck_shift(32'b0);
-        rst_immR;
-        imm=32'd16; //half bit shift 
-        #5;
-        ck_shift(32'b1);
+        ck_shift(32'h80000000);
         rst_r2R;
-        imm=32'd1; // 1 bit shift
+        reg2=32'd16; //half bit shift 
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'hFFFF0000);
+        rst_r2R;
+        reg2=32'd1; // 1 bit shift
+        #5;
+        ck_shift(32'hFFFFFFFE);
     endtask
 
     task ck_srl_imm;
