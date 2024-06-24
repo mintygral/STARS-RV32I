@@ -34,7 +34,7 @@ module tb_ALU;
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         subr2;
 
-        // Test 4: Subo
+        // Test 4: Subi
         tb_test_num++;
         tb_test_name = "Subi";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -175,6 +175,8 @@ module tb_ALU;
         // $info("XORr2");
         rst_r2R;
         f3=3'b100;
+        reg1 = 32'b1;
+        reg2 = 32'b0;
         #5;
         ck_logical(32'b1);
     endtask
@@ -183,6 +185,8 @@ module tb_ALU;
         // $info("XORi");
         rst_immR;
         f3=3'b100;
+        reg1 = 32'b1;
+        imm = 32'b0;
         #5;
         ck_logical(32'b1);
     endtask
@@ -207,6 +211,8 @@ module tb_ALU;
         // $info("ANDr2");
         rst_r2R;
         f3=3'b111;
+        reg1 = 32'b1;
+        reg2 = 32'b1;
         #5;
         ck_logical(32'b1);
     endtask
@@ -215,6 +221,8 @@ module tb_ALU;
         // $info("ANDi");
         rst_immR;
         f3=3'b111;
+        reg1 = 32'b1;
+        imm = 32'b1;
         #5;
         ck_logical(32'b1);
     endtask
