@@ -8,7 +8,7 @@ module ALU(
     output logic branch
 );
 
-logic [31:0] val2, rd;
+logic [31:0] val2;
 
 
 always_comb begin
@@ -22,7 +22,7 @@ always_comb begin
 always_comb begin
     read_address = 32'b0; 
     write_address = 32'b0; 
-    rd = 32'b0;
+    result = 32'b0;
     branch = 1'b0;
     //len = val2-1;
     case(opcode)
@@ -30,27 +30,27 @@ always_comb begin
             case(funct3)
                 3'b000, 3'b010: begin
                     if (funct7==7'b0100000) begin //subtract based on f7
-                        rd = reg1-val2;
+                        result = reg1-val2;
                     end else begin
-                        rd = reg1+val2;
+                        result = reg1+val2;
                     end
                     if (opcode==7'b0000011) begin //read_address is rs1+imm 
-                    read_address=rd; // rd = M[rs1+imm]
+                    read_address=result; // result = M[rs1+imm]
                 end else begin
                     read_address=32'b0;
                 end if (opcode==7'b0100011) begin //Same as above but writing
-                        write_address=rd;
-                        rd=reg2; // reg2 is data to be written to M[rs1+imm]
+                        write_address=result;
+                        result=reg2; // reg2 is data to be written to M[rs1+imm]
                 end else begin
                         write_address = 32'b0;
                     end end 
-                3'b100: rd = reg1^val2;
-                3'b110: rd = reg1|val2;
-                3'b111: rd = reg1&val2;
-                3'b001: rd = reg1<<val2[4:0];
-                3'b101: rd = reg1 >> val2[4:0];
+                3'b100: result = reg1^val2;
+                3'b110: result = reg1|val2;
+                3'b111: result = reg1&val2;
+                3'b001: result = reg1<<val2[4:0];
+                3'b101: result = reg1 >> val2[4:0];
                 default: begin
-                    rd=32'b0;
+                    result=32'b0;
                     read_address=32'b0;
                     write_address=32'b0;
                 end
@@ -76,11 +76,11 @@ always_comb begin
                 default: branch=1'b0;
             endcase end
         7'b1101111,7'b1100111: branch=1'b1;//jump and link, jalr
-        7'b0110111: rd = {val2[19:0],12'b0}; // lui
+        7'b0110111: result = {val2[19:0],12'b0}; // lui
         default: begin
             read_address = 32'b0; 
             write_address = 32'b0; 
-            rd = 32'b0;
+            result = 32'b0;
             branch = 1'b0;
         end 
     endcase
