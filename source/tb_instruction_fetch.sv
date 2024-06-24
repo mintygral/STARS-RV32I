@@ -105,7 +105,7 @@ module tb_instruction_fetch;
     endtask
 
     initial begin
-        $dumpfile("sim.vcd");
+        $dumpfile("instruction_fetch.vcd");
         $dumpvars(0, tb_instruction_fetch);
         rst = RESET_INACTIVE;
         //Test 1: Power on Reset

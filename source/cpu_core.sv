@@ -12,7 +12,7 @@ module cpu_core(
     input logic [31:0] data_in_BUS, //input data from memory bus
     input logic bus_full, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out//, instruction, result, reg1, reg2 //output data +address to memory bus
 );
 
     //Instruction Memory -> Control Unit
@@ -63,7 +63,7 @@ module cpu_core(
 
     //Data Memory
     logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i, data_cpu_i;
-    logic clk, data_good, rst;
+    logic clk, data_good, rst, bus_full_CPU;
     logic data_read, data_write;
     logic [31:0] data_adr_o, data_bus_o, data_cpu_o;
 
@@ -79,6 +79,15 @@ module cpu_core(
     //Instruction Memory -> Memory Manager
     logic instr_fetch;
     logic [31:0] instruction_adr_o; 
+
+    logic [31:0] mem_addr_i;
+    logic data_en, mem_read;
+
+    always_comb begin
+        mem_adr_i = (data_adr_o | instruction_adr_o);
+        data_en = data_read | data_write;
+        mem_read = data_read | instr_fetch;
+    end
 
     instruction_memory instr_mem(
         .instruction_adr_i(pc_val),
@@ -139,6 +148,10 @@ module cpu_core(
         .result(result), 
         .branch(branch));
 
+    always_comb begin
+        data_good = !bus_full_CPU & (state == Read);
+    end
+
     //sort through mem management inputs/outputs
     data_memory data_mem(
         .data_read_adr_i(read_address),
@@ -156,14 +169,14 @@ module cpu_core(
 
     //need to figure out these inputs
     memcontrol mem_ctrl(
-        .address_in(data_adr_o | instruction_adr_o), //only works if non-active addresses are set to 0 
+        .address_in(mem_adr_i), //only works if non-active addresses are set to 0 
         .data_in_CPU(data_cpu_o),
         .data_in_BUS(data_in_BUS), //external info
-        .data_en(data_read | data_write),
+        .data_en(data_en),
         .instr_en(instr_fetch),
         .bus_full(bus_full), //external info
         .memWrite(data_write),
-        .memRead(data_read | instr_fetch),
+        .memRead(mem_read),
         .clk(clk),
         .rst(rst),
         // outputs
@@ -172,7 +185,7 @@ module cpu_core(
         .data_out_CPU(data_out_CPU), //to data mem
         .data_out_BUS(data_out_BUS), //to external output
         .data_out_INSTR(data_out_INSTR), //to instr mem
-        .bus_full_CPU(data_good)); 
+        .bus_full_CPU(bus_full_CPU)); 
 
     pc program_count(
         .clk(clk),
@@ -291,7 +304,7 @@ module control_unit(
     always_comb begin
         opcode = instruction[6:0];
         rd = 5'b0;
-        imm_32 = 32'b0;
+        imm_32 = 32'h00000000;
         rs1 = 5'b0;
         rs2 = 5'b0;
         funct3 = 3'b0;
@@ -504,12 +517,12 @@ module memcontrol(
     end
 
     always_comb begin : changeState
-        bus_full_CPU = !bus_full;
+        bus_full_CPU = bus_full;
         // garbage values for testing
-        address_out = 32'hABCDEF12;
-        data_out_BUS = 32'hABCDEF12;
-        data_out_CPU = 32'hABCDEF12;
-        data_out_INSTR = 32'hABCDEF12;
+        address_out = 32'h0;
+        data_out_BUS = 32'h0;
+        data_out_CPU = 32'h0;
+        data_out_INSTR = 32'h0;
         next_state = state;
         prev_state = state;
         case(state)

@@ -1,3 +1,5 @@
+`timescale 1ms/10ps
+
 module tb_cpu_core;
 
     localparam CLK_PERIOD = 100;
@@ -35,12 +37,15 @@ module tb_cpu_core;
         rst = 1'b0;
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00000_00100_010_00001_0000011); //load data into register 1 (figure out how to load data)
+        load_data(32'h00000001);
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00000_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
+        load_data(32'h00000001);
         #(CLK_PERIOD);
-        //load_instruction(32'b) //add register 1 & 2, store in register 3
-
-        //read data from register 3
+        load_instruction(32'b0000000_00001_00010_000_00011_0110011); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00001_00010_010_00001_0100011); //read data from register 3
+        #(CLK_PERIOD * 3);
         $finish;
     end
 
@@ -49,7 +54,15 @@ module tb_cpu_core;
         bus_full = 1'b1;
         #(CLK_PERIOD);
         bus_full = 1'b0;
-        #(CLK_PERIOD * 5);
+        #(CLK_PERIOD * 3);
+    endtask
+
+    task load_data(input [31:0] data);
+        data_in_BUS = data;
+        bus_full = 1'b1;
+        #(CLK_PERIOD);
+        bus_full = 1'b0;
+        #(CLK_PERIOD);
     endtask
     
 
