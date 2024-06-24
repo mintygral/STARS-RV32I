@@ -76,33 +76,66 @@ module tb_ALU;
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ANDi;
         
-        // Test 11: ck_sll_r2
+        // Test 11: Left shift (reg2)
         tb_test_num++;
-        tb_test_name = "Left shift";
+        tb_test_name = "Left shift (reg2)";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ck_sll_r2;
 
-        // Test 12: ck_srl_r2
+        // Test 12: Right shift (reg2)
         tb_test_num++;
-        tb_test_name = "Right shift";
+        tb_test_name = "Right shift (reg2)";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ck_srl_r2;
 
-        // Test 13: ck_sll_imm
+        // Test 13: Left shift (imm)
         tb_test_num++;
-        tb_test_name = "ck_sll_imm";
+        tb_test_name = "Left shift (imm)";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ck_sll_imm;
 
-        // not working
+        // Test 14: Right shift (imm)
         tb_test_num++;
-        tb_test_name = "A bunch of branch tests (not working)";
+        tb_test_name = "Right shift (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        ck_srl_imm;
+
+        // Tets 15: Branch equality
+        tb_test_num++;
+        tb_test_name = "Branch equality test";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         branch_eq;
+
+        // Test 16: Branch inequality
+        tb_test_num++;
+        tb_test_name = "Branch inequality test";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         branch_neq;
+
+        // Test 17: Branch less than
+        tb_test_num++;
+        tb_test_name = "Branch less than test";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         branch_r1_less;
+
+        // Test 18: Branch greater than or equal to
+        tb_test_num++;
+        tb_test_name = "Branch greater than or equal to test";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         branch_r1_geq;
 
+        // Test 19: Jump link
+        tb_test_num++;
+        tb_test_name = "Jump link test";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        jump_link;
+
+        // Test 20: Branch greater than or equal to
+        tb_test_num++;
+        tb_test_name = "Lui";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        lui;
+        
         $finish;
     end
 
@@ -259,7 +292,7 @@ module tb_ALU;
         rst_r2R;
         reg2=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'hFFFFFFFE);
+        ck_shift(32'hFFFFFFFE); // one 0 at the end
     endtask
 
     task ck_srl_r2;
@@ -277,88 +310,149 @@ module tb_ALU;
         rst_r2R;
         reg2=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'h0FFFFFFF);
+        ck_shift(32'h7FFFFFFF); // one 0 in the beginning 
     endtask
 
     task ck_sll_imm;
         // $info("sll_imm");
+        reg1 = 32'hFFFFFFFF;
         rst_immR;
-        imm=32'd32; //full bit shift
+        imm=32'd31; //full bit shift
         f3=3'b001; 
         #5;
-        ck_shift(32'b0);
+        ck_shift(32'h80000000);
         rst_immR;
         imm=32'd16; //half bit shift 
         #5;
-        ck_shift(32'b1);
-        rst_r2R;
+        ck_shift(32'hFFFF0000);
+        rst_immR;
         imm=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'hFFFFFFFE);
     endtask
 
     task ck_srl_imm;
-        f3=3'b101;
-        // $info("srl_imm");
         rst_immR;
-        imm=32'd32; //full bit shift 
+        f3=3'b101;
+        reg1 = 32'hFFFFFFFF;
+        imm=32'd31; //full bit shift
         #5;
-        ck_shift(32'b0);
+        ck_shift(32'b1);
         rst_immR;
         imm=32'd16; //half bit shift 
         #5;
-        ck_shift(32'b1);
-        rst_r2R;
+        ck_shift(32'h0000FFFF);
+        rst_immR;
         imm=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'h7FFFFFFF); // one 0 in the beginning 
     endtask
     
     task branch_eq;
-        // $info("branch_eq");
-        rst_branch;
-        gen_eq;
-        f3=3'b0;
+        // EQUAL
+        src = 0;
+        opc = 7'b1100011;
+        f3=3'b000;
+        reg1 = 32'hFFFFFFFF;
+        reg2 = 32'hFFFFFFFF;
+        #5;
         ck_branch(1'b1);
-        rst_branch;
-        gen_neq;
+
+        // NOT EQUAL 
+        src = 0;
+        reg1 = 32'b1;
+        reg2 = 32'b0;
+        #5;
         ck_branch(1'b0);
     endtask
 
     task branch_neq;
-        // $info("branch_neq");
-        rst_branch;
-        gen_neq;
+        // EQUAL
+        src = 0;
+        opc = 7'b1100011;
         f3=3'b001;
-        ck_branch(1'b1);
-        rst_branch;
-        gen_eq;
+        reg1 = 32'hFFFFFFFF;
+        reg2 = 32'hFFFFFFFF;
+        #5;
         ck_branch(1'b0);
+
+        // NOT EQUAL 
+        src = 0;
+        reg1 = 32'b1;
+        reg2 = 32'b0;
+        #5;
+        ck_branch(1'b1);
     endtask
 
     task branch_r1_less;
-        // $info("branch_r1_less");
-        rst_branch;
-        gen_r1_less;
-        f3=3'b110;
-        ck_branch(1'b1);
-        rst_branch;
-        gen_r1_geq;
+        // NOT LESS THAN
+        src = 0;
+        opc = 7'b1100011;
+        f3=3'b100;
+        reg1 = 32'hFFFFFFFF;
+        reg2 = 32'b0;
+        #5;
         ck_branch(1'b0);
+
+        // LESS THAN 
+        src = 0;
+        reg1 = 32'b0;
+        reg2 = 32'hFFFFFFFF;
+        #5;
+        ck_branch(1'b1);
     endtask
 
     task branch_r1_geq;
-        // $info("branch_r1_geq");
-        rst_branch;
-        gen_r1_geq;
-        f3=3'b110;
+        // GREATER THAN
+        src = 0;
+        opc = 7'b1100011;
+        f3=3'b101;
+        reg1 = 32'hFFFFFFFF;
+        reg2 = 32'b0;
+        #5;
         ck_branch(1'b1);
-        rst_branch;
-        gen_r1_less;
+
+        // EQUAL TO
+        reg1 = 32'hFFFFFFFF;
+        reg2 = 32'hFFFFFFFF;
+        #5;
+        ck_branch(1'b1);
+
+        // NOT GREATER THAN 
+        src = 0;
+        reg1 = 32'b0;
+        reg2 = 32'hFFFFFFFF;
+        #5;
         ck_branch(1'b0);
     endtask
 
+    task jump_link;
+        // 7'bb1101111
+        src = 0;
+        opc = 7'b1101111;
+        #5;
+        ck_branch(1'b1);
 
+        // 7'b1100111
+        src = 0;
+        opc = 7'b1100111;
+        #5;
+        ck_branch(1'b1);
+    endtask
+
+    task lui;
+        src = 0;
+        opc = 7'b0110111;
+        reg2 = 32'hFFFFFFFF;
+        #5;
+        ck_shift(32'hFFFFF000);
+
+        src = 1;
+        imm = 32'hFFFFFFFF;
+        #5;
+        ck_shift(32'hFFFFF000);
+
+    endtask
 
 
     task ck_sum(input [31:0] exp_sum);
