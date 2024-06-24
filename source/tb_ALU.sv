@@ -34,37 +34,43 @@ module tb_ALU;
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         subr2;
 
-        // Test 4: XORr2
+        // Test 4: Subo
+        tb_test_num++;
+        tb_test_name = "Subi";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        subi;
+
+        // Test 5: XORr2
         tb_test_num++;
         tb_test_name = "XORr2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         XORr2;
         
-        // Test 5: XORi
+        // Test 6: XORi
         tb_test_num++;
         tb_test_name = "XORi";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         XORi;
 
-        // Test 6: ORr2
+        // Test 7: ORr2
         tb_test_num++;
         tb_test_name = "ORr2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ORr2;
         
-        // Test 7: ORi
+        // Test 8: ORi
         tb_test_num++;
         tb_test_name = "ORi";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ORi;
 
-        // Test 8: ANDr2
+        // Test 9: ANDr2
         tb_test_num++;
         tb_test_name = "ANDr2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ANDr2;
 
-        // Test 9: ANDi
+        // Test 10: ANDi
         tb_test_num++;
         tb_test_name = "ANDi";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -149,8 +155,20 @@ module tb_ALU;
         rst_r2R;
         f3=3'b000;
         f7=7'b0100000;
+        reg1 = 32'b1;
+        reg2 = 32'b1;
         #5;
-        ck_diff(32'b1);
+        ck_diff(32'b0);
+    endtask
+
+    task subi;
+        rst_immR;
+        f3 = 3'b000;
+        f7=7'b0100000;
+        reg1 = 32'b1;
+        imm = 32'b1;
+        #5;
+        ck_diff(32'b0);
     endtask
 
     task XORr2;
