@@ -75,12 +75,29 @@ module tb_ALU;
         tb_test_name = "ANDi";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ANDi;
-
+        
+        // Test 11: ck_sll_r2
+        tb_test_num++;
+        tb_test_name = "Left shift";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ck_sll_r2;
+
+        // Test 12: ck_srl_r2
+        tb_test_num++;
+        tb_test_name = "Right shift";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ck_srl_r2;
+
+        // Test 13: ck_sll_imm
+        tb_test_num++;
+        tb_test_name = "ck_sll_imm";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         ck_sll_imm;
 
         // not working
+        tb_test_num++;
+        tb_test_name = "A bunch of branch tests (not working)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         branch_eq;
         branch_neq;
         branch_r1_less;
@@ -230,35 +247,37 @@ module tb_ALU;
     task ck_sll_r2;
         // $info("sll_r2");
         rst_r2R;
-        reg2=32'd32; //full bit shift
+        reg1 = 32'hFFFFFFFF;
+        reg2=32'd31; //full bit shift
         f3=3'b001; 
         #5;
-        ck_shift(32'b0);
+        ck_shift(32'h80000000);
         rst_r2R;
         reg2=32'd16; //half bit shift 
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'hFFFF0000);
         rst_r2R;
         reg2=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'hFFFFFFFE);
     endtask
 
     task ck_srl_r2;
         // $info("srl_r2");
         rst_r2R;
-        reg2=32'd32; //full bit shift
+        reg1 = 32'hFFFFFFFF;
+        reg2=32'd31; //full bit shift
         f3=3'b101; 
         #5;
-        ck_shift(32'b0);
+        ck_shift(32'b1);
         rst_r2R;
         reg2=32'd16; //half bit shift 
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'h0000FFFF);
         rst_r2R;
         reg2=32'd1; // 1 bit shift
         #5;
-        ck_shift(32'b1);
+        ck_shift(32'h0FFFFFFF);
     endtask
 
     task ck_sll_imm;
