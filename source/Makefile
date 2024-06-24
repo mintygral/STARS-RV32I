@@ -52,6 +52,16 @@ sim: $(SRC)
 	vvp $(BUILD)/$(PROJ)
 	gtkwave $(TRACE)
 
+#verify_cpu_core: $(SRC) cpu_core.sv tb_cpu_core.sv ALU.sv control_unit.sv data_memory.sv instruction_memory.sv memcontrol.sv pc.sv register_file.sv
+#	# if build folder doesn't exist, create it
+#	mkdir -p $(BUILD)
+#	# synthesize with yosys to cell-level Verilog
+#	$(YOSYS) -p "read_verilog -sv -noblackbox cpu_core.sv; synth_ice40 -top cpu_core; write_verilog $(BUILD)/$(PROJ).v"
+#	# run simulation
+#	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_cpu_core.sv -o $(BUILD)/$(PROJ)
+#	vvp $(BUILD)/$(PROJ)
+#	gtkwave $*.vcd
+
 verify_%: $(SRC) %.sv tb_%.sv
 	# if build folder doesn't exist, create it
 	mkdir -p $(BUILD)

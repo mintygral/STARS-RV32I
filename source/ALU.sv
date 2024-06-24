@@ -58,7 +58,7 @@ always_comb begin
         7'b1100011:begin
             case(funct3)
                 3'b000: begin //branch ==
-                    if (reg1==val2) branch=1'b1;
+                    if (reg1 == val2) branch=1'b1;
                     else branch=1'b0;
                 end
                 3'b001:  begin //branch !=

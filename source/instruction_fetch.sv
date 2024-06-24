@@ -1,3 +1,5 @@
+`default_nettype none
+
 typedef enum logic [2:0] {
     INIT = 0,
     IDLE = 1,
