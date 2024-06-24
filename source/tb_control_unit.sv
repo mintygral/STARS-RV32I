@@ -11,7 +11,7 @@ module tb_control_unit;
     control_unit cont(.instruction(instruction), .opcode(opcode), .funct7(funct7), .funct3(funct3), .rs1(rs1), .rs2(rs2), .rd(rd), .imm_32(imm_32), .ALU_source(ALU_source), .memToReg(memToReg));
 
     initial begin
-        $dumpfile("sim.vcd");
+        $dumpfile("control_unit.vcd");
         $dumpvars(0, tb_control_unit);
 
         add_r1_r2_r3;

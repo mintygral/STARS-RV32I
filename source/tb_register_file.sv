@@ -10,7 +10,7 @@ module tb_register_file;
     logic [31:0] regOut1, regOut2; //????
     integer tb_test_num;
     string tb_test_name;
-
+///
     register_file regFile(.reg_write(writeData), 
     .clk(clk), 
     .rst(rst), 
@@ -20,7 +20,7 @@ module tb_register_file;
     .rs2(readReg2), 
     .reg1(regOut1), 
     .reg2(regOut2));
-
+//////
     //Toggle clock
     always begin
         clk = 0;
@@ -52,6 +52,7 @@ module tb_register_file;
 
         tb_test_num += 1;
         tb_test_name = "Power on reset";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         toggle_rst;
 
         //set inputs to non-reset values
@@ -78,124 +79,117 @@ module tb_register_file;
         exp_read2 = 32'b1;
         check_output(exp_read1, exp_read2);
 
-        toggle_rst;
+        toggle_rst();
 
         exp_read1 = 32'b0;
         exp_read2 = 32'b1; //still being written too
         check_output(exp_read1, exp_read2);
 
         /////////////////////////////////////////
-        //Test 1: Test Writing to both outputs //
+        //Test 2: Test Writing to reg1   //
         /////////////////////////////////////////
-        $info("Test 1: Test Writing");
+        // $info("Test writing to reg1");
 
         tb_test_num += 1;
-        tb_test_name = "Test Writing";
+        tb_test_name = "write reg1";
+         $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        toggle_rst();
+
+        writeReg = 5'b0;
+        writeData = 32'b1;
+        readReg1 = 5'b0;
+        readReg2 = 5'b0;
+        writeEnable = 1'b0;
+
+        writeReg = 5'b1;
+        writeData = 32'b1;
+        readReg1 = 5'b0;
+        readReg2 = 5'b0;
+        writeEnable = 1'b1;
+
+        
+        readReg1 = 5'b1;
+        readReg2 = 5'b0;
+
+        exp_read1 = 32'b1;
+        exp_read2 = 32'b0;
+        @(posedge clk)
+        check_output(exp_read1, exp_read2);
+
+        /////////////////////////////////////////
+        //Test 3: Test Writing to reg2   //
+        /////////////////////////////////////////
+        $info("Test 2: Test Writing to reg2");
+
+        tb_test_num += 1;
+        tb_test_name = "Test Writing to reg2";
+         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         toggle_rst;
 
-        //set inputs to non-reset values
+        writeReg = 5'b0;
+        writeData = 32'b1;
+        readReg1 = 5'b0;
+        readReg2 = 5'b0;
+        writeEnable = 1'b0;
+
         writeReg = 5'b1;
         writeData = 32'b1;
         readReg1 = 5'b0;
         readReg2 = 5'b0;
         writeEnable = 1'b1;
         
-        readReg1 = 5'b1;
+        readReg1 = 5'b0;
         readReg2 = 5'b1;
 
-        exp_read1 = 32'b1;
+        exp_read1 = 32'b0;
         exp_read2 = 32'b1;
+        @(posedge clk)
         check_output(exp_read1, exp_read2);
-
-        /////////////////////////////////////////
-        //Test 2: Test Writing to reg1   //
-        /////////////////////////////////////////
-        // $info("Test 2: Test Writing to reg1");
-
-        // tb_test_num += 1;
-        // tb_test_name = "Test Writing one output";
-        // toggle_rst;
-
-        // //set inputs to non-reset values
-        // writeReg = 5'b1;
-        // writeData = 32'b1;
-        // readReg1 = 5'b0;
-        // readReg2 = 5'b0;
-        // writeEnable = 1'b1;
-        
-        // readReg1 = 5'b1;
-        // readReg2 = 5'b0;
-
-        // exp_read1 = 32'b1;
-        // exp_read2 = 32'b0;
-        // check_output(exp_read1, exp_read2);
-
-        /////////////////////////////////////////
-        //Test 3: Test Writing to reg2   //
-        /////////////////////////////////////////
-        // $info("Test 2: Test Writing to reg2");
-
-        // tb_test_num += 1;
-        // tb_test_name = "Test Writing to reg2";
-        // toggle_rst;
-
-        // //set inputs to non-reset values
-        // writeReg = 5'b1;
-        // writeData = 32'b1;
-        // readReg1 = 5'b0;
-        // readReg2 = 5'b0;
-        // writeEnable = 1'b1;
-        
-        // readReg1 = 5'b0;
-        // readReg2 = 5'b1;
-
-        // exp_read1 = 32'b0;
-        // exp_read2 = 32'b1;
-        // check_output(exp_read1, exp_read2);
 
         /////////////////////////////
         //Test 4: Nothing going on //
         /////////////////////////////
-        // $info("Test 2: Nothing going on");
+        $info("Test 2: Nothing going on");
 
-        // tb_test_num += 1;
-        // tb_test_name = "Nothing going on";
-        // toggle_rst;
+        tb_test_num += 1;
+        tb_test_name = "Nothing going on";
+         $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        toggle_rst;
 
-        // writeReg = 5'b0;
-        // readReg1 = 5'b0;
-        // readReg2 = 5'b0;
-        // writeEnable = 1'b0;
-        // writeData = 32'b0;
+        writeReg = 5'b0;
+        readReg1 = 5'b0;
+        readReg2 = 5'b0;
+        writeEnable = 1'b0;
+        writeData = 32'b0;
 
-        // #(CLK_PERIOD * 1);
-
-        
-        // exp_read1 = 32'b0;
-        // exp_read2 = 32'b0;
-        // check_output(exp_read1, exp_read2);
+        exp_read1 = 32'b0;
+        exp_read2 = 32'b0;
+        @(posedge clk)
+        check_output(exp_read1, exp_read2);
 
         //////////////////////////////////////
         //Test 5: Test Reading/Sending value//
         //////////////////////////////////////
-        // $info("Test 3: Test Reading/Sending value");
+        $info("Test 3: Test Reading/Sending value");
 
-        // tb_test_num += 1;
-        // tb_test_name = "Test Reading/Sending Value";
-        // toggle_rst; 
+        tb_test_num += 1;
+        tb_test_name = "Test Reading/Sending Value";
+         $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        toggle_rst; 
 
-        // writeReg = 5'b0;
-        // readReg1 = 5'b1;
-        // readReg2 = 5'b1;
-        // writeEnable = 1'b0;
-        // writeData = 32'b0;
+        writeReg = 5'b0;
+        readReg1 = 5'b1;
+        readReg2 = 5'b1;
+        writeEnable = 1'b0;
+        writeData = 32'b0;
 
-        // #(CLK_PERIOD * 1);
+        #(CLK_PERIOD * 1);
 
-        // //OUYpUYS
-        // exp_read1 = 32'b0;
-        // exp_read2 = 32'b0;
-        // check_output(exp_read1, exp_read2);
+        //OUYpUYS
+        exp_read1 = 32'b0;
+        exp_read2 = 32'b0;
+        @(posedge clk)
+        check_output(exp_read1, exp_read2);
 
         $finish;
 

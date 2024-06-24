@@ -60,7 +60,7 @@ verify_%: $(SRC) %.sv tb_%.sv
 	# run simulation
 	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_$*.sv -o $(BUILD)/$(PROJ)
 	vvp $(BUILD)/$(PROJ)
-	gtkwave $(TRACE)
+	gtkwave $*.vcd
 
 # source_sim: $(SRC)
 # 	# if build folder doesn't exist, create it
