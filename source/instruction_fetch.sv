@@ -1,3 +1,5 @@
+`default_nettype none
+
 typedef enum logic [2:0] {
     INIT = 0,
     IDLE = 1,
@@ -12,7 +14,6 @@ module instruction_fetch(
     input logic [31:0] data_in_CPU, data_in_BUS,
     input logic data_en, bus_full, memWrite,
     input logic clk, rst,
-
     input logic [31:0] instruction_adr_i,
 
     output state_t state,
