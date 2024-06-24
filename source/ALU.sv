@@ -47,7 +47,7 @@ always_comb begin
                 3'b100: result = reg1^val2;
                 3'b110: result = reg1|val2;
                 3'b111: result = reg1&val2;
-                3'b001: result = reg1<<val2[4:0];
+                3'b001: result = reg1 << val2[4:0];
                 3'b101: result = reg1 >> val2[4:0];
                 default: begin
                     result=32'b0;
