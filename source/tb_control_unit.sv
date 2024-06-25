@@ -11,7 +11,7 @@ module tb_control_unit;
     control_unit cont(.instruction(instruction), .opcode(opcode), .funct7(funct7), .funct3(funct3), .rs1(rs1), .rs2(rs2), .rd(rd), .imm_32(imm_32), .ALU_source(ALU_source), .memToReg(memToReg));
 
     initial begin
-        $dumpfile("sim.vcd");
+        $dumpfile("control_unit.vcd");
         $dumpvars(0, tb_control_unit);
 
         add_r1_r2_r3;
@@ -31,6 +31,9 @@ module tb_control_unit;
         bneq_r1_r2_48;
         blt_r1_r2_48;
         bgte_r1_r2_48;
+        lw_to_r1;
+        sw_to_mem_0x11111111;
+        jal_r4;
 
         $finish;
 
@@ -253,6 +256,45 @@ module tb_control_unit;
         check_funct3(3'b101);
         check_registers(5'b00001, 5'b00010, 5'b00000);
         check_imm(32'h00000030);
+        check_alu_source(1'b1);
+        check_memToReg(1'b0);
+    endtask
+
+    task lw_to_r1;
+        $info("lw_to_r1");
+        instruction = 32'b0000011_00000_00010_010_00001_0000011;
+        #5;
+        check_opcode(7'b0000011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b010);
+        check_registers(5'b00010, 5'b00000, 5'b00001);
+        check_imm(32'h00000060);
+        check_alu_source(1'b1);
+        check_memToReg(1'b1);
+    endtask
+
+    task sw_to_mem_0x11111111;
+        $info("sw_to_mem_0x11111111");
+        instruction = 32'b0000011_00001_00010_010_00001_0100011;
+        #5;
+        check_opcode(7'b0100011);
+        check_funct7(7'b0000000);
+        check_funct3(3'b010);
+        check_registers(5'b00010, 5'b00001, 5'b00000);
+        check_imm(32'h00000061);
+        check_alu_source(1'b1);
+        check_memToReg(1'b0);
+    endtask
+
+    task jal_r4;
+        $info("jal_r4");
+        instruction = 32'b0_0000010000_0_00000000_00100_1101111;
+        #5;
+        check_opcode(7'b1101111);
+        check_funct7(7'b0000000);
+        check_funct3(3'b000);
+        check_registers(5'b00000, 5'b00000, 5'b00100);
+        check_imm(32'h00000010);
         check_alu_source(1'b1);
         check_memToReg(1'b0);
     endtask

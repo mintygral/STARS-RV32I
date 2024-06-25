@@ -80,7 +80,7 @@ module tb_memcontrol;
             if (exp_dout_BUS != data_out_BUS) $error("Incorrect data_out_BUS. Expected %d. Actual: %d", exp_dout_BUS , data_out_BUS);
             else $display("Correct data_out_BUS. Expected %d. Actual: %d", exp_dout_BUS , data_out_BUS);;
             if (exp_dout_INSTR != data_out_INSTR) $error("Incorrect data_out_INSTR. Expected %d. Actual: %d", exp_dout_INSTR , data_out_INSTR);
-            else $display("Correct.");
+            else $display("Correct data_out_INSTR. Expected %d. Actual: %d", exp_dout_INSTR , data_out_INSTR);
         end
     endtask
 
@@ -167,8 +167,8 @@ module tb_memcontrol;
 
         // NOTE: Do not use reset task during reset test case 
         tb_test_num+=1;
-        tb_test_name = "Power on Reset";
-        $display("Test %d: %s", tb_test_num, tb_test_name);
+        tb_test_name = "Power on Reset, then Reading (dmem high)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         // Set inputs to non-reset values
         stream_inputs(1, 1, 1, 1, 0, 0, 0, 1);
@@ -191,11 +191,223 @@ module tb_memcontrol;
         #(CLK_PERIOD * 2); // wait one clock period to transition by one state
         stream_outputs(Read, 1, 1, 0, 0);
         check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
-        // NEED TO DO THIS FOR EVERY TEST CASEls
 
+        // check if outputs are reset to garbage -- WORKS
+        #(CLK_PERIOD); // should move back to idle
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // Format for EVERY test case
         // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead) // 8
         // stream_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR) // 5
         // check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        ////////////////////////////
+        // Test 2: Check Write    //
+        ////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Write capabilities (dmem high)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        
+        // Check Idle state
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 0, 0, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write, 1, 0, 1, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR); // WORKS
+
+        /////////////////////////////////////
+        // Test 3: Bus_Full remains high   //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Bus_Full remaining high";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 0, 1, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Wait, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Wait, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR); // WORKS
+
+        /////////////////////////////////////
+        // Test 4: Read vs. Write prec.    //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Read vs. Write precedence";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 0, 0, 1, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        // #(CLK_PERIOD);
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        /////////////////////////////////
+        // Test 5: Dmem precedence     //
+        /////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check Dmem precedence";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // This is the same as the previous test case except instr also = 1
+        // Send in inputs
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 1, 1, 0, 1, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        @(posedge clk);
+        // #(CLK_PERIOD);
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        /////////////////////////////////////
+        // Test 6: MemWrite = MemRead = 0  //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Check MemWrite and MemRead = 0";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 0, 0, 0, 0, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // make sure it stays in IDLE
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(IDLE, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        /////////////////////////////////////
+        // Test 7: Read with instr_en high //
+        /////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Read with instr_en high";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 0, 1, 0, 0, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Read, 1, 0, 0, 1);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        //////////////////////////////////////
+        // Test 8: Write with instr_en high //
+        //////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Write with instr_en high";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 0, 1, 0, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Write, 1, 0, 1, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        /////////////////////////////////////////////////////
+        // Test 9: Test Bus_Full then empty with instr_en  //
+        /////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////
+        // Test 10: Test mRead then mWrite  (dMem)  //
+        /////////////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Read then write with data_en high";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        stream_inputs(1, 1, 1, 1, 0, 0, 0, 1);
+        @(posedge clk);
+        #(CLK_PERIOD); // wait one clock period to transition by one state
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Read, 1, 1, 0, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        // Write
+        stream_inputs(1, 1, 1, 1, 0, 0, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Write, 1, 0, 1, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR); // WORKS
+
+        //////////////////////////////////////////////
+        // Test 11: Test mRead then mWrite  (iMem) //
+        /////////////////////////////////////////////
+        reset_dut();
+        tb_test_num+=1;
+        tb_test_name = "Read then write with instr_en high";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        // stream_inputs(add_in, d_in_CPU, d_in_BUS, data, instr, b_full, mWrite, mRead)
+        stream_inputs(1, 1, 1, 0, 1, 0, 0, 1);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Read_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Read, 1, 0, 0, 1);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_inputs(1, 1, 1, 0, 1, 0, 1, 0);
+        @(posedge clk);
+        #(CLK_PERIOD);
+        stream_outputs(Write_Request, 32'hABCD, 32'hABCD, 32'hABCD, 32'hABCD);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+
+        stream_outputs(Write, 1, 0, 1, 0);
+        check_outputs(exp_state, exp_add_out, exp_dout_CPU, exp_dout_BUS, exp_dout_INSTR);
+        $finish;
+
+        
     end
 
 

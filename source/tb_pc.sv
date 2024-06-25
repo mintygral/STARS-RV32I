@@ -117,6 +117,7 @@ module tb_pc();
         check_pc_value(32'd24); // Expected value should remain the same as no increment or fetch
 
         // Test 6: Verify branch operation with immediate_value > 4 and ALU_out = 1 
+<<<<<<< HEAD
         reset_dut();
         tb_load = 1'b0;
         tb_Disable = 1'b0;
@@ -125,10 +126,23 @@ module tb_pc();
         tb_ALU_out = 1'd1; 
         #(CLK_PERIOD);
         check_pc_value(32'd12); // Expected value after branch (2*4 + 4)
+=======
+        tb_load = 1'b0;
+        tb_Disable = 1'b0;
+        reset_dut;
+        tb_immediate_value = 32'd8;
+        tb_ALU_out = 1'd1; 
+        #(CLK_PERIOD);
+        check_pc_value(32'd12); // Expected value after branch
+>>>>>>> 2542fbcd515670cdcb01b25e8b948c96a2cece5c
         #(CLK_PERIOD * 3);  
 
 
         $finish;
     end
 
+<<<<<<< HEAD
 endmodule
+=======
+endmodule
+>>>>>>> 2542fbcd515670cdcb01b25e8b948c96a2cece5c
