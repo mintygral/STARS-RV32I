@@ -104,6 +104,7 @@ module tb_cpu_core;
         load_instruction(32'b0000000_00010_00001_000_00011_0110011); //add register 1 & 2, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011); //read data from register 3
+
     endtask
 
     task sub_32minus2; 
