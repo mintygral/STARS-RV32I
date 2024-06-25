@@ -53,16 +53,28 @@ module tb_cpu_core;
         rst = 1'b1;
         #(CLK_PERIOD);
         rst = 1'b0;
+        // #(CLK_PERIOD);
+        add_1plus1;
+
         #(CLK_PERIOD);
-        load_instruction(32'b000000000011_00100_010_00001_0000011); //load data into register 1 (figure out how to load data)
-        load_data(32'h00000001);
+        data_in_BUS = 32'b0;
+        bus_full = 32'b0;
+        rst = 1'b1;
         #(CLK_PERIOD);
+<<<<<<< HEAD
         load_instruction(32'b000000000011_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
         load_data(32'h00000001);
         #(CLK_PERIOD);
         load_instruction(32'b0000000_00001_00010_000_00011_0110011); //add register 1 & 2, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011); //read data from register 3
+=======
+        rst = 1'b0;
+        // #(CLK_PERIOD * 2);
+
+        sub_32minus2;
+
+>>>>>>> b0b3c14 (pp)
         #(CLK_PERIOD * 3);
         $finish;
     end
@@ -81,6 +93,38 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         bus_full = 1'b0;
         #(CLK_PERIOD * 5);
+    endtask
+
+    task check_output (input [31:0] exp_result); 
+        begin
+            @(negedge clk)
+            if (exp_result != result) $error("You suck :(. Expected:  %b, actual result: %b", exp_result, result);
+            else $info("Correct output! :)");
+        end
+    endtask
+
+    task add_1plus1;
+        load_instruction(32'b000000000011_00100_010_00001_0000011); //load data into register 1 (figure out how to load data)
+        load_data(32'h00000001);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
+        load_data(32'h00000001);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_000_00011_0110011); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011); //read data from register 3
+    endtask
+
+    task sub_32minus2; 
+        load_instruction(32'b000000000011_00100_010_00001_0000011); //load data into register 1 (figure out how to load data)
+        load_data(32'd32);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
+        load_data(32'd2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0100000_00010_00001_000_00011_0110011); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011); //read data from register 3
     endtask
     
 
