@@ -16,7 +16,8 @@ module dmem_reg (
     // register
     input logic [4:0] rd, rs1, rs2, 
     input logic writeEnable,
-    output logic [31:0] reg1, reg2 //array????
+    input logic [31:0] reg1, reg2, //array????
+    output logic [31:0] register1, register2
 );
     
     ALU alu_grab(
@@ -54,9 +55,9 @@ module dmem_reg (
 
     always_comb begin
         if (MemToReg) begin
-            assign regWrite = data_cpu_o;
+            regWrite = data_cpu_o;
         end else begin 
-            assign regWrite = result;
+            regWrite = result;
         end 
     end
 
@@ -67,8 +68,8 @@ module dmem_reg (
                         .clk(clk),
                         .rst(rst),
                         .write(writeEnable),
-                        .reg1(reg1),
-                        .reg2(reg2));
+                        .reg1(register1),
+                        .reg2(register2));
 
 endmodule
 
