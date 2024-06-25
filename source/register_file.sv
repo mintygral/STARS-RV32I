@@ -24,7 +24,7 @@ module register_file (
     end
 
     always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
-        if (~rst) begin
+        if (rst) begin
             register <= '0;
         end
         else begin
