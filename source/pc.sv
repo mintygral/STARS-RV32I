@@ -13,9 +13,9 @@ module pc(
     assign imm = imm_val * 32'd4;
 
     // Register 
-    always_ff @(posedge clk, negedge clr) begin
+    always_ff @(posedge clk, posedge clr) begin
 
-        if (~clr) begin
+        if (clr) begin
             pc_val <= 32'd0;
         end
 
