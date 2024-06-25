@@ -28,11 +28,7 @@ module pc(
    always_comb begin
        next_pc = pc_val;
        next_line_ad = pc_val + 32'd4;	// Calculate next line address  
-<<<<<<< HEAD
        jump_ad = pc_val + imm;    // Calculate jump address (jump and link)
-=======
-       jump_ad = next_line_ad + imm;    // Calculate jump address (jump and link)
->>>>>>> 2f402ad (fix pc tb)
 
 	
         // Mux choice between next line address and jump address
