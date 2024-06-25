@@ -26,7 +26,7 @@ always_comb begin
     branch = 1'b0;
     //len = val2-1;
     case(opcode)
-        7'b0110011, 7'b0010011, 7'b0100011:
+        7'b0110011, 7'b0010011, 7'b0000011, 7'b0100011:
             case(funct3)
                 3'b000, 3'b010: begin
                     if (funct7==7'b0100000) begin //subtract based on f7

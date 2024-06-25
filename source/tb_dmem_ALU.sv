@@ -91,8 +91,7 @@ module tb_dmem_ALU;
             else $info("Correct result! :)");
     endtask
 
-    task check_dmem (input exp_data_read,
-                     input exp_data_write,
+    task check_dmem (input exp_data_read, exp_data_write,
                      input [31:0] exp_data_adr_o, exp_data_bus_o, exp_data_cpu_o);
         if (exp_data_read != data_read) $error("Incorrect data_read! Expected: %b. Actual %b", exp_data_read, data_read);
             else $info("Correct data_read! :)");
@@ -114,7 +113,7 @@ module tb_dmem_ALU;
         tb_test_name = "Test";
         reset_dut();
         //////////////////////////
-        //Test 0: Power on Reset//
+        //Test 1: Power on Reset//
         //////////////////////////
         tb_test_num += 1;
         tb_test_name = "Basic test case";
@@ -129,12 +128,45 @@ module tb_dmem_ALU;
         reg2 = 32'd1;
         immediate = 32'b0;
         data_good = 0;
-        #(CLK_PERIOD * 2);
         
         @(posedge clk);
         #(CLK_PERIOD * 2); // wait one clock period to transition by one state
+        // read_add, write_add, result
         check_ALU(32'b0, 32'b0, 32'd2);
+        // data_read, data_write, data_adr_o, data_bus_o, data_cpu_o
         check_dmem(0, 0, 0, 0, 0);
+
+        /////////////////////////////
+        //Test 2: Non-zero outputs //
+        /////////////////////////////
+        tb_test_num += 1;
+        tb_test_name = "Check that dmem reacts for read_address";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+
+        reset_dut();
+        // check that read_address from ALU is updated to dmem
+        MemToReg = 0;
+        ALU_source = 0;
+        funct7 = 7'b0;
+        funct3 = 3'b0;
+        opcode = 7'b0000011;
+        reg1 = 32'd1;
+        reg2 = 32'd1;
+        immediate = 32'b1;
+        
+
+        // dmem inputs
+        data_good = 1;
+        // data_read_adr_i, data_write_bus_i, data_cpu_i set by ALU
+        data_bus_i = 32'b1;
+        
+        @(posedge clk);
+        #(CLK_PERIOD * 2); // wait one clock period to transition by one state
+        // read_add, write_add, result
+        check_ALU(32'd2, 32'b0, 32'd2);
+        // data_read, data_write, data_adr_o, data_bus_o, data_cpu_o
+        check_dmem(1'b0, 1'b0, 32'b0, 0, data_bus_i);
+
         $finish;
     end
 endmodule
