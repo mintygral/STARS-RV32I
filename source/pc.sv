@@ -10,11 +10,8 @@ module pc(
     logic branch_choice;
     logic [31:0] imm;
 
-<<<<<<< HEAD
     assign imm = imm_val * 32'd4;
 
-=======
->>>>>>> 2542fbcd515670cdcb01b25e8b948c96a2cece5c
     // Register 
     always_ff @(posedge clk, negedge clr) begin
 
@@ -31,11 +28,7 @@ module pc(
    always_comb begin
        next_pc = pc_val;
        next_line_ad = pc_val + 32'd4;	// Calculate next line address  
-<<<<<<< HEAD
-       jump_ad = next_line_ad + imm;    // Calculate jump address (jump and link)
-=======
-       jump_ad = next_line_ad + imm_val;    // Calculate jump address (jump and link)
->>>>>>> 2542fbcd515670cdcb01b25e8b948c96a2cece5c
+       jump_ad = pc_val + imm;    // Calculate jump address (jump and link)
 
 	
         // Mux choice between next line address and jump address
@@ -59,8 +52,4 @@ module pc(
        
    end       
     
-<<<<<<< HEAD
  endmodule
-=======
- endmodule
->>>>>>> 2542fbcd515670cdcb01b25e8b948c96a2cece5c
