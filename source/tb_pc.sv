@@ -4,6 +4,8 @@ module tb_pc();
 
     // Parameters
     localparam CLK_PERIOD = 10; // 100 MHz clock period
+    localparam RESET_ACTIVE = 1;
+    localparam RESET_INACTIVE = 0;
 
     // DUT Inputs
     logic tb_clk;
@@ -21,11 +23,11 @@ module tb_pc();
     // Expected values for checks
     logic [31:0] tb_pc_val_exp;
 
-     // Signal Dump
-    initial begin
-        $dumpfile("sim.vcd");
-        $dumpvars(0, tb_pc);
-    end
+    //  // Signal Dump
+    // initial begin
+    //     $dumpfile("pc.vcd");
+    //     $dumpvars(0, tb_pc);
+    // end
 
     // DUT Instance
     pc dut (
@@ -48,16 +50,21 @@ module tb_pc();
         #(CLK_PERIOD / 2);
     end
 
-
-    // Testbench Tasks
+    // Quick reset for 2 clock cycles
     task reset_dut;
-    begin
-        tb_clr = 1'b0;
-        @(negedge tb_clk);
-        @(negedge tb_clk);
-        tb_clr = 1'b1;
-        @(negedge tb_clk);
-    end
+        begin
+            @(negedge tb_clk); // synchronize to negedge edge so there are not hold or setup time violations
+            
+            // Activate reset
+            tb_clr = RESET_ACTIVE;
+
+            // Wait 2 clock cycles
+            @(negedge tb_clk);
+            @(negedge tb_clk);
+
+            // Deactivate reset
+            tb_clr = RESET_INACTIVE; 
+        end
     endtask
 
     task check_pc_value(input logic [31:0] expected_value);
@@ -73,8 +80,9 @@ module tb_pc();
     endtask
 
     initial begin
+        $dumpfile("pc.vcd");
+        $dumpvars(0, tb_pc);
         // Initialize inputs
-        tb_clr = 1'b0;
         tb_load = 1'b0;
         tb_inc = 1'b0;
         tb_ALU_out = 1'b0;
@@ -96,10 +104,10 @@ module tb_pc();
 
         // Test 3: Test asynchronous reset, verify reset
         tb_inc = 0;
-        tb_clr = 1'b0;
+        tb_clr = 1'b1;
         @(negedge tb_clk);
         check_pc_value(32'd0); // Expected value after reset
-        tb_clr = 1'b1;
+        tb_clr = 1'b0;
 
         // Test 4: Load a specific value and verify the counter points to that value
         reset_dut;
