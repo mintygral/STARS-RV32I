@@ -9,7 +9,7 @@ module tb_cpu_core;
     logic clk, rst; //external clock, reset
     logic [31:0] data_out_BUS, address_out; //output data +address to memory bus
     //testing to verify control unit
-    logic [31:0] imm_32, reg1, reg2, data_cpu_o, read_address, reg_write;
+    logic [31:0] imm_32, reg1, reg2, data_cpu_o, write_address, reg_write;
     logic [31:0] result;
     logic [4:0] rs1, rs2, rd;
     logic memToReg, instr_wait, reg_write_en;
@@ -30,7 +30,7 @@ module tb_cpu_core;
         .rd(rd),
         .memToReg_flipflop(memToReg),
         .data_cpu_o(data_cpu_o),
-        .read_address(read_address),
+        .write_address(write_address),
         .instr_wait(instr_wait),
         .reg_write(reg_write),
         .reg_write_en(reg_write_en)
@@ -62,7 +62,7 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         load_instruction(32'b0000000_00001_00010_000_00011_0110011); //add register 1 & 2, store in register 3
         #(CLK_PERIOD);
-        load_instruction(32'b0000011_00001_00010_010_00001_0100011); //read data from register 3
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011); //read data from register 3
         #(CLK_PERIOD * 3);
         $finish;
     end

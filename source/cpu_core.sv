@@ -12,10 +12,10 @@ module cpu_core(
     input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
     input logic bus_full, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, read_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
     //testing vals from control unit
     output logic [4:0] rs1, rs2, rd,
-    output logic memToReg_flipflop, instr_wait, reg_write_en,
+    output logic memToReg_flipflop, instr_wait, reg_write_en, data_write,
     output logic [6:0] opcode
 );
 
@@ -49,7 +49,7 @@ module cpu_core(
     //logic [31:0] reg1, reg2;
 
     //ALU -> Data Memory
-    logic [31:0] write_address; //read_address, write_address;//, result;
+    logic [31:0] read_address; //read_address, write_address;//, result;
 
     //ALU -> Program Counter
     logic branch;
@@ -66,9 +66,9 @@ module cpu_core(
     logic inc;
 
     //Data Memory
-    logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i, data_cpu_i;
+    logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i;
     logic clk, data_good, rst, bus_full_CPU;
-    logic data_read, data_write;
+    logic data_read;//, data_write;
     logic [31:0] data_adr_o, data_bus_o;//, data_cpu_o;
 
     //(ALU or external reset) -> Program Counter 
@@ -163,14 +163,14 @@ module cpu_core(
         .branch(branch));
 
     always_comb begin
-        data_good = !bus_full_CPU & (state == Read);
+        data_good = !bus_full_CPU & (state == Read | state == Write);
     end
 
     //sort through mem management inputs/outputs
     data_memory data_mem(
         .data_read_adr_i(read_address),
         .data_write_adr_i(write_address),
-        .data_cpu_i(result),
+        .data_cpu_i(reg2),
         .data_bus_i(data_out_CPU),
         .clk(clk),
         .rst(rst),
@@ -184,7 +184,7 @@ module cpu_core(
     //need to figure out these inputs
     memcontrol mem_ctrl(
         .address_in(mem_adr_i), //only works if non-active addresses are set to 0 
-        .data_in_CPU(data_cpu_o),
+        .data_in_CPU(data_bus_o),
         .data_in_BUS(data_in_BUS), //external info
         .data_en(data_en),
         .instr_en(instr_fetch),
@@ -245,7 +245,9 @@ module ALU(
             7'b0000011:
                 read_address = reg1 + val2;
             7'b0100011:
-                write_address = reg1 + val2;
+                begin
+                    write_address = reg1 + val2;
+                end
             7'b0110011, 7'b0010011:
                 begin
                     case(funct3)
@@ -432,25 +434,20 @@ module data_memory(
         next_write = 1'b0;
         stored_read_data = 32'b0;
         stored_write_data = 32'b0;
-        stored_data_adr = 32'b0;
+        stored_data_adr = data_read_adr_i | data_write_adr_i;
         data_cpu_o = data_bus_i;
+        data_bus_o = data_cpu_i;
         if(~(data_read_adr_i == 32'b0)) begin
             if(data_good & data_read) begin
-                stored_read_data = data_bus_i;
                 next_read = 1'b0;
             end else begin
-                stored_read_data = 32'b0;
                 next_read = 1'b1;
-                stored_data_adr = data_read_adr_i;
             end
         end else if(~(data_write_adr_i == 32'b0)) begin
-            if(data_good) begin
-                stored_write_data = 32'b0;
+            if(data_good & data_write) begin
                 next_write = 1'b0;
             end else begin
-                stored_write_data = data_cpu_i;
                 next_write = 1'b1;
-                stored_data_adr = data_write_adr_i;
             end
         end
     end
@@ -458,7 +455,7 @@ module data_memory(
     always_ff @(posedge clk, posedge rst) begin
         if(rst) begin
             data_adr_o <= 32'b0;
-            data_bus_o <= 32'b0;
+            //data_bus_o <= 32'b0;
             //data_cpu_o <= 32'b0;
             data_read <= 1'b0;
             data_write <= 1'b0;
@@ -467,7 +464,7 @@ module data_memory(
             data_write <= next_write;
             data_adr_o <= stored_data_adr;
             //data_cpu_o <= stored_read_data;
-            data_bus_o <= stored_write_data;
+            //data_bus_o <= stored_write_data;
         end
     end
 endmodule
