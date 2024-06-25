@@ -21,11 +21,11 @@ module tb_pc();
     // Expected values for checks
     logic [31:0] tb_pc_val_exp;
 
-     // Signal Dump
-    initial begin
-        $dumpfile("sim.vcd");
-        $dumpvars(0, tb_pc);
-    end
+    //  // Signal Dump
+    // initial begin
+    //     $dumpfile("pc.vcd");
+    //     $dumpvars(0, tb_pc);
+    // end
 
     // DUT Instance
     pc dut (
@@ -73,6 +73,8 @@ module tb_pc();
     endtask
 
     initial begin
+        $dumpfile("pc.vcd");
+        $dumpvars(0, tb_pc);
         // Initialize inputs
         tb_clr = 1'b0;
         tb_load = 1'b0;
@@ -124,7 +126,11 @@ module tb_pc();
         tb_immediate_value = 32'd2;
         tb_ALU_out = 1'd1; 
         #(CLK_PERIOD);
+<<<<<<< HEAD
         check_pc_value(32'd8); // Expected value after branch (2*4)
+=======
+        check_pc_value(32'd12); // Expected value after branch (2*4 + 4)
+>>>>>>> 2f402ad (fix pc tb)
         #(CLK_PERIOD * 3);  
 
 

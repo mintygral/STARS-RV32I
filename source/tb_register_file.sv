@@ -31,7 +31,7 @@ module tb_register_file;
 
     initial begin
         
-        $dumpfile("sim.vcd");
+        $dumpfile("register_file.vcd");
         $dumpvars(0, tb_register_file);
 
         tb_test_num = -1;
