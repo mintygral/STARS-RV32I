@@ -36,7 +36,7 @@ module tb_register_file;
 
         tb_test_num = -1;
         tb_test_name = "Test Bench Initialization";
-        rst = 1'b1;
+        rst = 1'b0;
         writeEnable = 1'b0;
         writeData = 32'b0;
         writeReg = 5'b0;
@@ -214,9 +214,9 @@ module tb_register_file;
     endtask
 
     task toggle_rst; 
-        rst = 1; #10;
         rst = 0; #10;
         rst = 1; #10;
+        rst = 0; #10;
     endtask
 
 endmodule

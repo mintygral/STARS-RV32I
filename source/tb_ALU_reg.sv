@@ -126,7 +126,7 @@ module tb_ALU_reg;
 
         tb_test_num = -1;
         tb_test_name = "Test Bench Initialization";
-        rst = 1'b1;
+        rst = 1'b0;
         writeEnable = 1'b0;
         reg_write = 32'b0;
         rd = 5'b0;

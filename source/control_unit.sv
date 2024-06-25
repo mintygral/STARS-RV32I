@@ -22,7 +22,7 @@ module control_unit(
                     imm_32 = 32'b0;
                     ALU_source = 1'b0;
                     memToReg = 1'b0;
-                    load = 1'b0;
+                    load_pc = 1'b0;
                 end
             7'b0010011, //i type instructions
             7'b0000011,
@@ -36,7 +36,7 @@ module control_unit(
                     rs2 = 5'b0;
                     ALU_source = 1'b1;
                     memToReg = (opcode == 7'b0000011) ? 1'b1 : 1'b0;
-                    load = (opcode == 7'b1100111) ? 1'b1 : 1'b0;
+                    load_pc = (opcode == 7'b1100111) ? 1'b1 : 1'b0;
                 end
             7'b0100011: //s type instructions
                 begin
@@ -48,7 +48,7 @@ module control_unit(
                     rd = 5'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
-                    load = 1'b0;
+                    load_pc = 1'b0;
                 end
             7'b1100011: //b type instruction
                 begin
@@ -60,7 +60,7 @@ module control_unit(
                     rd = 5'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
-                    load = 1'b0;
+                    load_pc = 1'b0;
                 end
             7'b1101111: //j type instruction
                 begin
@@ -72,7 +72,7 @@ module control_unit(
                     funct7 = 7'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
-                    load = 1'b0;
+                    load_pc = 1'b0;
                 end
             7'b0110111: //u type instruction
                 begin
@@ -84,7 +84,7 @@ module control_unit(
                     funct7 = 7'b0;
                     ALU_source = 1'b1;
                     memToReg = 1'b0;
-                    load = 1'b0;
+                    load_pc = 1'b0;
                 end
             default:
                 begin
@@ -96,7 +96,7 @@ module control_unit(
                     funct7 = 7'b0;
                     ALU_source = 1'b0;
                     memToReg = 1'b0;
-                    load = 1'b0;
+                    load_pc = 1'b0;
                 end
         endcase
     end
