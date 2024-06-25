@@ -1,47 +1,55 @@
 
-module PC(
-    input logic clk, clr, load, inc, ALU_out, Disable,
-    input logic [31:0] data, immediate_value, 
+module pc(
+    input logic clk, clr, load, inc, Disable, ALU_out,
+    input logic [31:0] data, imm_val, 
     output logic [31:0] pc_val 
 );
-    logic [31:0] next_line_address;
-    logic [31:0] jump_address;
+    logic [31:0] next_line_ad;
+    logic [31:0] jump_ad;
     logic [31:0] next_pc;
     logic branch_choice;
+    logic [31:0] imm;
 
-   always_comb begin
-       next_line_address = pc + 4;	// Calculate next line address
-       jump_address = next_line_address + immediate_value;    // Calculate jump address
-       branch_choice = ALU_out;     // branch choice based on ALU output
-	
-        // Mux choice between next line address and jump address
-       if (inc) begin
-            next_pc= next_line_address;
-       end
-       else begin
-            next_pc = data;
-       end
-   end
+    assign imm = imm_val * 32'd4;
 
-        
     // Register 
     always_ff @(posedge clk, negedge clr) begin
-	    if (Disable) begin 
-		pc_val <= pc_val 
-	end
 
-        else if (clr) begin
+        if (~clr) begin
             pc_val <= 32'd0;
         end
 
-        else if (load) begin
-            if (branch_choice) begin
-		pc_val <= jump_address;
-	    end
-	
-	    else begin
-		pc_val <= next_pc;
-	    end
+        else begin
+            pc_val <= next_pc;
         end
     end
+
+
+   always_comb begin
+       next_pc = pc_val;
+       next_line_ad = pc_val + 32'd4;	// Calculate next line address  
+       jump_ad = next_line_ad + imm;    // Calculate jump address (jump and link)
+
+	
+        // Mux choice between next line address and jump address
+        if (Disable) begin 
+		    next_pc = pc_val; 
+	    end
+
+        else if (load) begin
+            next_pc = data + next_line_ad;
+        end
+            
+        else if (ALU_out) begin
+		    next_pc = jump_ad ;
+	    end
+	
+        else if (inc) begin
+            next_pc= next_line_ad;
+       end
+
+        
+       
+   end       
+    
  endmodule

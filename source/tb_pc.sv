@@ -1,6 +1,6 @@
-`timescale 1ns/1ps
+`timescale 1ms/1ps
 
-module tb_PC();
+module tb_pc();
 
     // Parameters
     localparam CLK_PERIOD = 10; // 100 MHz clock period
@@ -23,12 +23,12 @@ module tb_PC();
 
      // Signal Dump
     initial begin
-        $dumpfile("dump.vcd");
-        $dumpvars;
+        $dumpfile("sim.vcd");
+        $dumpvars(0, tb_pc);
     end
 
     // DUT Instance
-    PC dut (
+    pc dut (
         .clk(tb_clk),
         .clr(tb_clr),
         .load(tb_load),
@@ -36,7 +36,7 @@ module tb_PC();
         .ALU_out(tb_ALU_out),
         .Disable(tb_Disable),
         .data(tb_data),
-        .immediate_value(tb_immediate_value),
+        .imm_val(tb_immediate_value),
         .pc_val(tb_pc_val)
     );
 
@@ -53,15 +53,15 @@ module tb_PC();
     task reset_dut;
     begin
         tb_clr = 1'b0;
-        #(2 * CLK_PERIOD); // Wait for 2 clock periods
+        @(negedge tb_clk);
+        @(negedge tb_clk);
         tb_clr = 1'b1;
-        #(CLK_PERIOD); // Wait for 1 clock period
+        @(negedge tb_clk);
     end
     endtask
 
     task check_pc_value(input logic [31:0] expected_value);
     begin
-        #(CLK_PERIOD); // Wait for 1 clock period
         tb_pc_val_exp = expected_value;
         if (tb_pc_val === tb_pc_val_exp) begin
             $display("PC Value Correct: %0d", tb_pc_val);
@@ -74,7 +74,7 @@ module tb_PC();
 
     initial begin
         // Initialize inputs
-        tb_clr = 1'b1;
+        tb_clr = 1'b0;
         tb_load = 1'b0;
         tb_inc = 1'b0;
         tb_ALU_out = 1'b0;
@@ -85,53 +85,50 @@ module tb_PC();
         // Test 1: Fetch an instruction, verify that the counter has been incremented
         reset_dut();
         tb_inc = 1'b1;
-        @(posedge tb_clk);
-        #(CLK_PERIOD);
+        @(negedge tb_clk);
         check_pc_value(32'd4); // Expected value after first increment
 
         // Test 2: Fetch an instruction, verify that the counter points to the address of the next instruction
         tb_inc = 1'b1;
-        @(posedge tb_clk);
-        #(CLK_PERIOD);
+        @(negedge tb_clk);
         check_pc_value(32'd8); // Expected value after second increment
 
 
         // Test 3: Test asynchronous reset, verify reset
+        tb_inc = 0;
         tb_clr = 1'b0;
-        @(posedge tb_clk);
-        #(CLK_PERIOD);
+        @(negedge tb_clk);
         check_pc_value(32'd0); // Expected value after reset
         tb_clr = 1'b1;
 
         // Test 4: Load a specific value and verify the counter points to that value
+        reset_dut;
         tb_load = 1'b1;
         tb_data = 32'd20;
-        @(posedge tb_clk);
-        #(CLK_PERIOD);
-        tb_load = 1'b0;
-        check_pc_value(32'd20); // Expected value after loading specific value
+        @(negedge tb_clk);
+        check_pc_value(32'd24); // Expected value after loading specific value
 
         // Test 5: Verify that if no instruction data is being fetched, the counter does not increment
         tb_inc = 1'b0; // Disable increment
         tb_Disable = 1'b1; // Disable fetching
         tb_data = 32'd0;
-        @(posedge tb_clk);
-        #(CLK_PERIOD * 5); // Wait for 5 clock cycles
-        check_pc_value(32'd20); // Expected value should remain the same as no increment or fetch
+        @(negedge tb_clk);
+        #(CLK_PERIOD * 3); // Wait for 3 clock cycles
+        check_pc_value(32'd24); // Expected value should remain the same as no increment or fetch
 
         // Test 6: Verify branch operation with immediate_value > 4 and ALU_out = 1 
-        tb_immediate_value = 32'd8;
-        tb_ALU_out = 1'b1; 
-        tb_load = 1'b1;
-        @(posedge tb_clk); 
-        #(CLK_PERIOD); 
-        tb_load = 1'b0; 
-        check_pc_value(32'd32); // Expected value after branch (20 + 8 + 4 = 32)
+        reset_dut();
+        tb_load = 1'b0;
+        tb_Disable = 1'b0;
+        reset_dut;
+        tb_immediate_value = 32'd2;
+        tb_ALU_out = 1'd1; 
+        #(CLK_PERIOD);
+        check_pc_value(32'd12); // Expected value after branch (2*4 + 4)
+        #(CLK_PERIOD * 3);  
+
 
         $finish;
     end
 
 endmodule
-
-
-
