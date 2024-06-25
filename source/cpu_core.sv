@@ -14,15 +14,16 @@ module cpu_core(
     input logic clk, rst, //external clock, reset
     output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, read_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
     //testing vals from control unit
-    output logic [4:0] rs1_flipflop, rs2_flipflop, rd_flipflop,
-    output logic memToReg_flipflop, instr_wait, reg_write_en
+    output logic [4:0] rs1, rs2, rd,
+    output logic memToReg_flipflop, instr_wait, reg_write_en,
+    output logic [6:0] opcode
 );
 
     //Instruction Memory -> Control Unit
     logic [31:0] instruction;
 
     //Control Unit -> ALU
-    logic [6:0] opcode, funct7;
+    logic [6:0] funct7; //opcode
     logic [2:0] funct3;
     logic ALU_source; //0 means register, 1 means immediate
     
@@ -30,7 +31,7 @@ module cpu_core(
     //logic [31:0] imm_32;
 
     //Control Unit -> Registers
-    logic [4:0] rs1, rs2, rd;
+    //logic [4:0] rs1, rs2, rd;
     
     //Control Unit -> Data Memory
     logic memToReg; //0 means use ALU output, 1 means use data from memory
@@ -90,16 +91,13 @@ module cpu_core(
         mem_adr_i = (data_adr_o | instruction_adr_o);
         data_en = data_read | data_write;
         mem_read = data_read | instr_fetch;
-        instr_wait = (~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good;
+        instr_wait = ((~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good);
     end
 
     logic [31:0] load_data_flipflop;
 
     always_ff @(posedge clk) begin
         memToReg_flipflop <= memToReg;
-        rs1_flipflop <= rs1;
-        rs2_flipflop <= rs2;
-        rd_flipflop <= rd;
         load_data_flipflop <= data_cpu_o;
     end
 
@@ -145,9 +143,9 @@ module cpu_core(
         .clk(clk), 
         .rst(rst), 
         .write(reg_write_en), 
-        .rd(rd_flipflop),
-        .rs1(rs1_flipflop), 
-        .rs2(rs2_flipflop),
+        .rd(rd),
+        .rs1(rs1), 
+        .rs2(rs2),
         .reg1(reg1),
         .reg2(reg2));
  
@@ -435,6 +433,7 @@ module data_memory(
         stored_read_data = 32'b0;
         stored_write_data = 32'b0;
         stored_data_adr = 32'b0;
+        data_cpu_o = data_bus_i;
         if(~(data_read_adr_i == 32'b0)) begin
             if(data_good & data_read) begin
                 stored_read_data = data_bus_i;
@@ -460,14 +459,14 @@ module data_memory(
         if(rst) begin
             data_adr_o <= 32'b0;
             data_bus_o <= 32'b0;
-            data_cpu_o <= 32'b0;
+            //data_cpu_o <= 32'b0;
             data_read <= 1'b0;
             data_write <= 1'b0;
         end else begin
             data_read <= next_read;
             data_write <= next_write;
             data_adr_o <= stored_data_adr;
-            data_cpu_o <= stored_read_data;
+            //data_cpu_o <= stored_read_data;
             data_bus_o <= stored_write_data;
         end
     end
@@ -701,7 +700,7 @@ module register_file (
         reg2 = register[rs2];
     end
 
-    always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
+    always_ff @ (negedge clk, posedge rst) begin //reset pos or neg or no reset
         if (rst) begin
             register <= '0;
         end
