@@ -23,7 +23,7 @@ module register_file (
         reg2 = register[rs2];
     end
 
-    always_ff @ (posedge clk, negedge rst) begin //reset pos or neg or no reset
+    always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
         if (~rst) begin
             register <= '0;
         end

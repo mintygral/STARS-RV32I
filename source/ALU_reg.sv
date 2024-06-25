@@ -9,7 +9,7 @@ module ALU_reg (
     input logic [6:0] opcode,
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic [31:0] regfile1, regfile2, immediate,
+    input logic [31:0] immediate,
 
     // All outputs
     // register file
@@ -19,8 +19,8 @@ module ALU_reg (
     output logic branch
 );
     logic [31:0] reg1, reg2;
-    assign reg1 = regfile1;
-    assign reg2 = regfile2;
+    // assign reg1 = regfile1;
+    // assign reg2 = regfile2;
     
     register_file regfile(.reg_write(reg_write),
                         .rd(rd),
@@ -34,7 +34,7 @@ module ALU_reg (
 
     ALU call_ALU (.ALU_source(ALU_source),
                   .opcode(opcode),
-                  . funct3(funct3),
+                  .funct3(funct3),
                   .funct7(funct7),
                   .reg1(regALU1),
                   .reg2(regALU2),
@@ -157,8 +157,8 @@ module register_file (
             reg2 = register[rs2];
         end
 
-        always_ff @ (posedge clk, negedge rst) begin //reset pos or neg or no reset
-            if (~rst) begin
+        always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
+            if (rst) begin
                 register <= '0;
             end
             else begin
