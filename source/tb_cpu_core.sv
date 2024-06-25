@@ -61,20 +61,11 @@ module tb_cpu_core;
         bus_full = 32'b0;
         rst = 1'b1;
         #(CLK_PERIOD);
-<<<<<<< HEAD
-        load_instruction(32'b000000000011_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
-        load_data(32'h00000001);
-        #(CLK_PERIOD);
-        load_instruction(32'b0000000_00001_00010_000_00011_0110011); //add register 1 & 2, store in register 3
-        #(CLK_PERIOD);
-        load_instruction(32'b0000011_00011_00010_010_00001_0100011); //read data from register 3
-=======
         rst = 1'b0;
         // #(CLK_PERIOD * 2);
 
         sub_32minus2;
 
->>>>>>> b0b3c14 (pp)
         #(CLK_PERIOD * 3);
         $finish;
     end
