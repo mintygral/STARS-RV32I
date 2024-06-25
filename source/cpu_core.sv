@@ -9,10 +9,13 @@ typedef enum logic [2:0] {
 } state_t;
 
 module cpu_core(
-    input logic [31:0] data_in_BUS, //input data from memory bus
+    input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
     input logic bus_full, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out//, instruction, result, reg1, reg2 //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, read_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
+    //testing vals from control unit
+    output logic [4:0] rs1_flipflop, rs2_flipflop, rd_flipflop,
+    output logic memToReg_flipflop, instr_wait, reg_write_en
 );
 
     //Instruction Memory -> Control Unit
@@ -24,7 +27,7 @@ module cpu_core(
     logic ALU_source; //0 means register, 1 means immediate
     
     //Control Unit -> ALU + Program Counter
-    logic [31:0] imm_32;
+    //logic [31:0] imm_32;
 
     //Control Unit -> Registers
     logic [4:0] rs1, rs2, rd;
@@ -36,16 +39,16 @@ module cpu_core(
     logic load_pc; //0 means leave pc as is, 1 means need to load in data
 
     //Data Memory -> Registers
-    logic [31:0] reg_write;
+    //logic [31:0] reg_write;
 
     //Register Input (double check where its coming from)
-    logic reg_write_en;
+    //logic reg_write_en;
 
     //Registers -> ALU
-    logic [31:0] reg1, reg2;
+    //logic [31:0] reg1, reg2;
 
     //ALU -> Data Memory
-    logic [31:0] read_address, write_address, result;
+    logic [31:0] write_address; //read_address, write_address;//, result;
 
     //ALU -> Program Counter
     logic branch;
@@ -65,10 +68,10 @@ module cpu_core(
     logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i, data_cpu_i;
     logic clk, data_good, rst, bus_full_CPU;
     logic data_read, data_write;
-    logic [31:0] data_adr_o, data_bus_o, data_cpu_o;
+    logic [31:0] data_adr_o, data_bus_o;//, data_cpu_o;
 
     //(ALU or external reset) -> Program Counter 
-    logic [31:0] pc_data;
+    //logic [31:0] pc_data; //external reset value only now
 
     //Program Counter -> Instruction Memory
     logic [31:0] pc_val;
@@ -80,14 +83,26 @@ module cpu_core(
     logic instr_fetch;
     logic [31:0] instruction_adr_o; 
 
-    logic [31:0] mem_addr_i;
+    logic [31:0] mem_adr_i;
     logic data_en, mem_read;
-
+    
     always_comb begin
         mem_adr_i = (data_adr_o | instruction_adr_o);
         data_en = data_read | data_write;
         mem_read = data_read | instr_fetch;
+        instr_wait = (~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good;
     end
+
+    logic [31:0] load_data_flipflop;
+
+    always_ff @(posedge clk) begin
+        memToReg_flipflop <= memToReg;
+        rs1_flipflop <= rs1;
+        rs2_flipflop <= rs2;
+        rd_flipflop <= rd;
+        load_data_flipflop <= data_cpu_o;
+    end
+
 
     instruction_memory instr_mem(
         .instruction_adr_i(pc_val),
@@ -96,8 +111,9 @@ module cpu_core(
         .data_good(data_good),
         .rst(rst),
         .instr_fetch(instr_fetch),
-        .instruction_adr_o(address_in),
-        .instruction_o(instruction));
+        .instruction_adr_o(instruction_adr_o),
+        .instruction_o(instruction),
+        .instr_wait(instr_wait));
     
     control_unit ctrl(
         .instruction(instruction), 
@@ -110,12 +126,12 @@ module cpu_core(
         .imm_32(imm_32), 
         .ALU_source(ALU_source), 
         .memToReg(memToReg),
-        .load_pc(load_pc));
+        .load(load_pc));
 
     //multiplexer for register input
     always_comb begin
-        if(opcode != 7'b0100011 & opcode != 7'b1100011) begin
-            if(memToReg == 1'b1) reg_write = data_cpu_o;
+        if((opcode != 7'b0100011) && (opcode != 7'b1100011)) begin
+            if(memToReg_flipflop == 1'b1) reg_write = (load_data_flipflop | data_cpu_o);
             else reg_write = result;
             reg_write_en = 1'b1;
         end else begin
@@ -129,10 +145,10 @@ module cpu_core(
         .clk(clk), 
         .rst(rst), 
         .write(reg_write_en), 
-        .rd(rd), 
-        .rs1(rs1), 
-        .rs2(rs2), 
-        .reg1(reg1), 
+        .rd(rd_flipflop),
+        .rs1(rs1_flipflop), 
+        .rs2(rs2_flipflop),
+        .reg1(reg1),
         .reg2(reg2));
  
     ALU math(
@@ -193,7 +209,7 @@ module cpu_core(
         .load(load_pc),
         .inc(data_good),
         .ALU_out(branch),
-        .Disable(!data_good),
+        .Disable(instr_wait),
         .data(pc_data),
         .imm_val(imm_32),
         .pc_val(pc_val));
@@ -218,9 +234,8 @@ module ALU(
             val2 = immediate;
         end else begin
             val2 = reg2;
-        end 
-    end
-    
+        end end
+        
 
     always_comb begin
         read_address = 32'b0; 
@@ -229,66 +244,67 @@ module ALU(
         branch = 1'b0;
         //len = val2-1;
         case(opcode)
-            7'b0110011, 7'b0010011, 7'b0100011:
-                case(funct3)
-                    3'b000, 3'b010: begin
-                        if (funct7==7'b0100000) begin //subtract based on f7
-                            result = reg1-val2;
-                        end else begin
-                            result = reg1+val2;
+            7'b0000011:
+                read_address = reg1 + val2;
+            7'b0100011:
+                write_address = reg1 + val2;
+            7'b0110011, 7'b0010011:
+                begin
+                    case(funct3)
+                        3'b000, 3'b010: begin
+                            if (funct7==7'b0100000) begin //subtract based on f7
+                                result = reg1-val2;
+                            end else begin
+                                result = reg1+val2;
+                            end
                         end
-                        if (opcode==7'b0000011) begin //read_address is rs1+imm 
-                        read_address=result; // result = M[rs1+imm]
-                    end else begin
-                        read_address=32'b0;
-                    end if (opcode==7'b0100011) begin //Same as above but writing
-                            write_address=result;
-                            result=reg2; // reg2 is data to be written to M[rs1+imm]
-                    end else begin
-                            write_address = 32'b0;
-                        end end 
-                    3'b100: result = reg1^val2;
-                    3'b110: result = reg1|val2;
-                    3'b111: result = reg1&val2;
-                    3'b001: result = reg1 << val2[4:0];
-                    3'b101: result = reg1 >> val2[4:0];
-                    default: begin
-                        result=32'b0;
-                        read_address=32'b0;
-                        write_address=32'b0;
-                    end
-                endcase 
-            7'b1100011:begin
-                case(funct3)
-                    3'b000: begin //branch ==
-                        if (reg1 == val2) branch=1'b1;
-                        else branch=1'b0;
-                    end
-                    3'b001:  begin //branch !=
-                        if (reg1!=val2) branch=1'b1;
-                        else branch=1'b0;
-                    end
-                    3'b100:  begin //branch <
-                        if (reg1<val2) branch=1'b1;
-                        else branch=1'b0;
-                    end
-                    3'b101: begin //branch >=
-                        if (reg1>=val2) branch=1'b1;
-                        else branch=1'b0;
-                    end
-                    default: branch=1'b0;
-                endcase end
+                        3'b100: result = reg1^val2;
+                        3'b110: result = reg1|val2;
+                        3'b111: result = reg1&val2;
+                        3'b001: result = reg1 << val2[4:0];
+                        3'b101: result = reg1 >> val2[4:0];
+                        default: begin
+                            result=32'b0;
+                            read_address=32'b0;
+                            write_address=32'b0;
+                        end
+                    endcase 
+                end
+            7'b1100011:
+                begin
+                    case(funct3)
+                        3'b000: begin //branch ==
+                            if (reg1 == val2) branch=1'b1;
+                            else branch=1'b0;
+                        end
+                        3'b001:  begin //branch !=
+                            if (reg1!=val2) branch=1'b1;
+                            else branch=1'b0;
+                        end
+                        3'b100:  begin //branch <
+                            if (reg1<val2) branch=1'b1;
+                            else branch=1'b0;
+                        end
+                        3'b101: begin //branch >=
+                            if (reg1>=val2) branch=1'b1;
+                            else branch=1'b0;
+                        end
+                        default: branch=1'b0;
+                    endcase 
+                end
             7'b1101111,7'b1100111: branch=1'b1;//jump and link, jalr
             7'b0110111: result = {val2[19:0],12'b0}; // lui
-            default: begin
-                read_address = 32'b0; 
-                write_address = 32'b0; 
-                result = 32'b0;
-                branch = 1'b0;
-            end 
+            default: 
+                begin
+                    read_address = 32'b0; 
+                    write_address = 32'b0; 
+                    result = 32'b0;
+                    branch = 1'b0;
+                end 
         endcase
     end
 endmodule
+
 
 module control_unit(
     input logic [31:0] instruction,
@@ -298,7 +314,7 @@ module control_unit(
     output logic [31:0] imm_32,
     output logic ALU_source, //0 means register, 1 means immediate
     output logic memToReg, //0 means use ALU output, 1 means use data from memory
-    output logic load_pc //0 means leave pc as is, 1 means need to load in data
+    output logic load //0 means leave pc as is, 1 means need to load in data
 );
 
     always_comb begin
@@ -419,8 +435,8 @@ module data_memory(
         stored_read_data = 32'b0;
         stored_write_data = 32'b0;
         stored_data_adr = 32'b0;
-        if(data_read_adr_i != 32'b0) begin
-            if(data_good) begin
+        if(~(data_read_adr_i == 32'b0)) begin
+            if(data_good & data_read) begin
                 stored_read_data = data_bus_i;
                 next_read = 1'b0;
             end else begin
@@ -428,7 +444,7 @@ module data_memory(
                 next_read = 1'b1;
                 stored_data_adr = data_read_adr_i;
             end
-        end else if(data_write_adr_i != 32'b0) begin
+        end else if(~(data_write_adr_i == 32'b0)) begin
             if(data_good) begin
                 stored_write_data = 32'b0;
                 next_write = 1'b0;
@@ -459,7 +475,7 @@ endmodule
 
 module instruction_memory(
     input logic [31:0] instruction_adr_i, instruction_i,
-    input logic clk, data_good, rst,
+    input logic clk, data_good, rst, instr_wait,
     output logic instr_fetch,
     output logic [31:0] instruction_adr_o, instruction_o
 );
@@ -473,10 +489,14 @@ module instruction_memory(
             next_fetch = 1'b0;
             stored_instr_adr = 32'b0;
             stored_instr = instruction_i;
-        end else begin
+        end else if(!instr_wait) begin
             next_fetch = 1'b1;
             stored_instr_adr = instruction_adr_i;
             stored_instr = 32'b0;
+        end else begin
+            next_fetch = 1'b0;
+            stored_instr_adr = 32'b0;
+            stored_instr = instruction_i;
         end
     end
 
@@ -485,12 +505,15 @@ module instruction_memory(
             instruction_adr_o <= 32'b0;
             instruction_o <= 32'b0;
             instr_fetch <= 1'b0;
+        end else if(instr_wait) begin
+            instruction_adr_o <= 32'b0;
+            instruction_o <= instruction_o;
+            instr_fetch <= 1'b0;
         end else begin
             instruction_adr_o <= stored_instr_adr;
             instruction_o <= stored_instr;
             instr_fetch <= next_fetch;
         end
-        $display("instr fetch: %b", instr_fetch);
     end
 endmodule
 
@@ -658,30 +681,35 @@ module register_file (
     input logic clk, rst, write,
     output logic [31:0] reg1, reg2 //array????
 );
-    reg[31:0][31:0] register; 
-    reg[31:0][31:0] next_register; 
+    reg[31:0][31:0] register;
+    //reg[31:0][31:0] next_register; 
 
+    logic [31:0] write_data;
 
     //assign register = '{default:'0};
 
     always_comb begin
-        next_register = register;
+        write_data = 32'b0;
         if (write) begin
             if (rd != 0) begin
-                next_register[rd] = reg_write;
+                write_data = reg_write;
+            end else begin
+                write_data = 32'b0;
             end
         end
         reg1 = register[rs1];
         reg2 = register[rs2];
     end
 
-    always_ff @ (posedge clk, negedge rst) begin //reset pos or neg or no reset
-        if (~rst) begin
+    always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
+        if (rst) begin
             register <= '0;
         end
         else begin
-            register <= next_register;
-           
+            //register <= next_register;
+            if(write) begin
+                register[rd] <= write_data;
+            end
         end
     end
 endmodule
