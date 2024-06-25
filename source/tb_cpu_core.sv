@@ -8,6 +8,11 @@ module tb_cpu_core;
     logic bus_full; //input from memory bus
     logic clk, rst; //external clock, reset
     logic [31:0] data_out_BUS, address_out; //output data +address to memory bus
+    //testing to verify control unit
+    logic [31:0] imm_32, reg1, reg2, data_cpu_o, read_address, reg_write;
+    logic [31:0] result;
+    logic [4:0] rs1, rs2, rd;
+    logic memToReg, instr_wait, reg_write_en;
 
     cpu_core core0(
         .data_in_BUS(data_in_BUS),
@@ -15,7 +20,20 @@ module tb_cpu_core;
         .clk(clk),
         .rst(rst),
         .data_out_BUS(data_out_BUS),
-        .address_out(address_out)
+        .address_out(address_out),
+        .result(result),
+        .imm_32(imm_32),
+        .reg1(reg1),
+        .reg2(reg2),
+        .rs1_flipflop(rs1),
+        .rs2_flipflop(rs2),
+        .rd_flipflop(rd),
+        .memToReg_flipflop(memToReg),
+        .data_cpu_o(data_cpu_o),
+        .read_address(read_address),
+        .instr_wait(instr_wait),
+        .reg_write(reg_write),
+        .reg_write_en(reg_write_en)
     );
 
     always begin
@@ -36,10 +54,10 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         rst = 1'b0;
         #(CLK_PERIOD);
-        load_instruction(32'b0000011_00000_00100_010_00001_0000011); //load data into register 1 (figure out how to load data)
+        load_instruction(32'b000000000011_00100_010_00001_0000011); //load data into register 1 (figure out how to load data)
         load_data(32'h00000001);
         #(CLK_PERIOD);
-        load_instruction(32'b0000011_00000_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
+        load_instruction(32'b000000000011_00100_010_00010_0000011); //load data into register 2 (figure out how to load data)
         load_data(32'h00000001);
         #(CLK_PERIOD);
         load_instruction(32'b0000000_00001_00010_000_00011_0110011); //add register 1 & 2, store in register 3
@@ -54,7 +72,7 @@ module tb_cpu_core;
         bus_full = 1'b1;
         #(CLK_PERIOD);
         bus_full = 1'b0;
-        #(CLK_PERIOD * 3);
+        #(CLK_PERIOD * 5);
     endtask
 
     task load_data(input [31:0] data);
@@ -62,7 +80,7 @@ module tb_cpu_core;
         bus_full = 1'b1;
         #(CLK_PERIOD);
         bus_full = 1'b0;
-        #(CLK_PERIOD);
+        #(CLK_PERIOD * 5);
     endtask
     
 
