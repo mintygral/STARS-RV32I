@@ -522,7 +522,7 @@ module memcontrol(
     // outputs
     output state_t state,
     output logic bus_full_CPU,
-    output logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR,
+    output logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR
 );
 
     state_t next_state, prev_state;
