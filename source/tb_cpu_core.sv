@@ -135,7 +135,6 @@ module tb_cpu_core;
     	#(CLK_PERIOD * 3);
     	if (check_enable) check_output(exp_result);
     	#(CLK_PERIOD * 2);
-    
     endtask
 
     task load_data(input [31:0] data);
@@ -148,7 +147,7 @@ module tb_cpu_core;
 
     task check_output (input [31:0] exp_result); 
         begin
-          @(negedge clk)
+          @(negedge clk) // check away from clk idk why but this works
           if (exp_result != result) $error("You suck :(. Expected:  %d, actual result: %d", exp_result, result);
           else $info("Correct output :). Expected:  %d, actual result: %d", exp_result, result);
         end
