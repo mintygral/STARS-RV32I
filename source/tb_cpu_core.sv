@@ -153,6 +153,20 @@ module tb_cpu_core;
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         reset_dut;
         test_xor_imm(32'b1, 32'b0);
+      
+      	tb_test_num++;  
+        tb_test_name = "Testing OR (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+      	test_or_imm(32'b0, 32'b1); // imm is set to 1
+      
+      	tb_test_num++;  
+        tb_test_name = "Testing AND (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+      	test_and_imm(32'b0, 32'b0); // imm is set to 1
+      	reset_dut;
+      	test_and_imm(32'b1, 32'b1); // imm is set to 1
 
         // keep going for a little longer
         #(CLK_PERIOD * 3);
@@ -332,26 +346,20 @@ module tb_cpu_core;
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
 
-    task test_or_imm (input [31:0] register1, register2, exp_result);
+  	task test_or_imm (input [31:0] register1, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
-        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
-        load_data(register2);
-        #(CLK_PERIOD);
-        load_instruction(32'b0100000_00010_00001_110_00011_0110011, 1, exp_result); //XOR register 1 & 2, store in register 3
+    	load_instruction(32'b0000000_00001_00001_110_00011_0010011, 1, exp_result); //OR register 1 & imm, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
 
-    task test_and_imm (input [31:0] register1, register2, exp_result);
+    task test_and_imm (input [31:0] register1, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
-        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
-        load_data(register2);
-        #(CLK_PERIOD);
-        load_instruction(32'b0100000_00010_00001_111_00011_0110011, 1, exp_result); //XOR register 1 & 2, store in register 3
+      	load_instruction(32'b0000000_00001_00001_111_00011_0010011, 1, exp_result); //AND register 1 & imm, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
