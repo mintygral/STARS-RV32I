@@ -3,6 +3,8 @@
 module tb_cpu_core;
 
     localparam CLK_PERIOD = 100;
+    integer tb_test_num;
+    string tb_test_name;
 
     logic [31:0] data_in_BUS; //input data from memory bus
     logic bus_full; //input from memory bus
@@ -54,21 +56,52 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         rst = 1'b0;
         // #(CLK_PERIOD);
+
+        tb_test_num = 1;
+        tb_test_name = "Testing Hardcoded Add 1+1";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         add_1plus1;
 
+        tb_test_num++;
+        tb_test_name = "Testing Hardcoded Subtract 32-2";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         reset_dut;
         sub_32minus2;
 
-        // check tasks for add + subtract
-        reset_dut;
-        add(32'd15, 32'd30, 32'd45);
-
-        reset_dut;
-        sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
+        tb_test_num++;
+        tb_test_name = "Testing Add/Sub Tasks for Maximum 32-bit values";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
         reset_dut;
         add(32'h0000FFFF, 32'hFFFF0000, 32'hFFFFFFFF);
 
+        reset_dut;
+        sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
+
+      	tb_test_num++;
+        tb_test_name = "Testing XOR";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+        test_xor(32'd1, 32'd1, 0);
+        reset_dut;
+        test_xor(32'd1, 32'd0, 1);
+
+        tb_test_num++;
+        tb_test_name = "Testing OR";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+        test_or(32'd1, 32'd0, 1);
+        reset_dut;
+        test_or(32'd0, 32'd0, 0);
+
+        tb_test_num++;
+        tb_test_name = "Testing AND";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+        test_and(32'd1, 32'd1, 1);
+        reset_dut;
+        test_and(32'd1, 32'd0, 0);
+        
         #(CLK_PERIOD * 3);
         $finish;
     end
@@ -105,7 +138,7 @@ module tb_cpu_core;
 
     task check_output (input [31:0] exp_result); 
         begin
-            @(negedge clk)
+          @(negedge clk)
           if (exp_result != result) $error("You suck :(. Expected:  %d, actual result: %d", exp_result, result);
           else $info("Correct output :). Expected:  %d, actual result: %d", exp_result, result);
         end
@@ -136,6 +169,7 @@ module tb_cpu_core;
     endtask
     
     task add (input [31:0] register1, register2, exp_result);
+        $display("Now adding %d + %d = %d", register1, register2, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
@@ -148,13 +182,50 @@ module tb_cpu_core;
     endtask
 
     task sub (input [31:0] register1, register2, exp_result);
+        $display("Now subtracting %d - %d = %d", register1, register2, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
         load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
         load_data(register2);
         #(CLK_PERIOD);
-        load_instruction(32'b0100000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
+        load_instruction(32'b0100000_00010_00001_000_00011_0110011, 1, exp_result); //subtract register 1 - 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+
+    task test_xor (input [31:0] register1, register2, exp_result);
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0100000_00010_00001_100_00011_0110011, 1, exp_result); //XOR register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+
+    task test_or (input [31:0] register1, register2, exp_result);
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0100000_00010_00001_110_00011_0110011, 1, exp_result); //XOR register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+
+    task test_and (input [31:0] register1, register2, exp_result);
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0100000_00010_00001_111_00011_0110011, 1, exp_result); //XOR register 1 & 2, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
