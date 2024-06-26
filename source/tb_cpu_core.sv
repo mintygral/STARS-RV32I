@@ -55,19 +55,21 @@ module tb_cpu_core;
         rst = 1'b1;
         #(CLK_PERIOD);
         rst = 1'b0;
-        // #(CLK_PERIOD);
 
+        // Add 1 + 1
         tb_test_num = 1;
         tb_test_name = "Testing Hardcoded Add 1+1";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         add_1plus1;
 
+        // Sub 32 - 2
         tb_test_num++;
         tb_test_name = "Testing Hardcoded Subtract 32-2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         reset_dut;
         sub_32minus2;
 
+        // Add/Sub Tasks
         tb_test_num++;
         tb_test_name = "Testing Add/Sub Tasks for Maximum 32-bit values";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -77,7 +79,8 @@ module tb_cpu_core;
 
         reset_dut;
         sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
-
+        
+        // XOR
       	tb_test_num++;
         tb_test_name = "Testing XOR";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -86,6 +89,7 @@ module tb_cpu_core;
         reset_dut;
         test_xor(32'd1, 32'd0, 1);
 
+        // OR
         tb_test_num++;
         tb_test_name = "Testing OR";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -94,7 +98,8 @@ module tb_cpu_core;
         reset_dut;
         test_or(32'd0, 32'd0, 0);
 
-        tb_test_num++;
+        // AND
+        tb_test_num++;  
         tb_test_name = "Testing AND";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         reset_dut;
@@ -102,9 +107,14 @@ module tb_cpu_core;
         reset_dut;
         test_and(32'd1, 32'd0, 0);
         
+        // keep going for a little longer
         #(CLK_PERIOD * 3);
         $finish;
     end
+
+    ////////////////////////
+    // Testbenching tasks //
+    ////////////////////////
   
     task reset_dut;
         #(CLK_PERIOD);
