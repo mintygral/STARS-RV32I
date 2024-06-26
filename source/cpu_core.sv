@@ -16,7 +16,9 @@ module cpu_core(
     //testing vals from control unit
     output logic [4:0] rs1, rs2, rd,
     output logic memToReg_flipflop, instr_wait, reg_write_en, data_write,
-    output logic [6:0] opcode
+    output logic [6:0] opcode,
+    output logic [31:0] pc_val,
+    output logic branch_ff, branch
 );
 
     //Instruction Memory -> Control Unit
@@ -52,7 +54,7 @@ module cpu_core(
     logic [31:0] read_address; //read_address, write_address;//, result;
 
     //ALU -> Program Counter
-    logic branch;
+    // logic branch;
 
     //Memcontrol
     logic [31:0] address_in, data_in_CPU;
@@ -75,7 +77,7 @@ module cpu_core(
     //logic [31:0] pc_data; //external reset value only now
 
     //Program Counter -> Instruction Memory
-    logic [31:0] pc_val;
+    // logic [31:0] pc_val;
 
     //Memory Manager -> Instruction Memory
     logic [31:0] instruction_i;
@@ -95,6 +97,7 @@ module cpu_core(
     end
 
     logic [31:0] load_data_flipflop;
+    // logic branch_ff;
 
     always_ff @(posedge clk) begin
         memToReg_flipflop <= memToReg;
@@ -148,7 +151,7 @@ module cpu_core(
         .rs2(rs2),
         .reg1(reg1),
         .reg2(reg2));
- 
+
     ALU math(
         .ALU_source(ALU_source), 
         .opcode(opcode), 
@@ -164,6 +167,10 @@ module cpu_core(
 
     always_comb begin
         data_good = !bus_full_CPU & (state == Read | state == Write);
+    end
+
+    always_comb begin 
+        branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000) | (funct3 == 3'b001) | (funct3 == 3'b101))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
     end
 
     //sort through mem management inputs/outputs
@@ -206,7 +213,7 @@ module cpu_core(
         .clr(rst),
         .load(load_pc),
         .inc(data_good),
-        .ALU_out(branch),
+        .ALU_out(branch_ff),
         .Disable(instr_wait),
         .data(pc_data),
         .imm_val(imm_32),
@@ -215,7 +222,7 @@ module cpu_core(
 endmodule
 
 module ALU(
-    input logic ALU_source,
+    input logic ALU_source, 
     input logic [6:0] opcode,
     input logic [2:0] funct3,
     input logic [6:0] funct7,
@@ -233,7 +240,6 @@ module ALU(
         end else begin
             val2 = reg2;
         end end
-        
 
     always_comb begin
         read_address = 32'b0; 
@@ -522,7 +528,7 @@ module memcontrol(
     // outputs
     output state_t state,
     output logic bus_full_CPU,
-    output logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR,
+    output logic [31:0] address_out, data_out_CPU, data_out_BUS, data_out_INSTR
 );
 
     state_t next_state, prev_state;
@@ -646,7 +652,7 @@ module pc(
    always_comb begin
        next_pc = pc_val;
        next_line_ad = pc_val + 32'd4;	// Calculate next line address  
-       jump_ad = next_line_ad + imm_val;    // Calculate jump address (jump and link)
+       jump_ad = pc_val + imm_val;    // Calculate jump address (jump and link)
 
 	
         // Mux choice between next line address and jump address
