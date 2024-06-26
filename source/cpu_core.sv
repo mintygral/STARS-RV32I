@@ -12,7 +12,6 @@ module cpu_core(
     input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
     input logic bus_full, //input from memory bus
     input logic clk, rst, //external clock, reset
-<<<<<<< HEAD
     output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
     //testing vals from control unit
     output logic [4:0] rs1, rs2, rd,
@@ -20,9 +19,6 @@ module cpu_core(
     output logic [6:0] opcode,
     output logic [31:0] pc_val,
     output logic branch_ff, branch
-=======
-    output logic [31:0] data_out_BUS, address_out, reg_write //output data +address to memory bus
->>>>>>> 258181b (flash cpu to fpga)
 );
 
     logic memToReg_flipflop, instr_wait;
