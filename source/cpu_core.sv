@@ -67,7 +67,7 @@ module cpu_core(
 
     //Data Memory
     logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i;
-    logic clk, data_good, rst, bus_full_CPU;
+    logic data_good, bus_full_CPU;
     logic data_read;//, data_write;
     logic [31:0] data_adr_o, data_bus_o;//, data_cpu_o;
 
@@ -85,7 +85,7 @@ module cpu_core(
     logic [31:0] instruction_adr_o; 
 
     logic [31:0] mem_adr_i;
-    logic data_en, mem_read;
+    logic mem_read;
     
     always_comb begin
         mem_adr_i = (data_adr_o | instruction_adr_o);

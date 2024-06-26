@@ -106,7 +106,7 @@ module cpu_core(data_in_BUS, pc_data, bus_full, clk, rst, data_out_BUS, address_
   (* src = "cpu_core.sv:13.17-13.25" *)
   input bus_full;
   wire bus_full;
-  (* src = "cpu_core.sv:70.32-70.44" *)
+  (* src = "cpu_core.sv:70.22-70.34" *)
   wire bus_full_CPU;
   (* force_downto = 32'd1 *)
   (* src = "/home/shay/a/ece270/bin/../share/yosys/ice40/cells_map.v:6.21-6.22" *)
