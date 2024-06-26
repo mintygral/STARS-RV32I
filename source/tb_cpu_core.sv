@@ -6,23 +6,29 @@ module tb_cpu_core;
     integer tb_test_num;
     string tb_test_name;
 
-    logic [31:0] data_in_BUS; //input data from memory bus
+    logic [31:0] data_in_BUS, pc_data; //input data from memory bus
     logic bus_full; //input from memory bus
     logic clk, rst; //external clock, reset
+<<<<<<< HEAD
     logic [31:0] data_out_BUS, address_out; //output data +address to memory bus
     //testing to verify control unit
     logic [31:0] imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, pc_val, pc_data;
     logic [31:0] result;
     logic [4:0] rs1, rs2, rd;
     logic memToReg, instr_wait, reg_write_en, branch_ff, branch;
+=======
+    logic [31:0] data_out_BUS, address_out, reg_write; //output data +address to memory bus
+>>>>>>> 258181b (flash cpu to fpga)
 
     cpu_core core0(
         .data_in_BUS(data_in_BUS),
+        .pc_data(pc_data),
         .bus_full(bus_full),
         .clk(clk),
         .rst(rst),
         .data_out_BUS(data_out_BUS),
         .address_out(address_out),
+<<<<<<< HEAD
         .result(result),
         .imm_32(imm_32),
         .reg1(reg1),
@@ -40,6 +46,9 @@ module tb_cpu_core;
         .pc_data(pc_data),
         .branch_ff(branch_ff),
         .branch(branch)
+=======
+        .reg_write(reg_write)
+>>>>>>> 258181b (flash cpu to fpga)
     );
 
     always begin

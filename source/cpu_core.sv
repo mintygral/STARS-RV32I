@@ -12,6 +12,7 @@ module cpu_core(
     input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
     input logic bus_full, //input from memory bus
     input logic clk, rst, //external clock, reset
+<<<<<<< HEAD
     output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
     //testing vals from control unit
     output logic [4:0] rs1, rs2, rd,
@@ -19,21 +20,26 @@ module cpu_core(
     output logic [6:0] opcode,
     output logic [31:0] pc_val,
     output logic branch_ff, branch
+=======
+    output logic [31:0] data_out_BUS, address_out, reg_write //output data +address to memory bus
+>>>>>>> 258181b (flash cpu to fpga)
 );
+
+    logic memToReg_flipflop, instr_wait;
 
     //Instruction Memory -> Control Unit
     logic [31:0] instruction;
 
     //Control Unit -> ALU
-    logic [6:0] funct7; //opcode
+    logic [6:0] funct7, opcode;
     logic [2:0] funct3;
     logic ALU_source; //0 means register, 1 means immediate
     
     //Control Unit -> ALU + Program Counter
-    //logic [31:0] imm_32;
+    logic [31:0] imm_32;
 
     //Control Unit -> Registers
-    //logic [4:0] rs1, rs2, rd;
+    logic [4:0] rs1, rs2, rd;
     
     //Control Unit -> Data Memory
     logic memToReg; //0 means use ALU output, 1 means use data from memory
@@ -45,13 +51,13 @@ module cpu_core(
     //logic [31:0] reg_write;
 
     //Register Input (double check where its coming from)
-    //logic reg_write_en;
+    logic reg_write_en;
 
     //Registers -> ALU
-    //logic [31:0] reg1, reg2;
+    logic [31:0] reg1, reg2;
 
     //ALU -> Data Memory
-    logic [31:0] read_address; //read_address, write_address;//, result;
+    logic [31:0] read_address, write_address, result;
 
     //ALU -> Program Counter
     // logic branch;
@@ -70,8 +76,8 @@ module cpu_core(
     //Data Memory
     logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i;
     logic data_good, bus_full_CPU;
-    logic data_read;//, data_write;
-    logic [31:0] data_adr_o, data_bus_o;//, data_cpu_o;
+    logic data_read, data_write;
+    logic [31:0] data_adr_o, data_bus_o, data_cpu_o;
 
     //(ALU or external reset) -> Program Counter 
     //logic [31:0] pc_data; //external reset value only now

@@ -10,7 +10,7 @@ module ram (
 reg[31:0] memory [4095:0];
 
 initial begin
-    $readmemh("cpu.txt", memory);
+    $readmemh("cpu.mem", memory);
 end
 
 always @(posedge clk) begin

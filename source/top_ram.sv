@@ -1,7 +1,7 @@
 `default_nettype none
 // Empty top module
 
-module top (
+module top_ram (
   // I/O ports
   input  logic hz100, reset,
   input  logic [20:0] pb,
@@ -17,83 +17,28 @@ module top (
 );
 
   logic [4:0] button_val;
-  logic [31:0] data_in_BUS, pc_data, temp; //input data from memory bus
-  logic strobe; //input from memory bus
-  logic [31:0] data_out_BUS, address_out, reg_write, result, register_out; //output data +address to memory bus
+  logic [31:0] data_in_BUS, pc_data; //input data from memory bus
+  logic bus_full; //input from memory bus
+  logic [31:0] data_out_BUS, address_out, reg_write; //output data +address to memory bus
   logic [31:0] memory_address_out;
 
-  /**edge_detector dec(
-    .button_sync(pb[0]),
-    .clk(hz100),
-    .nrst(!reset),
-    .posedge_button(strobe)
-  );**/
-
-  synckey sync(
-    .in(pb[19:0]),
-    .clock(hz100),
-    .reset(reset),
-    .out(button_val),
-    .strobe(strobe)
-  );
-
-  cpu_core core0(
-    .data_in_BUS(data_in_BUS),
-    .pc_data(pc_data),
-    .bus_full(1'b0),
-    .clk(strobe),
-    .rst(reset),
-    .data_out_BUS(data_out_BUS),
-    .address_out(address_out),
-    .reg_write(reg_write),
-    .result(result), 
-    .instruction_x(temp),
-    .data_good_x(left[2]),
-    .instr_fetch_x(left[1]),
-    .instr_wait_x(left[0]),
-    .reg_write_en_x(left[7]),
-    .register_out_x(register_out)
-  );
-
   ram mem(
-    .clk(strobe),
-    .address_data(address_out[11:0] >> 2),
-    .address_instr(address_out[11:0] >> 2),
-    .data_in(data_out_BUS),
-    .write_enable(1'b0),
+    .clk(hz100),
+    .address_data(12'b0),
+    .address_instr(12'b0),
+    .data_in(32'b0),
+    .write_enable(1'b1),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS)
   );
 
-  assign right[7:0] = result[7:0];
-  display displaying(.seq(register_out), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq(data_in_BUS), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 
 
 endmodule
 
 // Add more modules down here...
-module edge_detector(
-    input logic button_sync, clk, nrst,
-    output logic posedge_button
-);
-
-    logic [1:0] flipflops;
-
-    always_ff @(posedge clk, negedge nrst) begin
-        if(!nrst) begin
-            posedge_button <= 1'b0;
-            flipflops <= 2'b0;
-        end else begin
-            flipflops[1] <= flipflops[0];
-            flipflops[0] <= button_sync;
-            if(flipflops[0] & ~flipflops[1]) posedge_button <= 1'b1;
-            else posedge_button <= 1'b0;
-        end
-    end
-
-endmodule
-
 module synckey(
     input logic [19:0] in,
     input logic clock, reset,
@@ -191,6 +136,8 @@ endmodule
 typedef enum logic [2:0] {
     INIT = 0,
     IDLE = 1,
+    Read_Request = 2,
+    Write_Request = 3,
     Read = 4,
     Write = 5,
     Wait = 6
@@ -198,16 +145,11 @@ typedef enum logic [2:0] {
 
 module cpu_core(
     input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
-    input logic bus_full, 
-    output logic data_good_x, instr_fetch_x, instr_wait_x, reg_write_en_x, //input from memory bus
+    input logic bus_full, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out, reg_write //output data +address to memory bus
 );
 
-    assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
-    assign instruction_x = mem_adr_i;
-    assign reg_write_en_x = reg_write_en;
-    assign register_out_x = reg1;
     logic memToReg_flipflop, instr_wait;
 
     //Instruction Memory -> Control Unit
@@ -237,10 +179,10 @@ module cpu_core(
     logic reg_write_en;
 
     //Registers -> ALU
-    logic [31:0] reg1, reg2, resultx;
+    logic [31:0] reg1, reg2;
 
     //ALU -> Data Memory
-    logic [31:0] read_address, write_address;//, result;
+    logic [31:0] read_address, write_address, result;
 
     //ALU -> Program Counter
     logic branch;
@@ -285,11 +227,10 @@ module cpu_core(
         instr_wait = ((~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good);
     end
 
-    logic [31:0] load_data_flipflop, reg_write_flipflop;
+    logic [31:0] load_data_flipflop;
 
     always_ff @(posedge clk) begin
         memToReg_flipflop <= memToReg;
-        reg_write_flipflop <= reg_write;
         load_data_flipflop <= data_cpu_o;
     end
 
@@ -318,24 +259,20 @@ module cpu_core(
         .memToReg(memToReg),
         .load(load_pc));
 
-        assign result = imm_32;
-
     //multiplexer for register input
     always_comb begin
         if((opcode != 7'b0100011) && (opcode != 7'b1100011)) begin
             if(memToReg_flipflop == 1'b1) reg_write = (load_data_flipflop | data_cpu_o);
             else reg_write = result;
-            reg_write_en = (!instr_fetch) ? 1'b1 : 1'b0;
+            reg_write_en = 1'b1;
         end else begin
             reg_write = 32'b0;
             reg_write_en = 1'b0;
         end
     end
 
-    logic [31:0] register_out;
-    
     register_file regFile(
-        .reg_write(reg_write | reg_write_flipflop), 
+        .reg_write(reg_write), 
         .clk(clk), 
         .rst(rst), 
         .write(reg_write_en), 
@@ -343,8 +280,7 @@ module cpu_core(
         .rs1(rs1), 
         .rs2(rs2),
         .reg1(reg1),
-        .reg2(reg2),
-        .register_out(register_out));
+        .reg2(reg2));
  
     ALU math(
         .ALU_source(ALU_source), 
@@ -356,7 +292,7 @@ module cpu_core(
         .immediate(imm_32), 
         .read_address(read_address), 
         .write_address(write_address), 
-        .result(resultx), 
+        .result(result), 
         .branch(branch));
 
     always_comb begin
@@ -397,8 +333,6 @@ module cpu_core(
         .data_out_BUS(data_out_BUS), //to external output
         .data_out_INSTR(data_out_INSTR), //to instr mem
         .bus_full_CPU(bus_full_CPU)); 
-
-    // assign address_out = mem_adr_i;
 
     pc program_count(
         .clk(clk),
@@ -682,7 +616,7 @@ module instruction_memory(
         next_fetch = 1'b0;
         if(data_good & instr_fetch) begin
             next_fetch = 1'b0;
-            stored_instr_adr = instruction_adr_i;
+            stored_instr_adr = 32'b0;
             stored_instr = instruction_i;
         end else if(!instr_wait) begin
             next_fetch = 1'b1;
@@ -690,7 +624,7 @@ module instruction_memory(
             stored_instr = 32'b0;
         end else begin
             next_fetch = 1'b0;
-            stored_instr_adr = instruction_adr_i;
+            stored_instr_adr = 32'b0;
             stored_instr = instruction_i;
         end
     end
@@ -701,7 +635,7 @@ module instruction_memory(
             instruction_o <= 32'b0;
             instr_fetch <= 1'b0;
         end else if(instr_wait) begin
-            instruction_adr_o <= instruction_adr_o;
+            instruction_adr_o <= 32'b0;
             instruction_o <= instruction_o;
             instr_fetch <= 1'b0;
         end else begin
@@ -737,7 +671,7 @@ module memcontrol(
     always_comb begin : changeState
         bus_full_CPU = bus_full;
         // garbage values for testing
-        address_out = address_in;
+        address_out = 32'h0;
         data_out_BUS = 32'h0;
         data_out_CPU = 32'h0;
         data_out_INSTR = 32'h0;
@@ -751,18 +685,29 @@ module memcontrol(
             
             IDLE: begin
                 if (memRead) begin
-                    next_state = Read;
-                    prev_state = Read;
+                    next_state = Read_Request;
+                    prev_state = Read_Request;
                 end else if (memWrite) begin
-                    next_state = Write;
-                    prev_state = Write;
-                end else if (prev_state == Read | prev_state == Write) begin
-                    address_out = address_in;
-                    prev_state = IDLE;
+                    next_state = Write_Request;
+                    prev_state = Write_Request;
                 end else begin
-                    prev_state = IDLE;
                     next_state = IDLE;
-                    address_out = 32'b0;
+                end
+            end
+
+            Read_Request: begin 
+                if (bus_full) begin
+                    next_state = Wait;
+                end else begin
+                    next_state = Read;
+                end
+            end
+            
+            Write_Request: begin 
+                if (bus_full) begin
+                    next_state = Wait;
+                end else begin
+                    next_state = Write;
                 end
             end
             
@@ -790,9 +735,9 @@ module memcontrol(
 
             Wait: begin 
                 if (!bus_full) begin
-                    if (prev_state == Read) begin
+                    if (prev_state == Read_Request) begin
                         next_state = Read;
-                    end else if (prev_state == Write) begin
+                    end else if (prev_state == Write_Request) begin
                         next_state = Write;
                     end else begin
                         next_state = IDLE;
@@ -853,6 +798,9 @@ module pc(
         else if (inc) begin
             next_pc= next_line_ad;
        end
+
+        
+       
    end       
 endmodule
 
@@ -860,8 +808,7 @@ module register_file (
     input logic [31:0] reg_write, 
     input logic [4:0] rd, rs1, rs2, 
     input logic clk, rst, write,
-    output logic [31:0] reg1, reg2,
-    output logic [31:0] register_out//array????
+    output logic [31:0] reg1, reg2 //array????
 );
     reg[31:0][31:0] register;
     //reg[31:0][31:0] next_register; 
@@ -871,7 +818,7 @@ module register_file (
     //assign register = '{default:'0};
 
     always_comb begin
-        write_data = reg_write;
+        write_data = 32'b0;
         if (write) begin
             if (rd != 0) begin
                 write_data = reg_write;
@@ -881,10 +828,9 @@ module register_file (
         end
         reg1 = register[rs1];
         reg2 = register[rs2];
-        register_out = register[5'd2];
     end
 
-    always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
+    always_ff @ (negedge clk, posedge rst) begin //reset pos or neg or no reset
         if (rst) begin
             register <= '0;
         end
