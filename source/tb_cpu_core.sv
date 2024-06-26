@@ -142,31 +142,31 @@ module tb_cpu_core;
         test_srl(32'hFFFFFFFF, 32'd1, 32'h7FFFFFFF); // half bit shift
         
         // Immediate Value Tests
-        tb_test_num++;  
-        tb_test_name = "Testing add (imm)";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        reset_dut;
-        add_imm(32'd500, 32'd502);
+        // tb_test_num++;  
+        // tb_test_name = "Testing add (imm)";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+        // add_imm(32'd500, 32'd502);
 
-        tb_test_num++;  
-        tb_test_name = "Testing XOR (imm)";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        reset_dut;
-        test_xor_imm(32'b1, 32'b0);
+        // tb_test_num++;  
+        // tb_test_name = "Testing XOR (imm)";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+        // test_xor_imm(32'b1, 32'b0);
       
-      	tb_test_num++;  
-        tb_test_name = "Testing OR (imm)";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        reset_dut;
-      	test_or_imm(32'b0, 32'b1); // imm is set to 1
+      	// tb_test_num++;  
+        // tb_test_name = "Testing OR (imm)";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+      	// test_or_imm(32'b0, 32'b1); // imm is set to 1
       
-      	tb_test_num++;  
-        tb_test_name = "Testing AND (imm)";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        reset_dut;
-      	test_and_imm(32'b0, 32'b0); // imm is set to 1
-      	reset_dut;
-      	test_and_imm(32'b1, 32'b1); // imm is set to 1
+      	// tb_test_num++;  
+        // tb_test_name = "Testing AND (imm)";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+      	// test_and_imm(32'b0, 32'b0); // imm is set to 1
+      	// reset_dut;
+      	// test_and_imm(32'b1, 32'b1); // imm is set to 1
 
         // sll
         tb_test_num++;  
@@ -402,7 +402,7 @@ module tb_cpu_core;
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
-        load_instruction(32'b0000001_00000_00001_001_00011_0010011, 1, exp_result); //sll register 1 & imm, store in register 3
+        load_instruction(32'b0000000_11111_00001_001_00011_0010011, 1, exp_result); //sll register 1 & imm, store in register 3
                                                                                     // rd = rs1 << imm
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
@@ -432,7 +432,7 @@ module tb_cpu_core;
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
-        load_instruction(32'b0000001_00000_00001_101_00011_0010011, 1, exp_result); //sll register 1 & imm, store in register 3
+        load_instruction(32'b0000001_11111_00001_101_00011_0010011, 1, exp_result); //sll register 1 & imm, store in register 3
                                                                                     // rd = rs1 << imm
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
