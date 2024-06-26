@@ -152,6 +152,7 @@ module cpu_core(
         .reg1(reg1),
         .reg2(reg2));
 
+    logic branch_temp;
     ALU math(
         .ALU_source(ALU_source), 
         .opcode(opcode), 
@@ -169,9 +170,14 @@ module cpu_core(
         data_good = !bus_full_CPU & (state == Read | state == Write);
     end
 
+
+    logic [31:0] val2;
     always_comb begin 
-        branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000) | (funct3 == 3'b001) | (funct3 == 3'b101))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
+        val2 = reg2;
+        branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000 && (reg1 == val2)) | (funct3 == 3'b100 && (reg1 < val2)) | (funct3 == 3'b001 && (reg1 != val2)) | (funct3 == 3'b101 && (reg1 >= val2)))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
     end
+
+    // always_ff @ (posedge clk) branch <= branch_ff;
 
     //sort through mem management inputs/outputs
     data_memory data_mem(

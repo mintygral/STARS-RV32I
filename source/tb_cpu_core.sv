@@ -207,15 +207,28 @@ module tb_cpu_core;
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // reset_dut;
         // test_srl_imm_one(32'hFFFFFFFF, 32'h7FFFFFFF); // half bit shift
-
-        $display("Checking pc_val");
-        reset_dut;
-        // pc_data = 32'd20;
+        tb_test_num = 1;
+        $display("Checking branch tasks");
+        tb_test_num++;  
+        tb_test_name = "Testing Branch Equal task";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
         test_beq(32'd1, 32'd1, 1);
+        $display("pc_val: %b", pc_val); // pc should update
+        // reset_dut;
+        test_beq(32'd0, 32'd1, 1);
+        $display("pc_val: %b", pc_val); // pc should not update
+
+        tb_test_num++;  
+        tb_test_name = "Testing Branch Inequal task";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+        test_bneq(32'd1, 32'd1, 1);
+        $display("pc_val: %b", pc_val); // pc should not update
+        // reset_dut;
+        test_bneq(32'd1, 32'd0, 1); // pc should update
         $display("pc_val: %b", pc_val);
-        reset_dut;
-        // keep going for a little longer
-        // #(CLK_PERIOD * 3);
+        
         $finish;
     end
 
@@ -482,5 +495,15 @@ module tb_cpu_core;
         load_instruction(32'b0000000_00010_00001_000_00001_1100011, 0, exp_result);
         // #(CLK_PERIOD);
         // load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+
+    task test_bneq (input [31:0] register1, register2, exp_result);
+        load_instruction(32'b000000000001_00001_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000001_00001_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_001_00001_1100011, 0, exp_result);
     endtask
 endmodule
