@@ -16,8 +16,6 @@ module top (
   input  logic txready, rxready
 );
 
-  // Your code goes here...
-
 endmodule
 
 // Add more modules down here...
