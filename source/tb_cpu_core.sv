@@ -56,6 +56,7 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         rst = 1'b0;
 
+        $display("\n All Register 2 Value Tests Below");
         // Add 1 + 1
         tb_test_num = 1;
         tb_test_name = "Testing Hardcoded Add 1+1";
@@ -142,31 +143,32 @@ module tb_cpu_core;
         test_srl(32'hFFFFFFFF, 32'd1, 32'h7FFFFFFF); // half bit shift
         
         // Immediate Value Tests
-        // tb_test_num++;  
-        // tb_test_name = "Testing add (imm)";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        // add_imm(32'd500, 32'd502);
+        $display("\n All Immediate Value Tests Below");
+        tb_test_num++;  
+        tb_test_name = "Testing add (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+        add_imm(32'd500, 32'd502);
 
-        // tb_test_num++;  
-        // tb_test_name = "Testing XOR (imm)";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        // test_xor_imm(32'b1, 32'b0);
+        tb_test_num++;  
+        tb_test_name = "Testing XOR (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+        test_xor_imm(32'b1, 32'b0);
       
-      	// tb_test_num++;  
-        // tb_test_name = "Testing OR (imm)";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-      	// test_or_imm(32'b0, 32'b1); // imm is set to 1
+      	tb_test_num++;  
+        tb_test_name = "Testing OR (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+      	test_or_imm(32'b0, 32'b1); // imm is set to 1
       
-      	// tb_test_num++;  
-        // tb_test_name = "Testing AND (imm)";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-      	// test_and_imm(32'b0, 32'b0); // imm is set to 1
-      	// reset_dut;
-      	// test_and_imm(32'b1, 32'b1); // imm is set to 1
+      	tb_test_num++;  
+        tb_test_name = "Testing AND (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+      	test_and_imm(32'b0, 32'b0); // imm is set to 1
+      	reset_dut;
+      	test_and_imm(32'b1, 32'b1); // imm is set to 1
 
         // sll
         tb_test_num++;  
