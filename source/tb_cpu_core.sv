@@ -364,28 +364,22 @@ module tb_cpu_core;
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
 
-    task test_sll_imm (input [31:0] register1, register2, exp_result);
+    task test_sll_imm (input [31:0] register1, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
-        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
-        load_data(register2);
-        #(CLK_PERIOD);
-        load_instruction(32'b0000000_00010_00001_001_00011_0110011, 1, exp_result); //sll register 1 & 2, store in register 3
-                                                                                    // rd = rs1 << rs2
+        load_instruction(32'b0000000_00010_00001_001_00011_0110011, 1, exp_result); //sll register 1 & imm, store in register 3
+                                                                                    // rd = rs1 << imm
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
 
-    task test_srl_imm (input [31:0] register1, register2, exp_result);
+    task test_srl_imm (input [31:0] register1, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
         #(CLK_PERIOD);
-        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
-        load_data(register2);
-        #(CLK_PERIOD);
-        load_instruction(32'b0000000_00010_00001_101_00011_0110011, 1, exp_result); //sll register 1 & 2, store in register 3
-                                                                                    // rd = rs1 >> rs2
+        load_instruction(32'b0000000_00010_00001_101_00011_0110011, 1, exp_result); //sll register 1 & imm, store in register 3
+                                                                                    // rd = rs1 >> imm
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
