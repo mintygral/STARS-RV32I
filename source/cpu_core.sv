@@ -175,7 +175,8 @@ module cpu_core(
 
     logic [31:0] val2;
     always_comb begin 
-        val2 = reg2;
+        if (ALU_source) val2 = imm_32;
+        else val2 = reg2;
         branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000 && (reg1 == val2)) | (funct3 == 3'b100 && (reg1 < val2)) | (funct3 == 3'b001 && (reg1 != val2)) | (funct3 == 3'b101 && (reg1 >= val2)))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
     end
 
