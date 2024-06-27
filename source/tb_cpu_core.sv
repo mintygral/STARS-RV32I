@@ -90,18 +90,50 @@ module tb_cpu_core;
         // tb_test_name = "Testing Consecutive Add then Sub";
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // add_then_sub(32'd40, 32'd10, 32'd25, 32'd50, 32'd25);
-
+        
         reset_dut;
         tb_test_num++;
-        tb_test_name = "Multiplication";
+        tb_test_name = "Multiplication 1";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         multiply (32'd42, 7, 32'd294);
 
+        $info("Result: %d", result);
+        tb_test_num++;
+        tb_test_name = "Multiplication again";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        multiply (reg2, 2, 32'd588);
+
+        // // reset_dut;
+        // tb_test_num++;
+        // tb_test_name = "Division 1";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // divide (result, 7, 32'd42);
+
         reset_dut;
         tb_test_num++;
-        tb_test_name = "Division";
+        tb_test_name = "Division 2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        divide (32'd294, 7, 32'd42);
+        divide (32'd42, 7, 32'd6);
+        $info("Result: %d", result);
+        tb_test_num++;
+        tb_test_name = "Division 3";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        divide (result, 6, 32'd1);
+
+        // tb_test_num++;
+        // tb_test_name = "Multiplication 2";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // multiply (result, 6, 32'd36);
+
+        // tb_test_num++;
+        // tb_test_name = "Multiplication 3";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // multiply (result, 7, 32'd42);
+
+        // tb_test_num++;
+        // tb_test_name = "Multiplication 4";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // multiply (result, 7, 32'd249);
         
         // // XOR
       	// tb_test_num++;
@@ -354,25 +386,6 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
-    
-    task multiply (input [31:0] register1, 
-                   integer multiply_by, 
-                   input [31:0] exp_result);
-        $info("Expected Final: %d. Current Result: %d.",exp_result, result);
-        for (integer i = 1; i < multiply_by; i++) begin
-            register1 += (register1 / i);
-            $info("Expected Final: %d. Current Result: %d.", exp_result, register1);
-        end
-        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
-        load_data(register1);
-        #(CLK_PERIOD);
-        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
-        load_data(32'd0);
-        #(CLK_PERIOD);
-        load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
-        #(CLK_PERIOD);
-        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
-    endtask 
 
     task sub (input [31:0] register1, register2, exp_result);
         $display("Now subtracting %d - %d = %d", register1, register2, exp_result);
@@ -386,13 +399,32 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
+    
+    task multiply (input [31:0] register1, 
+                   integer multiply_by, 
+                   input [31:0] exp_result);
+        // $info("Expected Final: %d. Current Result: %d.",exp_result, result);
+        logic [31:0] multiplier;
+        multiplier = 32'd0;
+        for (integer i = 1; i < multiply_by; i++) begin
+            register1 += (register1 / i);
+            multiplier = register1;
+            // $info("Expected Final: %d. Current Result: %d.", exp_result, multiplier);
+        end
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(multiplier);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(32'd0);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask 
 
     task divide (input [31:0] register1, 
                    integer divide_by, 
                    input [31:0] exp_result);
-        // load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
-        // load_data(register1);
-        // #(CLK_PERIOD);
         logic [31:0] divisor;
         divisor = 32'd0;
         for (integer i = 0; i < exp_result; i++) begin
