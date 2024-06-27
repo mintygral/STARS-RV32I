@@ -373,7 +373,8 @@ module cpu_core(
         .read_address(read_address), 
         .write_address(write_address), 
         .result(result), 
-        .branch(branch));
+        .branch(branch),
+        .pc_data(pc_jump));
 
     always_comb begin
         data_good = !bus_full_CPU & (state == Read | state == Write);
@@ -430,7 +431,7 @@ module cpu_core(
         .inc(data_good),
         .ALU_out(branch_ff),
         .Disable(instr_wait),
-        .data(pc_data),
+        .data(pc_data | pc_jump),
         .imm_val(imm_32),
         .pc_val(pc_val));
 
@@ -441,8 +442,8 @@ module ALU(
     input logic [6:0] opcode,
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic [31:0] reg1, reg2, immediate,
-    output logic [31:0] read_address, write_address, result,
+    input logic [31:0] reg1, reg2, immediate, pc_val,
+    output logic [31:0] read_address, write_address, result, pc_data
     output logic branch
 );
 
@@ -458,6 +459,7 @@ module ALU(
         
 
     always_comb begin
+        pc_data = 32'b0;
         read_address = 32'b0;
         write_address = 32'b0; 
         result = 32'b0;
@@ -514,7 +516,17 @@ module ALU(
                         default: branch=1'b0;
                     endcase 
                 end
-            7'b1101111,7'b1100111: branch=1'b1;//jump and link, jalr
+            7'b1101111:
+              begin
+                branch = 1'b1;
+                result = pc_val + 32'd4;
+              end
+            7'b1100111:
+              begin 
+                branch=1'b1;//jump and link, jalr
+                result = pc_val + 32'd4;
+                pc_data = reg1 + val2;
+              end
             7'b0110111: result = {val2[19:0],12'b0}; // lui
             default: 
                 begin
@@ -853,7 +865,7 @@ endmodule
 
 module pc(
     input logic clk, clr, load, inc, Disable, ALU_out,
-    input logic [31:0] data, imm_val, 
+    input logic [31:0] data, imm_val, reg1,
     output logic [31:0] pc_val 
 );
     logic [31:0] next_line_ad;
@@ -896,6 +908,7 @@ module pc(
         else if (inc) begin
           next_pc = next_line_ad;
         end
+
    end       
 endmodule
 
