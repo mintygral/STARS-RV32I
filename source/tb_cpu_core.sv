@@ -59,10 +59,10 @@ module tb_cpu_core;
         rst = 1'b1;
         #(CLK_PERIOD);
         rst = 1'b0;
+        tb_test_num = 0;
 
         // $display("\n All Register 2 Value Tests Below");
         // // Add 1 + 1
-        tb_test_num = 0;
         // tb_test_num++;
         // tb_test_name = "Testing Hardcoded Add 1+1";
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -90,6 +90,12 @@ module tb_cpu_core;
         // tb_test_name = "Testing Consecutive Add then Sub";
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // add_then_sub(32'd40, 32'd10, 32'd25, 32'd50, 32'd25);
+
+        reset_dut;
+        tb_test_num++;
+        tb_test_name = "Multiplication";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        multiply (32'd42, 7, 32'd294);
         
         // // XOR
       	// tb_test_num++;
@@ -336,6 +342,25 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
         load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+    
+    task multiply (input [31:0] register1, 
+                   integer multiply_by, 
+                   input [31:0] exp_result);
+        $info("Expected Final: %d. Current Result: %d.",exp_result, result);
+        for (integer i = 1; i < multiply_by; i++) begin
+            register1 += (register1 / i);
+            $info("Expected Final: %d. Current Result: %d.", exp_result, register1);
+        end
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(32'd0);
         #(CLK_PERIOD);
         load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
         #(CLK_PERIOD);
