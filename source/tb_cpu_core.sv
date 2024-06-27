@@ -304,7 +304,7 @@ module tb_cpu_core;
         // test_bge(32'd0, 32'd1, 1); // pc should not update
         // $info("pc_val: %b", pc_val);
         
-        reset_dut;
+        // reset_dut;
         tb_test_num++;  
         tb_test_name = "Testing JAL";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
@@ -715,6 +715,7 @@ module tb_cpu_core;
     task check_lui;
         // imm [31:12]    |    rd    |   opcode
         load_instruction(32'b00000000000000000010_010_0110111, 0, 0);
-        load_instruction(32'b0000000_00011_00010_010_00001_0100011, 0, 0); //read data from register 3
+        // imm [11:5]   | rs2  | rs1  | funct3  | imm[4:0]  |  opcode
+        load_instruction(32'b0000000_00001_00010_010_00011_0100011, 0, 0); //read data from register 1
     endtask
 endmodule
