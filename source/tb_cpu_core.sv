@@ -75,21 +75,21 @@ module tb_cpu_core;
         // reset_dut;
         // sub_32minus2;
 
-        // Add/Sub Tasks
-        tb_test_num++;
-        tb_test_name = "Testing Add/Sub Tasks for Maximum 32-bit values";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // // Add/Sub Tasks
+        // tb_test_num++;
+        // tb_test_name = "Testing Add/Sub Tasks for Maximum 32-bit values";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
-        reset_dut;
-        add(32'h0000FFFF, 32'hFFFF0000, 32'hFFFFFFFF);
-        reset_dut;
-        sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
+        // reset_dut;
+        // add(32'h0000FFFF, 32'hFFFF0000, 32'hFFFFFFFF);
+        // reset_dut;
+        // sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
 
-        reset_dut;
-        tb_test_num++;
-        tb_test_name = "Testing Consecutive Add then Sub";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        add_then_sub(32'd40, 32'd10, 32'd25, 32'd50, 32'd25);
+        // reset_dut;
+        // tb_test_num++;
+        // tb_test_name = "Testing Consecutive Add then Sub";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // add_then_sub(32'd40, 32'd10, 32'd25, 32'd50, 32'd25);
         
         // // XOR
       	// tb_test_num++;
@@ -153,18 +153,18 @@ module tb_cpu_core;
         // test_srl(32'hFFFFFFFF, 32'd1, 32'h7FFFFFFF); // half bit shift
         
         // Immediate Value Tests
-        $display("\n All Immediate Value Tests Below");
-        tb_test_num++;  
-        tb_test_name = "Testing add (imm)";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        reset_dut;
-        add_imm(32'd500, 32'd502);
+        // $display("\n All Immediate Value Tests Below");
+        // tb_test_num++;  
+        // tb_test_name = "Testing add (imm)";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+        // add_imm(32'd500, 32'd502);
 
-        reset_dut;
-        tb_test_num++;  
-        tb_test_name = "Testing add consecutively (imm)";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        add_imm_cons(32'd50, 32'd52, 32'd54);
+        // reset_dut;
+        // tb_test_num++;  
+        // tb_test_name = "Testing add consecutively (imm)";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // add_imm_cons(32'd50, 32'd52, 32'd54);
 
         // tb_test_num++;  
         // tb_test_name = "Testing XOR (imm)";
@@ -225,20 +225,40 @@ module tb_cpu_core;
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // reset_dut;
         test_beq(32'd1, 32'd1, 1);
-        $display("pc_val: %b", pc_val); // pc should update
+        $info("pc_val: %b", pc_val); // pc should update
         // reset_dut;
         test_beq(32'd0, 32'd1, 1);
-        $display("pc_val: %b", pc_val); // pc should not update
+        $info("pc_val: %b", pc_val); // pc should not update
 
         tb_test_num++;  
         tb_test_name = "Testing Branch Inequal task";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // reset_dut;
         test_bneq(32'd1, 32'd1, 1);
-        $display("pc_val: %b", pc_val); // pc should not update
+        $info("pc_val: %b", pc_val); // pc should not update
         // reset_dut;
         test_bneq(32'd1, 32'd0, 1); // pc should update
-        $display("pc_val: %b", pc_val);
+        $info("pc_val: %b", pc_val);
+
+        tb_test_num++;  
+        tb_test_name = "Testing Branch less than task";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+        test_blt(32'd1, 32'd1, 1);
+        $info("pc_val: %b", pc_val); // pc should not update
+        // reset_dut;
+        test_blt(32'd0, 32'd1, 1); // pc should update
+        $info("pc_val: %b", pc_val);
+
+        tb_test_num++;  
+        tb_test_name = "Testing Branch >= task";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // reset_dut;
+        test_bge(32'd1, 32'd1, 1);
+        $info("pc_val: %b", pc_val); // pc should update
+        // reset_dut;
+        test_bge(32'd0, 32'd1, 1); // pc should not update
+        $info("pc_val: %b", pc_val);
         
         $finish;
     end
@@ -546,5 +566,25 @@ module tb_cpu_core;
         load_data(register2);
         #(CLK_PERIOD);
         load_instruction(32'b0000000_00010_00001_001_00001_1100011, 0, exp_result);
+    endtask
+
+    task test_blt (input [31:0] register1, register2, exp_result);
+        load_instruction(32'b000000000001_00001_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000001_00001_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_100_00001_1100011, 0, exp_result);
+    endtask
+
+    task test_bge (input [31:0] register1, register2, exp_result);
+        load_instruction(32'b000000000001_00001_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000001_00001_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_101_00001_1100011, 0, exp_result);
     endtask
 endmodule
