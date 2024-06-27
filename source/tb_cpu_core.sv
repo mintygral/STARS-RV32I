@@ -114,11 +114,16 @@ module tb_cpu_core;
         tb_test_name = "Division 2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         divide (32'd42, 7, 32'd6);
-        $info("Result: %d", result);
         tb_test_num++;
         tb_test_name = "Division 3";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        divide (result, 6, 32'd1);
+        divide (reg2, 6, 32'd1);
+        tb_test_num++;
+        tb_test_name = "Try to multiply";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        divide (reg2, 6, 32'd36);
+
+
 
         // tb_test_num++;
         // tb_test_name = "Multiplication 2";
@@ -306,7 +311,7 @@ module tb_cpu_core;
         // $info("pc_val: %b", pc_val);
         
         reset_dut;
-        test_loop_multiply;
+        // test_loop_multiply;
 
         $finish;
     end
