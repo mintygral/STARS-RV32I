@@ -18,7 +18,7 @@ module top (
 
   logic [4:0] button_val;
   logic [31:0] data_in_BUS, pc_data, temp; //input data from memory bus
-  logic strobe; //input from memory bus
+  logic strobe, branch_ff; //input from memory bus
   logic [31:0] data_out_BUS, address_out, reg_write, result, register_out, register_out_2; //output data +address to memory bus
   logic [31:0] memory_address_out, imm_32_x;
 
@@ -54,7 +54,8 @@ module top (
     .reg_write_en_x(left[7]),
     .register_out_x(register_out),
     .register_out_x_2(register_out_2),
-    .imm_32_x(imm_32_x)
+    .imm_32_x(imm_32_x),
+    .branch_ff(branch_ff)
   );
 
   logic [11:0] address_real;
@@ -77,7 +78,8 @@ module top (
     .instr_out(data_in_BUS)
   );
 
-  assign right[7:0] = result[7:0];
+  assign right[7:0] = address_real[7:0];
+  assign left[3] = branch_ff;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
   display displaying(.seq({result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
@@ -212,7 +214,8 @@ module cpu_core(
     input logic bus_full, 
     output logic data_good_x, instr_fetch_x, instr_wait_x, reg_write_en_x, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x, register_out_x_2, imm_32_x //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x, register_out_x_2, imm_32_x, //output data +address to memory bus
+    output logic branch_ff
 );
 
     assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
@@ -377,7 +380,7 @@ module cpu_core(
     end
 
     logic [31:0] val2;
-    logic branch_ff;
+    //logic branch_ff;
     always_comb begin 
         val2 = reg2;
         branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000 && (reg1 == val2)) | (funct3 == 3'b100 && (reg1 < val2)) | (funct3 == 3'b001 && (reg1 != val2)) | (funct3 == 3'b101 && (reg1 >= val2)))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
@@ -614,9 +617,9 @@ module control_unit(
                 begin
                     rd = instruction[11:7];
                     if(instruction[31] == 1'b0) begin
-                      imm_32 = {12'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21]} << 1;
+                      imm_32 = ({12'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21]} << 1) - 32'd4;
                     end else begin
-                      imm_32 = {12'hfff, instruction[31], instruction[19:12], instruction[20], instruction[30:21]<< 1};
+                      imm_32 = ({12'hfff, instruction[31], instruction[19:12], instruction[20], instruction[30:21]<< 1}) - 32'd4;
                     end 
                     rs1 = 5'b0;
                     rs2 = 5'b0;
@@ -859,7 +862,7 @@ module pc(
     logic branch_choice;
 
     // Register 
-    always_ff @(posedge clk, posedge clr) begin
+    always_ff @(negedge clk, posedge clr) begin
 
         if (clr) begin
             pc_val <= 32'd0;
@@ -891,7 +894,7 @@ module pc(
 	      end
 	
         else if (inc) begin
-          next_pc= next_line_ad;
+          next_pc = next_line_ad;
         end
    end       
 endmodule

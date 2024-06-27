@@ -305,6 +305,9 @@ module tb_cpu_core;
         // test_bge(32'd0, 32'd1, 1); // pc should not update
         // $info("pc_val: %b", pc_val);
         
+        reset_dut;
+        test_loop_multiply;
+
         $finish;
     end
 
@@ -675,4 +678,5 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         load_instruction(32'b0000000_00010_00001_101_00001_1100011, 0, exp_result);
     endtask
+
 endmodule
