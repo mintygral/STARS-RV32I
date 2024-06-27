@@ -62,7 +62,8 @@ module tb_cpu_core;
 
         // $display("\n All Register 2 Value Tests Below");
         // // Add 1 + 1
-        // tb_test_num = 1;
+        tb_test_num = 0;
+        // tb_test_num++;
         // tb_test_name = "Testing Hardcoded Add 1+1";
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // add_1plus1;
@@ -74,16 +75,21 @@ module tb_cpu_core;
         // reset_dut;
         // sub_32minus2;
 
-        // // Add/Sub Tasks
-        // tb_test_num++;
-        // tb_test_name = "Testing Add/Sub Tasks for Maximum 32-bit values";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // Add/Sub Tasks
+        tb_test_num++;
+        tb_test_name = "Testing Add/Sub Tasks for Maximum 32-bit values";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
 
-        // reset_dut;
-        // add(32'h0000FFFF, 32'hFFFF0000, 32'hFFFFFFFF);
+        reset_dut;
+        add(32'h0000FFFF, 32'hFFFF0000, 32'hFFFFFFFF);
 
-        // reset_dut;
-        // sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
+        reset_dut;
+        sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
+
+        reset_dut;
+        tb_test_num++;
+        tb_test_name = "Testing Consecutive Add then Sub";
+        add_then_sub(32'd40, 32'd10, 32'd25, 32'd50, 32'd25);
         
         // // XOR
       	// tb_test_num++;
@@ -207,7 +213,6 @@ module tb_cpu_core;
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // reset_dut;
         // test_srl_imm_one(32'hFFFFFFFF, 32'h7FFFFFFF); // half bit shift
-        tb_test_num = 1;
         $display("Checking branch tasks");
         tb_test_num++;  
         tb_test_name = "Testing Branch Equal task";
@@ -322,6 +327,24 @@ module tb_cpu_core;
         load_instruction(32'b0100000_00010_00001_000_00011_0110011, 1, exp_result); //subtract register 1 - 2, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+
+    task add_then_sub (input [31:0] register1, register2, register4, exp_sum, exp_diff);
+        $display("Now adding %d + %d = %d", register1, register2, exp_sum);
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_sum); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_sum); //load data into register 2 (figure out how to load data)
+        load_data(register2);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_sum); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00100_0000011, 0, exp_diff); //load data into register 4 (figure out how to load data)
+        load_data(register4);
+        #(CLK_PERIOD);
+        load_instruction(32'b0100000_00100_00011_000_00101_0110011, 1, exp_diff); //subtract register 3 - 4, store in register 5
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_diff); //read data from register 3
     endtask
 
     task test_xor (input [31:0] register1, register2, exp_result);
