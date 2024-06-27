@@ -20,7 +20,7 @@ module top (
   logic [31:0] data_in_BUS, pc_data, temp; //input data from memory bus
   logic strobe; //input from memory bus
   logic [31:0] data_out_BUS, address_out, reg_write, result, register_out; //output data +address to memory bus
-  logic [31:0] memory_address_out;
+  logic [31:0] memory_address_out, imm_32_x;
 
   /**edge_detector dec(
     .button_sync(pb[0]),
@@ -52,7 +52,8 @@ module top (
     .instr_fetch_x(left[1]),
     .instr_wait_x(left[0]),
     .reg_write_en_x(left[7]),
-    .register_out_x(register_out)
+    .register_out_x(register_out),
+    .imm_32_x(imm_32_x)
   );
 
   ram mem(
@@ -66,9 +67,7 @@ module top (
   );
 
   assign right[7:0] = result[7:0];
-  display displaying(.seq(register_out), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
-
-
+  display displaying(.seq({result[15:0], register_out[7:0], imm_32_x[7:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -201,13 +200,14 @@ module cpu_core(
     input logic bus_full, 
     output logic data_good_x, instr_fetch_x, instr_wait_x, reg_write_en_x, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x, imm_32_x //output data +address to memory bus
 );
 
     assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
     assign instruction_x = mem_adr_i;
     assign reg_write_en_x = reg_write_en;
     assign register_out_x = reg1;
+    assign imm_32_x = imm_32;
     logic memToReg_flipflop, instr_wait;
 
     //Instruction Memory -> Control Unit
@@ -346,6 +346,7 @@ module cpu_core(
         .reg2(reg2),
         .register_out(register_out));
  
+    logic branch_temp;
     ALU math(
         .ALU_source(ALU_source), 
         .opcode(opcode), 
@@ -361,6 +362,12 @@ module cpu_core(
 
     always_comb begin
         data_good = !bus_full_CPU & (state == Read | state == Write);
+    end
+
+    logic [31:0] val2;
+    always_comb begin 
+        val2 = reg2;
+        branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000 && (reg1 == val2)) | (funct3 == 3'b100 && (reg1 < val2)) | (funct3 == 3'b001 && (reg1 != val2)) | (funct3 == 3'b101 && (reg1 >= val2)))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
     end
 
     //sort through mem management inputs/outputs
@@ -405,7 +412,7 @@ module cpu_core(
         .clr(rst),
         .load(load_pc),
         .inc(data_good),
-        .ALU_out(branch),
+        .ALU_out(branch_ff),
         .Disable(instr_wait),
         .data(pc_data),
         .imm_val(imm_32),
@@ -435,7 +442,7 @@ module ALU(
         
 
     always_comb begin
-        read_address = 32'b0; 
+        read_address = 32'b0;
         write_address = 32'b0; 
         result = 32'b0;
         branch = 1'b0;
@@ -834,25 +841,25 @@ module pc(
    always_comb begin
        next_pc = pc_val;
        next_line_ad = pc_val + 32'd4;	// Calculate next line address  
-       jump_ad = next_line_ad + imm_val;    // Calculate jump address (jump and link)
+       jump_ad = pc_val + imm_val;    // Calculate jump address (jump and link)
 
 	
         // Mux choice between next line address and jump address
         if (Disable) begin 
-		    next_pc = pc_val; 
-	    end
+		      next_pc = pc_val; 
+	      end
 
         else if (load) begin
-            next_pc = data + next_line_ad;
+          next_pc = data + next_line_ad;
         end
             
         else if (ALU_out) begin
-		    next_pc = jump_ad ;
-	    end
+		      next_pc = jump_ad ;
+	      end
 	
         else if (inc) begin
-            next_pc= next_line_ad;
-       end
+          next_pc= next_line_ad;
+        end
    end       
 endmodule
 
