@@ -93,33 +93,27 @@ module tb_cpu_core;
         
         reset_dut;
         tb_test_num++;
-        tb_test_name = "Multiplication 1";
+        tb_test_name = "Multiplication 42x7";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         multiply (32'd42, 7, 32'd294);
-
-        $info("Result: %d", result);
         tb_test_num++;
-        tb_test_name = "Multiplication again";
+        tb_test_name = "Multiplication 294x2";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         multiply (reg2, 2, 32'd588);
-
-        // // reset_dut;
-        // tb_test_num++;
-        // tb_test_name = "Division 1";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // divide (result, 7, 32'd42);
-
-        reset_dut;
         tb_test_num++;
-        tb_test_name = "Division 2";
+        tb_test_name = "Division 588/14";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        divide (32'd42, 7, 32'd6);
+        divide (reg2, 14, 32'd42);
         tb_test_num++;
-        tb_test_name = "Division 3";
+        tb_test_name = "Division 42/7";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        divide (reg2, 7, 32'd6);
+        tb_test_num++;
+        tb_test_name = "Division 6/6";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         divide (reg2, 6, 32'd1);
         tb_test_num++;
-        tb_test_name = "Try to multiply";
+        tb_test_name = "Try to multiply 6x6";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         divide (reg2, 6, 32'd36);
 
