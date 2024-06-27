@@ -11,7 +11,7 @@ module tb_cpu_core;
     logic clk, rst; //external clock, reset
     logic [31:0] data_out_BUS, address_out; //output data +address to memory bus
     //testing to verify control unit
-    logic [31:0] imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, pc_val, pc_data;
+    logic [31:0] imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, pc_val;
     logic [31:0] result;
     logic [4:0] rs1, rs2, rd;
     logic memToReg, instr_wait, reg_write_en, branch_ff, branch;
@@ -38,7 +38,6 @@ module tb_cpu_core;
         .reg_write(reg_write),
         .reg_write_en(reg_write_en),
         .pc_val(pc_val),
-        .pc_data(pc_data),
         .branch_ff(branch_ff),
         .branch(branch)
     );
