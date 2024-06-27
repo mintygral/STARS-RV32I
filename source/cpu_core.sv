@@ -1,41 +1,44 @@
 typedef enum logic [2:0] {
     INIT = 0,
     IDLE = 1,
-    Read_Request = 2,
-    Write_Request = 3,
     Read = 4,
     Write = 5,
     Wait = 6
 } state_t;
 
 module cpu_core(
-    input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
-    input logic bus_full, //input from memory bus
-    input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
-    //testing vals from control unit
-    output logic [4:0] rs1, rs2, rd,
-    output logic memToReg_flipflop, instr_wait, reg_write_en, data_write,
-    output logic [6:0] opcode,
-    output logic [31:0] pc_val,
-    output logic branch_ff, branch
+       input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
+        input logic bus_full, //input from memory bus
+        input logic clk, rst, //external clock, reset
+        output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
+        //testing vals from control unit
+        output logic [4:0] rs1, rs2, rd,
+        output logic memToReg_flipflop, instr_wait, reg_write_en, data_write,
+        output logic [6:0] opcode,
+        output logic [31:0] pc_val,
+        output logic branch_ff, branch
 );
 
-    logic memToReg_flipflop, instr_wait;
+    // assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
+    // assign instruction_x = mem_adr_i;
+    // assign reg_write_en_x = reg_write_en;
+    // assign register_out_x = reg1;
+    // assign imm_32_x = imm_32;
+    // logic memToReg_flipflop, instr_wait;
 
     //Instruction Memory -> Control Unit
     logic [31:0] instruction;
 
     //Control Unit -> ALU
-    logic [6:0] funct7, opcode;
+    logic [6:0] funct7;
     logic [2:0] funct3;
     logic ALU_source; //0 means register, 1 means immediate
     
     //Control Unit -> ALU + Program Counter
-    logic [31:0] imm_32;
+    // logic [31:0] imm_32;
 
     //Control Unit -> Registers
-    logic [4:0] rs1, rs2, rd;
+    // logic [4:0] rs1, rs2, rd;
     
     //Control Unit -> Data Memory
     logic memToReg; //0 means use ALU output, 1 means use data from memory
@@ -47,13 +50,14 @@ module cpu_core(
     //logic [31:0] reg_write;
 
     //Register Input (double check where its coming from)
-    logic reg_write_en;
+    // logic reg_write_en;
 
     //Registers -> ALU
-    logic [31:0] reg1, reg2;
+    // logic [31:0] reg1, reg2, resultx;
 
     //ALU -> Data Memory
-    logic [31:0] read_address, write_address, result;
+    logic [31:0] read_address;
+    //  write_address;//, result;
 
     //ALU -> Program Counter
     // logic branch;
@@ -72,8 +76,10 @@ module cpu_core(
     //Data Memory
     logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i;
     logic data_good, bus_full_CPU;
-    logic data_read, data_write;
-    logic [31:0] data_adr_o, data_bus_o, data_cpu_o;
+    logic data_read;
+    // data_write;
+    logic [31:0] data_adr_o, data_bus_o;
+    // data_cpu_o;
 
     //(ALU or external reset) -> Program Counter 
     //logic [31:0] pc_data; //external reset value only now
@@ -98,11 +104,11 @@ module cpu_core(
         instr_wait = ((~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good);
     end
 
-    logic [31:0] load_data_flipflop;
-    // logic branch_ff;
+    logic [31:0] load_data_flipflop, reg_write_flipflop;
 
     always_ff @(posedge clk) begin
         memToReg_flipflop <= memToReg;
+        reg_write_flipflop <= reg_write;
         load_data_flipflop <= data_cpu_o;
     end
 
@@ -131,20 +137,24 @@ module cpu_core(
         .memToReg(memToReg),
         .load(load_pc));
 
+        // assign result = imm_32;
+
     //multiplexer for register input
     always_comb begin
         if((opcode != 7'b0100011) && (opcode != 7'b1100011)) begin
             if(memToReg_flipflop == 1'b1) reg_write = (load_data_flipflop | data_cpu_o);
             else reg_write = result;
-            reg_write_en = 1'b1;
+            reg_write_en = (!instr_fetch) ? 1'b1 : 1'b0;
         end else begin
             reg_write = 32'b0;
             reg_write_en = 1'b0;
         end
     end
 
+    logic [31:0] register_out;
+    
     register_file regFile(
-        .reg_write(reg_write), 
+        .reg_write(reg_write | reg_write_flipflop), 
         .clk(clk), 
         .rst(rst), 
         .write(reg_write_en), 
@@ -152,8 +162,9 @@ module cpu_core(
         .rs1(rs1), 
         .rs2(rs2),
         .reg1(reg1),
-        .reg2(reg2));
-
+        .reg2(reg2),
+        .register_out(register_out));
+ 
     logic branch_temp;
     ALU math(
         .ALU_source(ALU_source), 
@@ -172,15 +183,13 @@ module cpu_core(
         data_good = !bus_full_CPU & (state == Read | state == Write);
     end
 
-
     logic [31:0] val2;
-    always_comb begin 
+    always_comb begin
         if (ALU_source) val2 = imm_32;
         else val2 = reg2;
+        // val2 = reg2;
         branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000 && (reg1 == val2)) | (funct3 == 3'b100 && (reg1 < val2)) | (funct3 == 3'b001 && (reg1 != val2)) | (funct3 == 3'b101 && (reg1 >= val2)))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
     end
-
-    // always_ff @ (posedge clk) branch <= branch_ff;
 
     //sort through mem management inputs/outputs
     data_memory data_mem(
@@ -217,6 +226,8 @@ module cpu_core(
         .data_out_INSTR(data_out_INSTR), //to instr mem
         .bus_full_CPU(bus_full_CPU)); 
 
+    // assign address_out = mem_adr_i;
+
     pc program_count(
         .clk(clk),
         .clr(rst),
@@ -231,7 +242,7 @@ module cpu_core(
 endmodule
 
 module ALU(
-    input logic ALU_source, 
+    input logic ALU_source,
     input logic [6:0] opcode,
     input logic [2:0] funct3,
     input logic [6:0] funct7,
@@ -249,9 +260,10 @@ module ALU(
         end else begin
             val2 = reg2;
         end end
+        
 
     always_comb begin
-        read_address = 32'b0; 
+        read_address = 32'b0;
         write_address = 32'b0; 
         result = 32'b0;
         branch = 1'b0;
@@ -498,7 +510,7 @@ module instruction_memory(
         next_fetch = 1'b0;
         if(data_good & instr_fetch) begin
             next_fetch = 1'b0;
-            stored_instr_adr = 32'b0;
+            stored_instr_adr = instruction_adr_i;
             stored_instr = instruction_i;
         end else if(!instr_wait) begin
             next_fetch = 1'b1;
@@ -506,7 +518,7 @@ module instruction_memory(
             stored_instr = 32'b0;
         end else begin
             next_fetch = 1'b0;
-            stored_instr_adr = 32'b0;
+            stored_instr_adr = instruction_adr_i;
             stored_instr = instruction_i;
         end
     end
@@ -517,7 +529,7 @@ module instruction_memory(
             instruction_o <= 32'b0;
             instr_fetch <= 1'b0;
         end else if(instr_wait) begin
-            instruction_adr_o <= 32'b0;
+            instruction_adr_o <= instruction_adr_o;
             instruction_o <= instruction_o;
             instr_fetch <= 1'b0;
         end else begin
@@ -553,7 +565,7 @@ module memcontrol(
     always_comb begin : changeState
         bus_full_CPU = bus_full;
         // garbage values for testing
-        address_out = 32'h0;
+        address_out = address_in;
         data_out_BUS = 32'h0;
         data_out_CPU = 32'h0;
         data_out_INSTR = 32'h0;
@@ -567,29 +579,18 @@ module memcontrol(
             
             IDLE: begin
                 if (memRead) begin
-                    next_state = Read_Request;
-                    prev_state = Read_Request;
-                end else if (memWrite) begin
-                    next_state = Write_Request;
-                    prev_state = Write_Request;
-                end else begin
-                    next_state = IDLE;
-                end
-            end
-
-            Read_Request: begin 
-                if (bus_full) begin
-                    next_state = Wait;
-                end else begin
                     next_state = Read;
-                end
-            end
-            
-            Write_Request: begin 
-                if (bus_full) begin
-                    next_state = Wait;
-                end else begin
+                    prev_state = Read;
+                end else if (memWrite) begin
                     next_state = Write;
+                    prev_state = Write;
+                end else if (prev_state == Read | prev_state == Write) begin
+                    address_out = address_in;
+                    prev_state = IDLE;
+                end else begin
+                    prev_state = IDLE;
+                    next_state = IDLE;
+                    address_out = 32'b0;
                 end
             end
             
@@ -617,9 +618,9 @@ module memcontrol(
 
             Wait: begin 
                 if (!bus_full) begin
-                    if (prev_state == Read_Request) begin
+                    if (prev_state == Read) begin
                         next_state = Read;
-                    end else if (prev_state == Write_Request) begin
+                    end else if (prev_state == Write) begin
                         next_state = Write;
                     end else begin
                         next_state = IDLE;
@@ -666,23 +667,20 @@ module pc(
 	
         // Mux choice between next line address and jump address
         if (Disable) begin 
-		    next_pc = pc_val; 
-	    end
+		      next_pc = pc_val; 
+	      end
 
         else if (load) begin
-            next_pc = data + next_line_ad;
+          next_pc = data + next_line_ad;
         end
             
         else if (ALU_out) begin
-		    next_pc = jump_ad ;
-	    end
+		      next_pc = jump_ad ;
+	      end
 	
         else if (inc) begin
-            next_pc= next_line_ad;
-       end
-
-        
-       
+          next_pc= next_line_ad;
+        end
    end       
 endmodule
 
@@ -690,7 +688,8 @@ module register_file (
     input logic [31:0] reg_write, 
     input logic [4:0] rd, rs1, rs2, 
     input logic clk, rst, write,
-    output logic [31:0] reg1, reg2 //array????
+    output logic [31:0] reg1, reg2,
+    output logic [31:0] register_out//array????
 );
     reg[31:0][31:0] register;
     //reg[31:0][31:0] next_register; 
@@ -700,7 +699,7 @@ module register_file (
     //assign register = '{default:'0};
 
     always_comb begin
-        write_data = 32'b0;
+        write_data = reg_write;
         if (write) begin
             if (rd != 0) begin
                 write_data = reg_write;
@@ -710,9 +709,10 @@ module register_file (
         end
         reg1 = register[rs1];
         reg2 = register[rs2];
+        register_out = register[5'd2];
     end
 
-    always_ff @ (negedge clk, posedge rst) begin //reset pos or neg or no reset
+    always_ff @ (posedge clk, posedge rst) begin //reset pos or neg or no reset
         if (rst) begin
             register <= '0;
         end

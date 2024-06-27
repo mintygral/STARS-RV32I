@@ -82,13 +82,13 @@ module tb_cpu_core;
 
         reset_dut;
         add(32'h0000FFFF, 32'hFFFF0000, 32'hFFFFFFFF);
-
         reset_dut;
         sub(32'hFFFFFFFF, 32'hFFFF0000, 32'h0000FFFF);
 
         reset_dut;
         tb_test_num++;
         tb_test_name = "Testing Consecutive Add then Sub";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
         add_then_sub(32'd40, 32'd10, 32'd25, 32'd50, 32'd25);
         
         // // XOR
@@ -152,13 +152,19 @@ module tb_cpu_core;
         // reset_dut;
         // test_srl(32'hFFFFFFFF, 32'd1, 32'h7FFFFFFF); // half bit shift
         
-        // // Immediate Value Tests
-        // $display("\n All Immediate Value Tests Below");
-        // tb_test_num++;  
-        // tb_test_name = "Testing add (imm)";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        // add_imm(32'd500, 32'd502);
+        // Immediate Value Tests
+        $display("\n All Immediate Value Tests Below");
+        tb_test_num++;  
+        tb_test_name = "Testing add (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        reset_dut;
+        add_imm(32'd500, 32'd502);
+
+        reset_dut;
+        tb_test_num++;  
+        tb_test_name = "Testing add consecutively (imm)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        add_imm_cons(32'd50, 32'd52, 32'd54);
 
         // tb_test_num++;  
         // tb_test_name = "Testing XOR (imm)";
@@ -258,7 +264,7 @@ module tb_cpu_core;
         bus_full = 1'b1;
         #(CLK_PERIOD);
         bus_full = 1'b0;
-    	#(CLK_PERIOD * 3);
+    	#(CLK_PERIOD * 2);
     	if (check_enable) check_output(exp_result);
     	#(CLK_PERIOD * 2);
     endtask
@@ -410,7 +416,7 @@ module tb_cpu_core;
     endtask
 
     // Immediate Commands
-        task add_imm (input [31:0] register1, exp_result);
+    task add_imm (input [31:0] register1, exp_result);
         // $display("Now adding %d + %d = %d", register1, register2, exp_result);
         load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
         load_data(register1);
@@ -418,6 +424,18 @@ module tb_cpu_core;
         load_instruction(32'b0000000_00010_00001_000_00011_0010011, 1, exp_result); //add register 1 & imm, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask
+
+    task add_imm_cons (input [31:0] register1, exp_sum1, exp_sum2);
+        // $display("Now adding %d + %d = %d", register1, register2, exp_result);
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_sum1); //load data into register 1 (figure out how to load data)
+        load_data(register1);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_000_00011_0010011, 1, exp_sum1); //add register 1 & imm, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00011_000_00100_0010011, 1, exp_sum2); //add register 3 & imm, store in register 4
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00100_00010_010_00001_0100011, 0, exp_sum2); //read data from register 3
     endtask
 
     task test_xor_imm (input [31:0] register1, exp_result);
