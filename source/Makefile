@@ -76,7 +76,7 @@ tester_%: $(SRC) %.sv tb_%.sv
 	# if build folder doesn't exist, create it
 	mkdir -p $(BUILD)
 	# synthesize with yosys to cell-level Verilog
-	$(YOSYS) -p "read_verilog -sv -noblackbox $*.sv; synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
+	$(YOSYS) -q -p "read_verilog -sv -noblackbox $*.sv; synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
 	# run simulation
 	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_$*.sv -o $(BUILD)/$(PROJ)
 	vvp $(BUILD)/$(PROJ)

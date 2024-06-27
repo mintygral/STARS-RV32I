@@ -19,7 +19,7 @@ module top (
   logic [4:0] button_val;
   logic [31:0] data_in_BUS, pc_data, temp; //input data from memory bus
   logic strobe; //input from memory bus
-  logic [31:0] data_out_BUS, address_out, reg_write, result, register_out; //output data +address to memory bus
+  logic [31:0] data_out_BUS, address_out, reg_write, result, register_out, register_out_2; //output data +address to memory bus
   logic [31:0] memory_address_out, imm_32_x;
 
   /**edge_detector dec(
@@ -53,13 +53,24 @@ module top (
     .instr_wait_x(left[0]),
     .reg_write_en_x(left[7]),
     .register_out_x(register_out),
+    .register_out_x_2(register_out_2),
     .imm_32_x(imm_32_x)
   );
 
+  logic [11:0] address_real;
+
+  always_comb begin
+    if(address_out[11] == 1'b1) begin
+      address_real = {2'b11, address_out[11:2]};
+    end else begin
+      address_real = {2'b00, address_out[11:2]};
+    end
+  end
+
   ram mem(
     .clk(strobe),
-    .address_data(address_out[11:0] >> 2),
-    .address_instr(address_out[11:0] >> 2),
+    .address_data(address_real),
+    .address_instr(address_real),
     .data_in(data_out_BUS),
     .write_enable(1'b0),
     .addr_out(memory_address_out),
@@ -67,7 +78,8 @@ module top (
   );
 
   assign right[7:0] = result[7:0];
-  display displaying(.seq({result[15:0], register_out[7:0], imm_32_x[7:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
+  display displaying(.seq({result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -200,13 +212,13 @@ module cpu_core(
     input logic bus_full, 
     output logic data_good_x, instr_fetch_x, instr_wait_x, reg_write_en_x, //input from memory bus
     input logic clk, rst, //external clock, reset
-    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x, imm_32_x //output data +address to memory bus
+    output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x, register_out_x_2, imm_32_x //output data +address to memory bus
 );
 
     assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
     assign instruction_x = mem_adr_i;
     assign reg_write_en_x = reg_write_en;
-    assign register_out_x = reg1;
+    assign {register_out_x, register_out_x_2} = {reg1, reg2};
     assign imm_32_x = imm_32;
     logic memToReg_flipflop, instr_wait;
 
@@ -237,7 +249,7 @@ module cpu_core(
     logic reg_write_en;
 
     //Registers -> ALU
-    logic [31:0] reg1, reg2, resultx;
+    logic [31:0] reg1, reg2;//, result;
 
     //ALU -> Data Memory
     logic [31:0] read_address, write_address;//, result;
@@ -318,7 +330,7 @@ module cpu_core(
         .memToReg(memToReg),
         .load(load_pc));
 
-        assign result = imm_32;
+        //assign result = imm_32;
 
     //multiplexer for register input
     always_comb begin
@@ -357,7 +369,7 @@ module cpu_core(
         .immediate(imm_32), 
         .read_address(read_address), 
         .write_address(write_address), 
-        .result(resultx), 
+        .result(result), 
         .branch(branch));
 
     always_comb begin
@@ -365,6 +377,7 @@ module cpu_core(
     end
 
     logic [31:0] val2;
+    logic branch_ff;
     always_comb begin 
         val2 = reg2;
         branch_ff = ((opcode == 7'b1100011) && ((funct3 == 3'b000 && (reg1 == val2)) | (funct3 == 3'b100 && (reg1 < val2)) | (funct3 == 3'b001 && (reg1 != val2)) | (funct3 == 3'b101 && (reg1 >= val2)))) | (opcode == 7'b1101111) | (opcode == 7'b1100111);
@@ -554,7 +567,11 @@ module control_unit(
                     funct3 = instruction[14:12];
                     rd = instruction[11:7];
                     rs1 = instruction[19:15];
-                    imm_32 = {20'b0, instruction[31:20]};
+                    if(instruction[31] == 1'b0) begin
+                      imm_32 = {20'b0, instruction[31:20]};
+                    end else begin
+                      imm_32 = {20'hfffff, instruction[31:20]};
+                    end 
                     funct7 = 7'b0;
                     rs2 = 5'b0;
                     ALU_source = 1'b1;
@@ -566,7 +583,11 @@ module control_unit(
                     funct3 = instruction[14:12];
                     rs1 = instruction[19:15];
                     rs2 = instruction[24:20];
-                    imm_32 = {20'b0, instruction[31:25], instruction[11:7]};
+                    if(instruction[31] == 1'b0) begin
+                      imm_32 = {20'b0, instruction[31:25], instruction[11:7]};
+                    end else begin
+                      imm_32 = {20'hfffff, instruction[31:25], instruction[11:7]};
+                    end 
                     funct7 = 7'b0;
                     rd = 5'b0;
                     ALU_source = 1'b1;
@@ -578,7 +599,11 @@ module control_unit(
                     funct3 = instruction[14:12];
                     rs1 = instruction[19:15];
                     rs2 = instruction[24:20];
-                    imm_32 = {20'b0, instruction[31], instruction[7], instruction[30:25], instruction[11:8]};
+                    if(instruction[31] == 1'b0) begin
+                      imm_32 = {20'b0, instruction[31], instruction[7], instruction[30:25], instruction[11:8]};
+                    end else begin
+                      imm_32 = {20'hfffff, instruction[31], instruction[7], instruction[30:25], instruction[11:8]};
+                    end 
                     funct7 = 7'b0;
                     rd = 5'b0;
                     ALU_source = 1'b1;
@@ -588,7 +613,11 @@ module control_unit(
             7'b1101111: //j type instruction
                 begin
                     rd = instruction[11:7];
-                    imm_32 = {12'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21]};
+                    if(instruction[31] == 1'b0) begin
+                      imm_32 = {12'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21]} << 1;
+                    end else begin
+                      imm_32 = {12'hfff, instruction[31], instruction[19:12], instruction[20], instruction[30:21]<< 1};
+                    end 
                     rs1 = 5'b0;
                     rs2 = 5'b0;
                     funct3 = 3'b0;
@@ -600,7 +629,11 @@ module control_unit(
             7'b0110111: //u type instruction
                 begin
                     rd = instruction[11:7];
-                    imm_32 = {12'b0, instruction[31:12]};
+                    if(instruction[31] == 1'b0) begin
+                      imm_32 = {12'b0, instruction[31:12]};
+                    end else begin
+                      imm_32 = {12'hfff, instruction[31:12]};
+                    end 
                     rs1 = 5'b0;
                     rs2 = 5'b0;
                     funct3 = 3'b0;
@@ -854,7 +887,7 @@ module pc(
         end
             
         else if (ALU_out) begin
-		      next_pc = jump_ad ;
+		      next_pc = jump_ad;
 	      end
 	
         else if (inc) begin
