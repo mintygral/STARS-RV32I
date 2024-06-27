@@ -7,7 +7,7 @@ typedef enum logic [2:0] {
 } state_t;
 
 module cpu_core(
-       input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
+        input logic [31:0] data_in_BUS, pc_data,//input data from memory bus, memory starting point
         input logic bus_full, //input from memory bus
         input logic clk, rst, //external clock, reset
         output logic [31:0] data_out_BUS, address_out, result, imm_32, reg1, reg2, data_cpu_o, write_address, reg_write, //instruction, result, reg1, reg2 //output data +address to memory bus
@@ -15,17 +15,9 @@ module cpu_core(
         output logic [4:0] rs1, rs2, rd,
         output logic memToReg_flipflop, instr_wait, reg_write_en, data_write,
         output logic [6:0] opcode,
-        output logic [31:0] pc_val,
+        output logic [31:0] pc_val, pc_jump,
         output logic branch_ff, branch
 );
-
-    // assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
-    // assign instruction_x = mem_adr_i;
-    // assign reg_write_en_x = reg_write_en;
-    // assign register_out_x = reg1;
-    // assign imm_32_x = imm_32;
-    // logic memToReg_flipflop, instr_wait;
-
     //Instruction Memory -> Control Unit
     logic [31:0] instruction;
 
@@ -36,6 +28,7 @@ module cpu_core(
     
     //Control Unit -> ALU + Program Counter
     // logic [31:0] imm_32;
+    // logic [31:0] pc_jump;
 
     //Control Unit -> Registers
     // logic [4:0] rs1, rs2, rd;
@@ -177,7 +170,9 @@ module cpu_core(
         .read_address(read_address), 
         .write_address(write_address), 
         .result(result), 
-        .branch(branch));
+        .branch(branch),
+        .pc_data(pc_jump),
+        .pc_val(pc_val));
 
     always_comb begin
         data_good = !bus_full_CPU & (state == Read | state == Write);
@@ -235,7 +230,7 @@ module cpu_core(
         .inc(data_good),
         .ALU_out(branch_ff),
         .Disable(instr_wait),
-        .data(pc_data),
+        .data(pc_data | pc_jump),
         .imm_val(imm_32),
         .pc_val(pc_val));
 
@@ -246,8 +241,8 @@ module ALU(
     input logic [6:0] opcode,
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic [31:0] reg1, reg2, immediate,
-    output logic [31:0] read_address, write_address, result,
+    input logic [31:0] reg1, reg2, immediate, pc_val,
+    output logic [31:0] read_address, write_address, result, pc_data,
     output logic branch
 );
 
@@ -263,6 +258,7 @@ module ALU(
         
 
     always_comb begin
+        pc_data = 32'b0;
         read_address = 32'b0;
         write_address = 32'b0; 
         result = 32'b0;
@@ -319,7 +315,17 @@ module ALU(
                         default: branch=1'b0;
                     endcase 
                 end
-            7'b1101111,7'b1100111: branch=1'b1;//jump and link, jalr
+            7'b1101111:
+              begin
+                branch = 1'b1;
+                result = pc_val + 32'd4;
+              end
+            7'b1100111:
+              begin 
+                branch=1'b1;//jump and link, jalr
+                result = pc_val + 32'd4;
+                pc_data = reg1 + val2;
+              end
             7'b0110111: result = {val2[19:0],12'b0}; // lui
             default: 
                 begin
@@ -408,7 +414,7 @@ module control_unit(
                 end
             7'b1101111: //j type instruction
                 begin
-                    rd = instruction[11:7];
+                    rd = instruction[11:7] ;
                     imm_32 = {12'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21]};
                     rs1 = 5'b0;
                     rs2 = 5'b0;
@@ -638,7 +644,7 @@ endmodule
 
 module pc(
     input logic clk, clr, load, inc, Disable, ALU_out,
-    input logic [31:0] data, imm_val, 
+    input logic [31:0] data, imm_val,
     output logic [31:0] pc_val 
 );
     logic [31:0] next_line_ad;
