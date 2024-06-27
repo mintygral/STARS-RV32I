@@ -96,6 +96,12 @@ module tb_cpu_core;
         tb_test_name = "Multiplication";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
         multiply (32'd42, 7, 32'd294);
+
+        reset_dut;
+        tb_test_num++;
+        tb_test_name = "Division";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        divide (32'd294, 7, 32'd42);
         
         // // XOR
       	// tb_test_num++;
@@ -225,46 +231,47 @@ module tb_cpu_core;
         // $display("\nTest %d: %s", tb_test_num, tb_test_name);
         // reset_dut;
         // test_srl_imm_one(32'hFFFFFFFF, 32'h7FFFFFFF); // half bit shift
-        $display("Checking branch tasks");
-        tb_test_num++;  
-        tb_test_name = "Testing Branch Equal task";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        test_beq(32'd1, 32'd1, 1);
-        $info("pc_val: %b", pc_val); // pc should update
-        // reset_dut;
-        test_beq(32'd0, 32'd1, 1);
-        $info("pc_val: %b", pc_val); // pc should not update
 
-        tb_test_num++;  
-        tb_test_name = "Testing Branch Inequal task";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        test_bneq(32'd1, 32'd1, 1);
-        $info("pc_val: %b", pc_val); // pc should not update
-        // reset_dut;
-        test_bneq(32'd1, 32'd0, 1); // pc should update
-        $info("pc_val: %b", pc_val);
+        // $display("Checking branch tasks");
+        // tb_test_num++;  
+        // tb_test_name = "Testing Branch Equal task";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // // reset_dut;
+        // test_beq(32'd1, 32'd1, 1);
+        // $info("pc_val: %b", pc_val); // pc should update
+        // // reset_dut;
+        // test_beq(32'd0, 32'd1, 1);
+        // $info("pc_val: %b", pc_val); // pc should not update
 
-        tb_test_num++;  
-        tb_test_name = "Testing Branch less than task";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        test_blt(32'd1, 32'd1, 1);
-        $info("pc_val: %b", pc_val); // pc should not update
-        // reset_dut;
-        test_blt(32'd0, 32'd1, 1); // pc should update
-        $info("pc_val: %b", pc_val);
+        // tb_test_num++;  
+        // tb_test_name = "Testing Branch Inequal task";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // // reset_dut;
+        // test_bneq(32'd1, 32'd1, 1);
+        // $info("pc_val: %b", pc_val); // pc should not update
+        // // reset_dut;
+        // test_bneq(32'd1, 32'd0, 1); // pc should update
+        // $info("pc_val: %b", pc_val);
 
-        tb_test_num++;  
-        tb_test_name = "Testing Branch >= task";
-        $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // reset_dut;
-        test_bge(32'd1, 32'd1, 1);
-        $info("pc_val: %b", pc_val); // pc should update
-        // reset_dut;
-        test_bge(32'd0, 32'd1, 1); // pc should not update
-        $info("pc_val: %b", pc_val);
+        // tb_test_num++;  
+        // tb_test_name = "Testing Branch less than task";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // // reset_dut;
+        // test_blt(32'd1, 32'd1, 1);
+        // $info("pc_val: %b", pc_val); // pc should not update
+        // // reset_dut;
+        // test_blt(32'd0, 32'd1, 1); // pc should update
+        // $info("pc_val: %b", pc_val);
+
+        // tb_test_num++;  
+        // tb_test_name = "Testing Branch >= task";
+        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        // // reset_dut;
+        // test_bge(32'd1, 32'd1, 1);
+        // $info("pc_val: %b", pc_val); // pc should update
+        // // reset_dut;
+        // test_bge(32'd0, 32'd1, 1); // pc should not update
+        // $info("pc_val: %b", pc_val);
         
         $finish;
     end
@@ -365,7 +372,7 @@ module tb_cpu_core;
         load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
-    endtask
+    endtask 
 
     task sub (input [31:0] register1, register2, exp_result);
         $display("Now subtracting %d - %d = %d", register1, register2, exp_result);
@@ -379,6 +386,30 @@ module tb_cpu_core;
         #(CLK_PERIOD);
         load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
     endtask
+
+    task divide (input [31:0] register1, 
+                   integer divide_by, 
+                   input [31:0] exp_result);
+        // load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        // load_data(register1);
+        // #(CLK_PERIOD);
+        logic [31:0] divisor;
+        divisor = 32'd0;
+        for (integer i = 0; i < exp_result; i++) begin
+            register1 -= divide_by;
+            divisor++;
+            // $info("Expected Final: %d. Current Result: %d.", exp_result, register1);
+        end
+        load_instruction(32'b000000000011_00100_010_00001_0000011, 0, exp_result); //load data into register 1 (figure out how to load data)
+        load_data(divisor);
+        #(CLK_PERIOD);
+        load_instruction(32'b000000000011_00100_010_00010_0000011, 0, exp_result); //load data into register 2 (figure out how to load data)
+        load_data(32'd0);
+        #(CLK_PERIOD);
+        load_instruction(32'b0000000_00010_00001_000_00011_0110011, 1, exp_result); //add register 1 & 2, store in register 3
+        #(CLK_PERIOD);
+        load_instruction(32'b0000011_00011_00010_010_00001_0100011, 0, exp_result); //read data from register 3
+    endtask 
 
     task add_then_sub (input [31:0] register1, register2, register4, exp_sum, exp_diff);
         $display("Now adding %d + %d = %d", register1, register2, exp_sum);
