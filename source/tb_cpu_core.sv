@@ -103,7 +103,7 @@ module tb_cpu_core;
         tb_test_num++;
         tb_test_name = "Division 588/14";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        divide (reg2, 14, 32'd42);
+        divide (result, 14, 32'd42);
         tb_test_num++;
         tb_test_name = "Division 42/7";
         $display("\nTest %d: %s", tb_test_num, tb_test_name);
