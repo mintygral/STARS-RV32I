@@ -187,7 +187,7 @@ module tb_ALU;
         reg1 = 32'b1;
         reg2 = 32'b0;
         #5;
-        ck_sum(32'b1);
+        ck_sum(32'b1); 
     endtask
 
     task addi;

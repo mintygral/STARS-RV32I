@@ -30,7 +30,7 @@ $(BUILD)/$(PROJ).json : $(ICE) $(SRC) $(PINMAP) Makefile
 	# if build folder doesn't exist, create it
 	mkdir -p $(BUILD)
 	# synthesize using Yosys
-	$(YOSYS) -p "read_verilog -sv -noblackbox $(FILES); synth_ice40 -top ice40hx8k -json $(BUILD)/$(PROJ).json"
+	$(YOSYS) -q -p "read_verilog -sv -noblackbox $(FILES); synth_ice40 -top ice40hx8k -json $(BUILD)/$(PROJ).json"
 
 $(BUILD)/$(PROJ).asc : $(BUILD)/$(PROJ).json
 	# Place and route using nextpnr
@@ -66,11 +66,20 @@ verify_%: $(SRC) %.sv tb_%.sv
 	# if build folder doesn't exist, create it
 	mkdir -p $(BUILD)
 	# synthesize with yosys to cell-level Verilog
-	$(YOSYS) -p "read_verilog -sv -noblackbox $*.sv; synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
+	$(YOSYS) -q -p "read_verilog -sv -noblackbox $*.sv; synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
 	# run simulation
 	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_$*.sv -o $(BUILD)/$(PROJ)
 	vvp $(BUILD)/$(PROJ)
 	gtkwave $*.vcd
+
+tester_%: $(SRC) %.sv tb_%.sv
+	# if build folder doesn't exist, create it
+	mkdir -p $(BUILD)
+	# synthesize with yosys to cell-level Verilog
+	$(YOSYS) -q -p "read_verilog -sv -noblackbox $*.sv; synth_ice40 -top $*; write_verilog $(BUILD)/$(PROJ).v"
+	# run simulation
+	iverilog -g2012 $(CELLS) $(BUILD)/$(PROJ).v tb_$*.sv -o $(BUILD)/$(PROJ)
+	vvp $(BUILD)/$(PROJ)
 
 # source_sim: $(SRC)
 # 	# if build folder doesn't exist, create it
