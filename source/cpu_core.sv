@@ -16,7 +16,7 @@ module cpu_core(
         output logic memToReg_flipflop, instr_wait, reg_write_en, data_write,
         output logic [6:0] opcode,
         output logic [31:0] pc_val, pc_jump,
-        output logic branch_ff, branch
+        output logic branch_ff, branch, load_pc
 );
     //Instruction Memory -> Control Unit
     logic [31:0] instruction;
@@ -37,7 +37,7 @@ module cpu_core(
     logic memToReg; //0 means use ALU output, 1 means use data from memory
 
     //Control Unit -> Program Counter
-    logic load_pc; //0 means leave pc as is, 1 means need to load in data
+    // logic load_pc; //0 means leave pc as is, 1 means need to load in data
 
     //Data Memory -> Registers
     //logic [31:0] reg_write;
@@ -222,7 +222,8 @@ module cpu_core(
         .bus_full_CPU(bus_full_CPU)); 
 
     // assign address_out = mem_adr_i;
-
+    logic [31:0] pc_input;
+    assign pc_input = (pc_jump != 32'b0) ? pc_jump : pc_data;
     pc program_count(
         .clk(clk),
         .clr(rst),
@@ -230,7 +231,7 @@ module cpu_core(
         .inc(data_good),
         .ALU_out(branch_ff),
         .Disable(instr_wait),
-        .data(pc_data | pc_jump),
+        .data(pc_input),
         .imm_val(imm_32),
         .pc_val(pc_val));
 
@@ -677,7 +678,7 @@ module pc(
 	      end
 
         else if (load) begin
-          next_pc = data + next_line_ad;
+          next_pc = data;
         end
             
         else if (ALU_out) begin

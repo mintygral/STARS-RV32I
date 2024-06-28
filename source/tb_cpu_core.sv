@@ -6,7 +6,7 @@ module tb_cpu_core;
     integer tb_test_num;
     string tb_test_name;
 
-    logic [31:0] data_in_BUS, pc_data; //input data from memory bus
+    logic [31:0] data_in_BUS, pc_jump, pc_data; //input data from memory bus
     logic bus_full; //input from memory bus
     logic clk, rst; //external clock, reset
     logic [31:0] data_out_BUS, address_out; //output data +address to memory bus
@@ -17,8 +17,9 @@ module tb_cpu_core;
     logic memToReg, instr_wait, reg_write_en, branch_ff, branch;
 
     cpu_core core0(
+        .pc_data(pc_data),
         .data_in_BUS(data_in_BUS),
-        .pc_jump(pc_data),
+        .pc_jump(pc_jump),
         .bus_full(bus_full),
         .clk(clk),
         .rst(rst),
@@ -53,6 +54,7 @@ module tb_cpu_core;
         $dumpfile("cpu_core.vcd");
         $dumpvars(0, tb_cpu_core);
         data_in_BUS = 32'b0;
+        pc_data = 32'b0;
         bus_full = 1'b0;
         rst = 1'b0;
         #(CLK_PERIOD);
@@ -311,10 +313,10 @@ module tb_cpu_core;
         test_jal;
 
         // reset_dut;
-        // tb_test_num++;  
-        // tb_test_name = "Testing JAL (reg)";
-        // $display("\nTest %d: %s", tb_test_num, tb_test_name);
-        // test_jalr;
+        tb_test_num++;  
+        tb_test_name = "Testing JAL (reg)";
+        $display("\nTest %d: %s", tb_test_num, tb_test_name);
+        test_jalr;
 
         tb_test_num++;
         tb_test_name = "Testing LUI";
