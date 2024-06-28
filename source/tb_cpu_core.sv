@@ -714,8 +714,9 @@ module tb_cpu_core;
     // lui
     task check_lui;
         // imm [31:12]    |    rd    |   opcode
-        load_instruction(32'b00000000000000000010_010_0110111, 0, 0);
+        load_instruction(32'b000000000000000011_00010_0110111, 0, 0);
+        // #(CLK_PERIOD);
         // imm [11:5]   | rs2  | rs1  | funct3  | imm[4:0]  |  opcode
-        load_instruction(32'b0000000_00001_00010_010_00011_0100011, 0, 0); //read data from register 1
+        load_instruction(32'b0000000_00011_00010_010_00011_0100011, 0, 0); //read data from register 3
     endtask
 endmodule
