@@ -15,7 +15,7 @@ module temp_sensor (
     // outputs
     output logic read_command, read_signal, read_clk, out_wire,
     output state_t state
-);
+    );
     logic [3:0] fcount; // read state
     logic [2:0] tcount;
     logic [2:0] rcount; // every clk cycle
