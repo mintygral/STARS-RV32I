@@ -1,20 +1,28 @@
 typedef enum logic [2:0] {
     IDLE = 0,
-    WRITE_ROM = 1,
-    WRITE_READ = 2,
-    READ = 3,
-    WRITE_STOP = 5
+    SKIP_ROM = 1,
+    CONVERT_TEMP = 2,
+    SKIP_ROM2 = 3,
+    READ_SCRATCH = 4,
+    READ = 5,
+    RESET = 6
 } state_t;
 
 module temp_sensor (
-    input clk, rst, 
-    input read_request,
+    // inputs
+    input logic clk, rst, 
+    input logic read_request,
     // outputs
-    output read_command, read_signal, read_clk, out_wire,
+    output logic read_command, read_signal, read_clk, out_wire,
     output state_t state
 );
-    integer counter;
+    logic [3:0] fcount;
+    logic [2:0] tcount;
     state_t next_state, prev_state;
+
+    logic [7:0] skip_rom = 8'hCC;
+    logic [7:0] convert_t = 8'h44;
+    logic [7:0] read_scratch = 8'hBE;
 
     always_ff @(posedge clk, posedge rst) begin : startFSM
         if (rst) begin
@@ -27,57 +35,86 @@ module temp_sensor (
     always_comb begin : changeState
         next_state = state;
         prev_state = state;
-        counter = 0;
+        fcount = 0;
+        tcount = 0;
+        out_wire = 0;
         case(state)
             IDLE: begin
+                fcount = 0;
                 if (read_request) begin
-                    next_state = READ;
-                    counter = 0;
+                    next_state = SKIP_ROM;
                 end
                 else begin
                     next_state = IDLE;
-                    counter = 0;
+                    fcount = 0;
                 end
             end
-            WRITE_ROM: begin
-                if (counter == 16) begin
-                    next_state = WRITE_READ;
+            SKIP_ROM: begin
+                fcount = 0;
+                if (fcount == 7) begin
+                    next_state = CONVERT_TEMP;
+                end
+                else begin
+                    out_wire = skip_rom[tcount]; 
+                    fcount++;
+                    tcount++;
+                    next_state = SKIP_ROM;
+                end
+            end
+            CONVERT_TEMP: begin
+                fcount = 0; 
+                if (fcount == 7) begin
+                    next_state = SKIP_ROM2;
                 end
                 else begin 
-                    counter++;
-                    next_state = WRITE_ROM;
+                    fcount++;
+                    next_state = CONVERT_TEMP;
                 end
             end
-            WRITE_READ: begin 
-                if (counter == 16) begin
+            SKIP_ROM2: begin 
+                fcount = 0;
+                if (fcount == 7) begin
+                    next_state = READ_SCRATCH;
+                end
+                else begin 
+                    fcount++;
+                    next_state = SKIP_ROM2;
+                end
+            end
+            READ_SCRATCH: begin
+                fcount = 0;
+                if (fcount == 7) begin
                     next_state = READ;
                 end
                 else begin 
-                    counter++;
-                    next_state = WRITE_READ;
+                    fcount++;
+                    next_state = READ_SCRATCH;
                 end
             end
-            READ: begin 
-                if (counter == 16) begin
-                    next_state = WRITE_STOP;
+            READ: begin
+                fcount = 0;
+                if (fcount == 15) begin
+                    next_state = RESET;
                 end
                 else begin 
-                    counter++;
-                    next_state = READ;
+                    fcount++;
+                    next_state = READ_SCRATCH;
                 end
             end
-            WRITE_STOP: begin
-                if (counter == 16) begin
+            RESET: begin
+                fcount = 0;
+                if (fcount == 15) begin
                     next_state = IDLE;
                 end
                 else begin 
-                    counter++;
-                    next_state = WRITE_STOP;
+                    fcount++;
+                    next_state = RESET;
                 end
             end
             default: begin
                 next_state = IDLE;
-                counter = 0;
+                fcount = 0;
+                fcount = 0;
             end
 
         endcase
