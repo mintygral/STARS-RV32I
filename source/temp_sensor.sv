@@ -16,8 +16,10 @@ module temp_sensor (
     output logic read_command, read_signal, read_clk, out_wire,
     output state_t state
 );
-    logic [3:0] fcount;
+    logic [3:0] fcount; // read state
     logic [2:0] tcount;
+    logic [2:0] rcount; // every clk cycle
+    logic [6:0] clk_divider; // writing state, when rcount == 7
     state_t next_state, prev_state;
 
     logic [7:0] skip_rom = 8'hCC;
@@ -37,6 +39,7 @@ module temp_sensor (
         prev_state = state;
         fcount = 0;
         tcount = 0;
+        rcount = 0;
         out_wire = 0;
         case(state)
             IDLE: begin
@@ -50,44 +53,44 @@ module temp_sensor (
                 end
             end
             SKIP_ROM: begin
-                fcount = 0;
-                if (fcount == 7) begin
+                rcount = 0;
+                if (rcount == 7) begin
                     next_state = CONVERT_TEMP;
                 end
                 else begin
                     out_wire = skip_rom[tcount]; 
-                    fcount++;
                     tcount++;
+                    rcount++;
                     next_state = SKIP_ROM;
                 end
             end
             CONVERT_TEMP: begin
-                fcount = 0; 
-                if (fcount == 7) begin
+                rcount = 0; 
+                if (rcount == 7) begin
                     next_state = SKIP_ROM2;
                 end
                 else begin 
-                    fcount++;
+                    rcount++;
                     next_state = CONVERT_TEMP;
                 end
             end
             SKIP_ROM2: begin 
-                fcount = 0;
-                if (fcount == 7) begin
+                rcount = 0;
+                if (rcount == 7) begin
                     next_state = READ_SCRATCH;
                 end
                 else begin 
-                    fcount++;
+                    rcount++;
                     next_state = SKIP_ROM2;
                 end
             end
             READ_SCRATCH: begin
-                fcount = 0;
-                if (fcount == 7) begin
+                rcount = 0;
+                if (rcount == 7) begin
                     next_state = READ;
                 end
                 else begin 
-                    fcount++;
+                    rcount++;
                     next_state = READ_SCRATCH;
                 end
             end
@@ -114,7 +117,8 @@ module temp_sensor (
             default: begin
                 next_state = IDLE;
                 fcount = 0;
-                fcount = 0;
+                tcount = 0;
+                rcount = 0; 
             end
 
         endcase
