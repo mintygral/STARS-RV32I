@@ -78,7 +78,7 @@ module top (
     .instr_out(data_in_BUS)
   );
 
-  keypad_interface keypad(
+  keypad_interface keypad0(
     .clk(hz100),
     .rst(reset),
     .columns({pb[13], pb[15], pb[17], pb[19]}),
@@ -1013,7 +1013,7 @@ module keypad_interface(
                             4'b0010: next_out = 4'b0010;
                             4'b0100: next_out = 4'b0011;
                             4'b1000: next_out = 4'b1010;
-                            default: next_out = 4'b0000;
+                            default: next_out = out;
                         endcase
                         next_rows = 4'b1101;
                         next_state = SCAN;
@@ -1025,7 +1025,7 @@ module keypad_interface(
                             4'b0010: next_out = 4'b0101;
                             4'b0100: next_out = 4'b0110;
                             4'b1000: next_out = 4'b1011;
-                            default: next_out = 4'b0000;
+                            default: next_out = out;
                         endcase
                         next_rows = 4'b1011;
                         next_state = SCAN;
@@ -1037,7 +1037,7 @@ module keypad_interface(
                             4'b0010: next_out = 4'b1000;
                             4'b0100: next_out = 4'b1001;
                             4'b1000: next_out = 4'b1100;
-                            default: next_out = 4'b0000;
+                            default: next_out = out;
                         endcase
                         next_rows = 4'b0111;
                         next_state = SCAN;
@@ -1049,7 +1049,7 @@ module keypad_interface(
                             4'b0010: next_out = 4'b0000;
                             4'b0100: next_out = 4'b1111;
                             4'b1000: next_out = 4'b1101;
-                            default: next_out = 4'b0000;
+                            default: next_out = out;
                         endcase
                         next_rows = 4'b1110;
                         next_state = SCAN;
