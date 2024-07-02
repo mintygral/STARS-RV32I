@@ -16,7 +16,6 @@ module top (
   input  logic txready, rxready
 );
 
-  logic [4:0] button_val;
   logic [31:0] data_in_BUS, pc_data, temp; //input data from memory bus
   logic strobe, branch_ff; //input from memory bus
   logic [31:0] data_out_BUS, address_out, reg_write, result, register_out, register_out_2; //output data +address to memory bus
@@ -30,10 +29,9 @@ module top (
   );**/
 
   synckey sync(
-    .in(pb[19:0]),
+    .in(pb[0]),
     .clock(hz100),
     .reset(reset),
-    .out(button_val),
     .strobe(strobe)
   );
 
@@ -73,6 +71,7 @@ module top (
     .address_data(address_real),
     .address_instr(address_real),
     .data_in(data_out_BUS),
+    .keyboard_in({pb[15], pb[13], pb[11], pb[9], pb[7], pb[5], pb[3], pb[1]}),
     .write_enable(1'b0),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS)
@@ -108,9 +107,9 @@ module edge_detector(
 endmodule
 
 module synckey(
-    input logic [19:0] in,
+    input logic in,
     input logic clock, reset,
-    output logic [4:0] out,
+    //output logic [4:0] out,
     output logic strobe
 );
 
@@ -128,12 +127,12 @@ module synckey(
     end
     
     always_comb begin
-        button_pressed = |in;
-        out = 0;
-        for (integer i = 0; i < 20; i++) begin
+        button_pressed = in;
+        //out = 0;
+        /**for (integer i = 0; i < 20; i++) begin
             if(in[i])
                 out = i[4:0];
-        end
+        end**/
         strobe = flipflops[1];
     end
 
@@ -164,11 +163,17 @@ module ram (
     input logic [11:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
+    input logic [7:0] keyboard_in,
     output logic [31:0] addr_out,
     output logic [31:0] instr_out
 );
 
-reg[31:0] memory [4095:0];
+reg[31:0] memory [4095:0]; //6 bytes of reserved data
+
+//reserved memory for I/O
+//[4095:4092] -> LCD screen data out
+//[4091] -> keyboard inputs
+//[4090] -> temp input
 
 initial begin
     $readmemh("cpu.mem", memory);
@@ -179,7 +184,14 @@ always @(posedge clk) begin
         memory[address_data] <= data_in;
     end
     addr_out <= memory[address_data];
-    instr_out <= memory[address_instr];
+    if(address_instr != 12'd100) begin
+        instr_out <= memory[address_instr];
+    end else begin
+        case(address_instr)
+            (12'd100): instr_out <= {24'b0, keyboard_in};
+            default: instr_out <= 32'b0;
+        endcase
+    end
     
 end
 
@@ -219,7 +231,7 @@ module cpu_core(
 );
 
     assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
-    assign instruction_x = mem_adr_i;
+    assign instruction_x = pc_val;
     assign reg_write_en_x = reg_write_en;
     assign {register_out_x, register_out_x_2} = {reg1, reg2};
     assign imm_32_x = imm_32;
@@ -290,11 +302,11 @@ module cpu_core(
     logic instr_fetch;
     logic [31:0] instruction_adr_o; 
 
-    logic [31:0] mem_adr_i;
+    logic [31:0] mem_adr_i, pc_jump;
     logic mem_read;
     
     always_comb begin
-        mem_adr_i = (data_adr_o | instruction_adr_o);
+        mem_adr_i = (data_adr_o == 32'b0) ? instruction_adr_o : data_adr_o;
         data_en = data_read | data_write;
         mem_read = data_read | instr_fetch;
         instr_wait = ((~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good);
@@ -329,7 +341,7 @@ module cpu_core(
         .rs2(rs2), 
         .rd(rd), 
         .imm_32(imm_32), 
-        .ALU_source(ALU_source), 
+        .ALU_source(ALU_source),
         .memToReg(memToReg),
         .load(load_pc));
 
@@ -369,7 +381,8 @@ module cpu_core(
         .funct7(funct7), 
         .reg1(reg1), 
         .reg2(reg2), 
-        .immediate(imm_32), 
+        .immediate(imm_32),
+        .pc_val(pc_val), 
         .read_address(read_address), 
         .write_address(write_address), 
         .result(result), 
@@ -428,7 +441,7 @@ module cpu_core(
         .clk(clk),
         .clr(rst),
         .load(load_pc),
-        .inc(data_good),
+        .inc(data_good & instr_fetch),
         .ALU_out(branch_ff),
         .Disable(instr_wait),
         .data(pc_data | pc_jump),
@@ -443,7 +456,7 @@ module ALU(
     input logic [2:0] funct3,
     input logic [6:0] funct7,
     input logic [31:0] reg1, reg2, immediate, pc_val,
-    output logic [31:0] read_address, write_address, result, pc_data
+    output logic [31:0] read_address, write_address, result, pc_data,
     output logic branch
 );
 
@@ -530,7 +543,7 @@ module ALU(
             7'b0110111: result = {val2[19:0],12'b0}; // lui
             default: 
                 begin
-                    read_address = 32'b0; 
+                    read_address = 32'b0;
                     write_address = 32'b0; 
                     result = 32'b0;
                     branch = 1'b0;
@@ -688,7 +701,7 @@ module data_memory(
         next_write = 1'b0;
         stored_read_data = 32'b0;
         stored_write_data = 32'b0;
-        stored_data_adr = data_read_adr_i | data_write_adr_i;
+        data_adr_o = data_read_adr_i | data_write_adr_i;
         data_cpu_o = data_bus_i;
         data_bus_o = data_cpu_i;
         if(~(data_read_adr_i == 32'b0)) begin
@@ -708,7 +721,7 @@ module data_memory(
 
     always_ff @(posedge clk, posedge rst) begin
         if(rst) begin
-            data_adr_o <= 32'b0;
+            //data_adr_o <= 32'b0;
             //data_bus_o <= 32'b0;
             //data_cpu_o <= 32'b0;
             data_read <= 1'b0;
@@ -716,7 +729,7 @@ module data_memory(
         end else begin
             data_read <= next_read;
             data_write <= next_write;
-            data_adr_o <= stored_data_adr;
+            //data_adr_o <= stored_data_adr;
             //data_cpu_o <= stored_read_data;
             //data_bus_o <= stored_write_data;
         end
@@ -865,7 +878,7 @@ endmodule
 
 module pc(
     input logic clk, clr, load, inc, Disable, ALU_out,
-    input logic [31:0] data, imm_val, reg1,
+    input logic [31:0] data, imm_val,
     output logic [31:0] pc_val 
 );
     logic [31:0] next_line_ad;
