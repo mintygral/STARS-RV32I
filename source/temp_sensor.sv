@@ -58,6 +58,7 @@ module temp_sensor (
             end
             SKIP_ROM: begin
                 count_reg = 0;
+                count_index = 0;
                 if (count_reg == 7) begin
                     clk_divider++;
                     next_state = CONVERT_TEMP;
@@ -70,12 +71,15 @@ module temp_sensor (
                 end
             end
             CONVERT_TEMP: begin
-                count_reg = 0; 
+                count_reg = 0;
+                count_index = 0;
                 if (count_reg == 7) begin
                     next_state = SKIP_ROM2;
                 end
-                else begin 
+                else begin
+                    out_wire = convert_t[count_index]; 
                     count_reg++;
+                    count_index++;
                     next_state = CONVERT_TEMP;
                 end
             end
@@ -92,11 +96,14 @@ module temp_sensor (
             end
             READ_SCRATCH: begin
                 count_reg = 0;
+                count_index = 0;
                 if (count_reg == 7) begin
                     next_state = READ;
                 end
                 else begin 
+                    out_wire = read_scratch[count_index]; 
                     count_reg++;
+                    count_index++;
                     next_state = READ_SCRATCH;
                 end
             end
