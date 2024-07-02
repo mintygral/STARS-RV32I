@@ -9,6 +9,7 @@ module ram (
 );
 
 reg[31:0] memory [4095:0]; //6 bytes of reserved data
+logic [31:0] output_word;
 
 //reserved memory for I/O
 //[4095:4092] -> LCD screen data out
@@ -19,19 +20,22 @@ initial begin
     $readmemh("cpu.mem", memory);
 end
 
-always @(posedge clk) begin
+always_comb begin
+    if(address_instr != 12'd25) begin
+        output_word = memory[address_instr];
+    end else begin
+        case(address_in)
+            (12'd25): output_word = {24'b0, keyboard_in}
+        endcase
+    end
+end
+
+always_ff @(posedge clk) begin
     if(write_enable) begin
         memory[address_data] <= data_in;
     end
     addr_out <= memory[address_data];
-    if(address_instr != 12'd100) begin
-        instr_out <= memory[address_instr];
-    end else begin
-        case(address_in)
-            (12'd100): instr_out <= {24'b0, keyboard_in}
-        endcase
-    end
-    
+    instr_out <= output_word;
 end
 
 endmodule

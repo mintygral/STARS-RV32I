@@ -20,6 +20,7 @@ module top (
   logic strobe, branch_ff; //input from memory bus
   logic [31:0] data_out_BUS, address_out, reg_write, result, register_out, register_out_2; //output data +address to memory bus
   logic [31:0] memory_address_out, imm_32_x;
+  logic [3:0] key_button;
 
   /**edge_detector dec(
     .button_sync(pb[0]),
@@ -71,14 +72,22 @@ module top (
     .address_data(address_real),
     .address_instr(address_real),
     .data_in(data_out_BUS),
-    .keyboard_in({pb[15], pb[13], pb[11], pb[9], pb[7], pb[5], pb[3], pb[1]}),
+    .keyboard_in({4'b0, key_button}),
     .write_enable(1'b0),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS)
   );
 
-  assign right[7:0] = address_real[7:0];
-  assign left[3] = branch_ff;
+  keypad_interface keypad(
+    .clk(hz100),
+    .rst(reset),
+    .columns({pb[13], pb[15], pb[17], pb[19]}),
+    .rows({right[1], right[3], right[5], right[7]}),
+    .out(key_button)
+  );
+
+  //assign right[7:0] = address_real[7:0];
+  assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
   display displaying(.seq({result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
@@ -169,6 +178,7 @@ module ram (
 );
 
 reg[31:0] memory [4095:0]; //6 bytes of reserved data
+logic [31:0] output_word;
 
 //reserved memory for I/O
 //[4095:4092] -> LCD screen data out
@@ -179,20 +189,23 @@ initial begin
     $readmemh("cpu.mem", memory);
 end
 
-always @(posedge clk) begin
+always_comb begin
+    if(address_instr != 12'd25) begin
+        output_word = memory[address_instr];
+    end else begin
+        case(address_instr)
+            (12'd25): output_word = {24'b0, keyboard_in};
+            default: output_word = 32'b0;
+        endcase
+    end
+end
+
+always_ff @(posedge clk) begin
     if(write_enable) begin
         memory[address_data] <= data_in;
     end
     addr_out <= memory[address_data];
-    if(address_instr != 12'd100) begin
-        instr_out <= memory[address_instr];
-    end else begin
-        case(address_instr)
-            (12'd100): instr_out <= {24'b0, keyboard_in};
-            default: instr_out <= 32'b0;
-        endcase
-    end
-    
+    instr_out <= output_word;
 end
 
 endmodule
@@ -962,6 +975,103 @@ module register_file (
             if(write) begin
                 register[rd] <= write_data;
             end
+        end
+    end
+endmodule
+
+
+typedef enum {KEY_IDLE, SCAN} key_state;
+
+module keypad_interface(
+    input logic clk, rst,
+    input logic [3:0] columns,
+    output logic [3:0] rows,
+    output logic [3:0] out
+);
+
+    logic [7:0] code;
+    key_state state, next_state;
+    logic [3:0] next_rows, next_out;
+
+
+    always_comb begin
+        code = {columns, rows};
+        next_rows = rows;
+        next_out = out;
+        /**if(state == KEY_IDLE) begin
+            if(columns != 4'b0000) begin
+                next_state = SCAN;
+                next_rows = 4'b1110;
+            end
+            else next_state = KEY_IDLE;
+        end else begin**/
+            case(rows)
+                4'b1110:
+                    begin
+                        case(columns)
+                            4'b0001: next_out = 4'b0001;
+                            4'b0010: next_out = 4'b0010;
+                            4'b0100: next_out = 4'b0011;
+                            4'b1000: next_out = 4'b1010;
+                            default: next_out = 4'b0000;
+                        endcase
+                        next_rows = 4'b1101;
+                        next_state = SCAN;
+                    end
+                4'b1101:
+                    begin
+                        case(columns)
+                            4'b0001: next_out = 4'b0100;
+                            4'b0010: next_out = 4'b0101;
+                            4'b0100: next_out = 4'b0110;
+                            4'b1000: next_out = 4'b1011;
+                            default: next_out = 4'b0000;
+                        endcase
+                        next_rows = 4'b1011;
+                        next_state = SCAN;
+                    end
+                4'b1011:
+                    begin
+                        case(columns)
+                            4'b0001: next_out = 4'b0111;
+                            4'b0010: next_out = 4'b1000;
+                            4'b0100: next_out = 4'b1001;
+                            4'b1000: next_out = 4'b1100;
+                            default: next_out = 4'b0000;
+                        endcase
+                        next_rows = 4'b0111;
+                        next_state = SCAN;
+                    end
+                4'b0111:
+                    begin
+                        case(columns)
+                            4'b0001: next_out = 4'b1110;
+                            4'b0010: next_out = 4'b0000;
+                            4'b0100: next_out = 4'b1111;
+                            4'b1000: next_out = 4'b1101;
+                            default: next_out = 4'b0000;
+                        endcase
+                        next_rows = 4'b1110;
+                        next_state = SCAN;
+                    end
+                default:
+                  begin
+                    next_state = SCAN;
+                    next_rows = 4'b1110;
+                  end
+            endcase
+        //end
+    end
+
+    always_ff @(posedge clk, posedge rst) begin
+        if(rst) begin
+            rows <= 4'b1110;
+            state <= KEY_IDLE;
+            out <= 4'b0000;
+        end else begin
+            rows <= next_rows;
+            state <= next_state;
+            out <= next_out;
         end
     end
 endmodule
