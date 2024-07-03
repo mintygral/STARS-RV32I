@@ -68,12 +68,18 @@ module top (
     end
   end
     logic [255:0] lcd_data_out;
+    logic [31:0] mem_data;
+
+    bin_to_LCD bin2lcd (
+                        .binary_in(data_out_BUS),
+                        .address(address_out),
+                        .LCD_out(mem_data));
   ram mem(
     .clk(strobe),
     .address_data(address_real),
     .address_instr(address_real),
-    .data_in(data_out_BUS),
-    .keyboard_in({4'b0, key_button}),
+    .data_in(mem_data),
+    .keyboard_in(key_out_bin),
     .write_enable(1'b0),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS),
@@ -81,6 +87,7 @@ module top (
   );
 
     logic [15:0] next_out;
+    logic[15:0] key_out_bin;
   keypad_interface keypad0(
     .clk(hz100),
     .rst(reset),
@@ -88,7 +95,8 @@ module top (
     .rows({right[1], right[3], right[5], right[7]}),
     .out(key_button),
     .key_out(key_out),
-    .next_out(next_out)
+    .next_out(next_out),
+    .key_out_bin(key_out_bin)
   );
 
   logic [127:0] row_1, row_2;
@@ -113,7 +121,7 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({next_out, key_out}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({key_out_bin, data_in_BUS[15:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -196,7 +204,7 @@ module ram (
     input logic [10:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
-    input logic [7:0] keyboard_in,
+    input logic [15:0] keyboard_in,
     output logic [31:0] addr_out,
     output logic [31:0] instr_out,
     output logic [255:0] lcd_data_out
@@ -219,7 +227,7 @@ always_comb begin
         output_word = memory[address_instr];
     end else begin
         case(address_instr)
-            (11'd25): output_word = {24'b0, keyboard_in};
+            (11'd25): output_word = {16'b0, keyboard_in};
             default: output_word = memory[address_instr];
         endcase
     end
@@ -1017,7 +1025,8 @@ module keypad_interface(
     output logic [3:0] rows,
     output logic [3:0] out,
     output logic [15:0] key_out,
-    output logic [15:0] next_out
+    output logic [15:0] next_out,
+    output logic [15:0] key_out_bin
 );
 
     logic [7:0] code;
@@ -1135,7 +1144,7 @@ module keypad_interface(
                     .bin(key_out_bin));
 
     // logic [31:0] key_out_bin;
-    logic [15:0] key_out_bin;
+    // logic [15:0] key_out_bin;
 endmodule
 
 module lcd_controller #(parameter clk_div = 24_000)(
@@ -1403,4 +1412,99 @@ module shift_reg
             else 
                 q_out <= next_q;
         end 
+endmodule
+
+module bin_to_LCD(
+    input logic [31:0] binary_in,
+    input logic [31:0] address,
+    output logic [31:0] LCD_out
+);
+
+    logic [15:0] BCD_interim;
+    // integer i;
+
+    always_comb begin
+        BCD_interim = 16'b0;
+        if(binary_in[31:16] == 16'h0000 & address <= 32'd49 & address >= 32'd42) begin
+            for(integer i = 0; i < 14; i = i + 1) begin
+                if(BCD_interim[3:0] >= 5) BCD_interim[3:0] = BCD_interim[3:0] + 3;
+                if(BCD_interim[7:4] >= 5) BCD_interim[7:4] = BCD_interim[7:4] + 3;
+                if(BCD_interim[11:8] >= 5) BCD_interim[11:8] = BCD_interim[11:8] + 3;
+                if(BCD_interim[15:12] >= 5) BCD_interim[15:12] = BCD_interim[15:12] + 3;
+                BCD_interim = {BCD_interim[14:0], binary_in[15-i]};
+            end
+
+            case(BCD_interim[15:12])
+                4'b0000: LCD_out[31:24] = 8'b00110000;
+                4'b0001: LCD_out[31:24] = 8'b00110001;
+                4'b0010: LCD_out[31:24] = 8'b00110010;
+                4'b0011: LCD_out[31:24] = 8'b00110011;
+                4'b0100: LCD_out[31:24] = 8'b00110100;
+                4'b0101: LCD_out[31:24] = 8'b00110101;
+                4'b0110: LCD_out[31:24] = 8'b00110110;
+                4'b0111: LCD_out[31:24] = 8'b00110111;
+                4'b1000: LCD_out[31:24] = 8'b00111000;
+                4'b1001: LCD_out[31:24] = 8'b00111001;
+                4'b1010: LCD_out[31:24] = 8'b00101011;
+                4'b1011: LCD_out[31:24] = 8'b00101101;
+                4'b1100: LCD_out[31:24] = 8'b00101010;
+                4'b1101: LCD_out[31:24] = 8'b11111101;
+                default: LCD_out[31:24] = 8'b01011111; //underscore - default/blank value
+            endcase
+            case(BCD_interim[11:8])
+                4'b0000: LCD_out[23:16] = 8'b00110000;
+                4'b0001: LCD_out[23:16] = 8'b00110001;
+                4'b0010: LCD_out[23:16] = 8'b00110010;
+                4'b0011: LCD_out[23:16] = 8'b00110011;
+                4'b0100: LCD_out[23:16] = 8'b00110100;
+                4'b0101: LCD_out[23:16] = 8'b00110101;
+                4'b0110: LCD_out[23:16] = 8'b00110110;
+                4'b0111: LCD_out[23:16] = 8'b00110111;
+                4'b1000: LCD_out[23:16] = 8'b00111000;
+                4'b1001: LCD_out[23:16] = 8'b00111001;
+                4'b1010: LCD_out[23:16] = 8'b00101011;
+                4'b1011: LCD_out[23:16] = 8'b00101101;
+                4'b1100: LCD_out[23:16] = 8'b00101010;
+                4'b1101: LCD_out[23:16] = 8'b11111101;
+                default: LCD_out[23:16] = 8'b01011111; //underscore - default/blank value
+            endcase
+            case(BCD_interim[7:4])
+                4'b0000: LCD_out[15:8] = 8'b00110000;
+                4'b0001: LCD_out[15:8] = 8'b00110001;
+                4'b0010: LCD_out[15:8] = 8'b00110010;
+                4'b0011: LCD_out[15:8] = 8'b00110011;
+                4'b0100: LCD_out[15:8] = 8'b00110100;
+                4'b0101: LCD_out[15:8] = 8'b00110101;
+                4'b0110: LCD_out[15:8] = 8'b00110110;
+                4'b0111: LCD_out[15:8] = 8'b00110111;
+                4'b1000: LCD_out[15:8] = 8'b00111000;
+                4'b1001: LCD_out[15:8] = 8'b00111001;
+                4'b1010: LCD_out[15:8] = 8'b00101011;
+                4'b1011: LCD_out[15:8] = 8'b00101101;
+                4'b1100: LCD_out[15:8] = 8'b00101010;
+                4'b1101: LCD_out[15:8] = 8'b11111101;
+                default: LCD_out[15:8] = 8'b01011111; //underscore - default/blank value
+            endcase
+            case(BCD_interim[3:0])
+                4'b0000: LCD_out[7:0] = 8'b00110000;
+                4'b0001: LCD_out[7:0] = 8'b00110001;
+                4'b0010: LCD_out[7:0] = 8'b00110010;
+                4'b0011: LCD_out[7:0] = 8'b00110011;
+                4'b0100: LCD_out[7:0] = 8'b00110100;
+                4'b0101: LCD_out[7:0] = 8'b00110101;
+                4'b0110: LCD_out[7:0] = 8'b00110110;
+                4'b0111: LCD_out[7:0] = 8'b00110111;
+                4'b1000: LCD_out[7:0] = 8'b00111000;
+                4'b1001: LCD_out[7:0] = 8'b00111001;
+                4'b1010: LCD_out[7:0] = 8'b00101011;
+                4'b1011: LCD_out[7:0] = 8'b00101101;
+                4'b1100: LCD_out[7:0] = 8'b00101010;
+                4'b1101: LCD_out[7:0] = 8'b11111101;
+                default: LCD_out[7:0] = 8'b01011111; //underscore - default/blank value
+            endcase
+        end else begin
+            LCD_out = binary_in;
+        end
+    end
+
 endmodule
