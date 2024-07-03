@@ -95,6 +95,29 @@ module top (
 
   logic nrst = (!reset);
 
+  shift_reg party(
+    .clk(hz100),
+    .rst(reset),
+    .in(key_button),
+    .q(key_out)
+  );
+//   logic [31:0] key_out;
+    logic [15:0] key_out;
+
+  bcd2bin partyyyyy(
+                    // .bcd7(key_out[31:28]),
+                    // .bcd6(key_out[27:24]),
+                    // .bcd5(key_out[23:20]),
+                    // .bcd4(key_out[19:16]),
+                    .bcd3(key_out[15:12]),
+                    .bcd2(key_out[11:8]),
+                    .bcd1(key_out[7:4]),
+                    .bcd0(key_out[3:0]),
+                    .bin(key_out_bin));
+
+    // logic [31:0] key_out_bin;
+    logic [15:0] key_out_bin;
+
   lcd_controller lcd_display(.clk(hz100), 
                                .rst(reset),
                                .row_1(lcd_data_out[255:128]),
@@ -1324,4 +1347,37 @@ module lcd_controller #(parameter clk_div = 24_000)(
             lcd_data <= lcd_data;
     end
 
+endmodule
+
+module bcd2bin
+   (
+    // input logic [3:0] bcd7, // 10,000,000
+    // input logic [3:0] bcd6, // 1,000,000
+    // input logic [3:0] bcd5, // 100,000
+    // input logic [3:0] bcd4, // 10,000
+    input logic [3:0] bcd3, // 1000
+    input logic [3:0] bcd2, // 100
+    input logic [3:0] bcd1, // 10
+    input logic [3:0] bcd0, // 1
+    // output logic [31:0] bin
+    output logic [15:0] bin
+   );
+
+//    assign bin = (bcd7 * 24'd10000000) + (bcd6 * 20'd1000000) + (bcd5 * 17'd100000) + (bcd4 * 14'd10000) + (bcd3 * 10'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1);
+        assign bin = (bcd3 * 10'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1);
+
+endmodule
+
+module shift_reg
+    ( input logic clk, rst,
+      input logic [3:0] in,
+      output reg [15:0] q);
+ 
+    always_ff @ (posedge clk, posedge rst)
+    begin
+        if(rst)
+            q <= 0;
+        else 
+            q <= {q[15:4], in};
+    end 
 endmodule
