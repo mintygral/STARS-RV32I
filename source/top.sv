@@ -80,12 +80,15 @@ module top (
     .lcd_data_out(lcd_data_out)
   );
 
+    logic [15:0] next_out;
   keypad_interface keypad0(
     .clk(hz100),
     .rst(reset),
     .columns({pb[13], pb[15], pb[17], pb[19]}),
     .rows({right[1], right[3], right[5], right[7]}),
-    .out(key_button)
+    .out(key_button),
+    .key_out(key_out),
+    .next_out(next_out)
   );
 
   logic [127:0] row_1, row_2;
@@ -94,29 +97,9 @@ module top (
   reg [7:0] lcd_data;
 
   logic nrst = (!reset);
-
-  shift_reg party(
-    .clk(hz100),
-    .rst(reset),
-    .in(key_button),
-    .q(key_out)
-  );
 //   logic [31:0] key_out;
     logic [15:0] key_out;
 
-  bcd2bin partyyyyy(
-                    // .bcd7(key_out[31:28]),
-                    // .bcd6(key_out[27:24]),
-                    // .bcd5(key_out[23:20]),
-                    // .bcd4(key_out[19:16]),
-                    .bcd3(key_out[15:12]),
-                    .bcd2(key_out[11:8]),
-                    .bcd1(key_out[7:4]),
-                    .bcd0(key_out[3:0]),
-                    .bin(key_out_bin));
-
-    // logic [31:0] key_out_bin;
-    logic [15:0] key_out_bin;
 
   lcd_controller lcd_display(.clk(hz100), 
                                .rst(reset),
@@ -130,7 +113,7 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({next_out, key_out}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -1032,18 +1015,22 @@ module keypad_interface(
     input logic clk, rst,
     input logic [3:0] columns,
     output logic [3:0] rows,
-    output logic [3:0] out
+    output logic [3:0] out,
+    output logic [15:0] key_out,
+    output logic [15:0] next_out
 );
 
     logic [7:0] code;
     key_state state, next_state;
-    logic [3:0] next_rows, next_out;
-
+    logic [3:0] next_rows;
+    // logic [15:0] next_out;
+    logic [8:0] counter;
+    logic key_clk;
 
     always_comb begin
         code = {columns, rows};
         next_rows = rows;
-        next_out = out;
+        next_out = key_out;
         /**if(state == KEY_IDLE) begin
             if(columns != 4'b0000) begin
                 next_state = SCAN;
@@ -1055,11 +1042,11 @@ module keypad_interface(
                 4'b1110:
                     begin
                         case(columns)
-                            4'b0001: next_out = 4'b0001;
-                            4'b0010: next_out = 4'b0010;
-                            4'b0100: next_out = 4'b0011;
-                            4'b1000: next_out = 4'b1010;
-                            default: next_out = out;
+                            4'b0001: next_out = {key_out[11:0], 4'b0001};
+                            4'b0010: next_out = {key_out[11:0], 4'b0010};
+                            4'b0100: next_out = {key_out[11:0], 4'b0011};
+                            4'b1000: next_out = {key_out[11:0], 4'b1010};
+                            default: next_out = key_out;
                         endcase
                         next_rows = 4'b1101;
                         next_state = SCAN;
@@ -1067,11 +1054,11 @@ module keypad_interface(
                 4'b1101:
                     begin
                         case(columns)
-                            4'b0001: next_out = 4'b0100;
-                            4'b0010: next_out = 4'b0101;
-                            4'b0100: next_out = 4'b0110;
-                            4'b1000: next_out = 4'b1011;
-                            default: next_out = out;
+                            4'b0001: next_out = {key_out[11:0], 4'b0100};
+                            4'b0010: next_out = {key_out[11:0], 4'b0101};
+                            4'b0100: next_out = {key_out[11:0], 4'b0110};
+                            4'b1000: next_out = {key_out[11:0], 4'b1011};
+                            default: next_out = key_out;
                         endcase
                         next_rows = 4'b1011;
                         next_state = SCAN;
@@ -1079,11 +1066,11 @@ module keypad_interface(
                 4'b1011:
                     begin
                         case(columns)
-                            4'b0001: next_out = 4'b0111;
-                            4'b0010: next_out = 4'b1000;
-                            4'b0100: next_out = 4'b1001;
-                            4'b1000: next_out = 4'b1100;
-                            default: next_out = out;
+                            4'b0001: next_out = {key_out[11:0], 4'b0111};
+                            4'b0010: next_out = {key_out[11:0], 4'b1000};
+                            4'b0100: next_out = {key_out[11:0], 4'b1001};
+                            4'b1000: next_out = {key_out[11:0], 4'b1100};
+                            default: next_out = key_out;
                         endcase
                         next_rows = 4'b0111;
                         next_state = SCAN;
@@ -1091,11 +1078,11 @@ module keypad_interface(
                 4'b0111:
                     begin
                         case(columns)
-                            4'b0001: next_out = 4'b1110;
-                            4'b0010: next_out = 4'b0000;
-                            4'b0100: next_out = 4'b1111;
-                            4'b1000: next_out = 4'b1101;
-                            default: next_out = out;
+                            4'b0001: next_out = {key_out[11:0], 4'b1110};
+                            4'b0010: next_out = {key_out[11:0], 4'b0000};
+                            4'b0100: next_out = {key_out[11:0], 4'b1111};
+                            4'b1000: next_out = {key_out[11:0], 4'b1101};
+                            default: next_out = key_out;
                         endcase
                         next_rows = 4'b1110;
                         next_state = SCAN;
@@ -1109,17 +1096,46 @@ module keypad_interface(
         //end
     end
 
-    always_ff @(posedge clk, posedge rst) begin
+    always_ff @(posedge key_clk, posedge rst) begin
         if(rst) begin
             rows <= 4'b1110;
             state <= KEY_IDLE;
-            out <= 4'b0000;
+            // out <= 4'b0000;
+            key_out <= 16'b0;
         end else begin
             rows <= next_rows;
             state <= next_state;
-            out <= next_out;
+            key_out <= next_out;
         end
     end
+
+    always_ff @ (posedge clk, posedge rst) begin
+        if (rst) begin
+            counter = 0;
+        end
+        else begin
+            counter = counter + 1;
+            key_clk = 0;
+            if (counter == 480) begin
+                counter = 0;
+                key_clk = 1;
+            end
+        end
+    end
+    
+    bcd2bin partyyyyy(
+                    // .bcd7(key_out[31:28]),
+                    // .bcd6(key_out[27:24]),
+                    // .bcd5(key_out[23:20]),
+                    // .bcd4(key_out[19:16]),
+                    .bcd3(key_out[15:12]),
+                    .bcd2(key_out[11:8]),
+                    .bcd1(key_out[7:4]),
+                    .bcd0(key_out[3:0]),
+                    .bin(key_out_bin));
+
+    // logic [31:0] key_out_bin;
+    logic [15:0] key_out_bin;
 endmodule
 
 module lcd_controller #(parameter clk_div = 24_000)(
@@ -1371,13 +1387,20 @@ endmodule
 module shift_reg
     ( input logic clk, rst,
       input logic [3:0] in,
-      output reg [15:0] q);
- 
-    always_ff @ (posedge clk, posedge rst)
-    begin
-        if(rst)
-            q <= 0;
-        else 
-            q <= {q[15:4], in};
-    end 
+    //   input logic [15:0] q_in,
+      output reg [15:0] q_out);
+    
+    logic [15:0] next_q;
+
+    always_comb begin 
+        next_q = {q_out[11:0], in};
+    end
+
+    always_ff @ (posedge clk)
+        begin
+            if(rst)
+                q_out <= 0;
+            else 
+                q_out <= next_q;
+        end 
 endmodule
