@@ -58,16 +58,16 @@ module top (
     .branch_ff(branch_ff)
   );
 
-  logic [11:0] address_real;
+  logic [10:0] address_real;
 
   always_comb begin
     if(address_out[11] == 1'b1) begin
-      address_real = {2'b11, address_out[11:2]};
+      address_real = {1'b1, address_out[11:2]};
     end else begin
-      address_real = {2'b00, address_out[11:2]};
+      address_real = {1'b0, address_out[11:2]};
     end
   end
-
+    logic [255:0] lcd_data_out;
   ram mem(
     .clk(strobe),
     .address_data(address_real),
@@ -76,7 +76,8 @@ module top (
     .keyboard_in({4'b0, key_button}),
     .write_enable(1'b0),
     .addr_out(memory_address_out),
-    .instr_out(data_in_BUS)
+    .instr_out(data_in_BUS),
+    .lcd_data_out(lcd_data_out)
   );
 
   keypad_interface keypad0(
@@ -92,11 +93,13 @@ module top (
   reg lcd_rs;
   reg [7:0] lcd_data;
 
+  logic nrst = (!reset);
+
   lcd_controller lcd_display(.clk(hz100), 
                                .rst(reset),
-                               .row_1({data_in_BUS, 96'b0}),
-                               .row_2({data_in_BUS, 96'b0}),
-                               .lcd_en(green),
+                               .row_1(lcd_data_out[255:128]),
+                               .row_2(lcd_data_out[127:0]),
+                               .lcd_en(right[6]),
                                .lcd_rw(right[2]),
                                .lcd_rs(right[4]),
                                .lcd_data(left[7:0]));
@@ -184,15 +187,16 @@ endmodule
 
 module ram (
     input logic clk,
-    input logic [11:0] address_data, address_instr,
+    input logic [10:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
     input logic [7:0] keyboard_in,
     output logic [31:0] addr_out,
-    output logic [31:0] instr_out
+    output logic [31:0] instr_out,
+    output logic [255:0] lcd_data_out
 );
 
-reg[31:0] memory [4095:0]; //6 bytes of reserved data
+reg[31:0] memory [2047:0]; //6 bytes of reserved data
 logic [31:0] output_word;
 
 //reserved memory for I/O
@@ -205,15 +209,19 @@ initial begin
 end
 
 always_comb begin
-    if(address_instr != 12'd25) begin
+    if(address_instr != 11'd25) begin
         output_word = memory[address_instr];
     end else begin
         case(address_instr)
-            (12'd25): output_word = {24'b0, keyboard_in};
-            default: output_word = 32'b0;
+            (11'd25): output_word = {24'b0, keyboard_in};
+            default: output_word = memory[address_instr];
         endcase
     end
+    // lcd_data_out = {memory[42], memory[43], memory[44], memory[45], memory[46], memory[47], memory[48], memory[49]};
+
+    lcd_data_out = {memory[49], memory[48], memory[47], memory[46], memory[45], memory[44], memory[43], memory[42]};
 end
+
 
 always_ff @(posedge clk) begin
     if(write_enable) begin
@@ -1119,9 +1127,9 @@ module lcd_controller #(parameter clk_div = 24_000)(
    
     // Set lcd_data accroding to datasheet
     localparam LCD_IDLE = 8'h00,                
-               SET_FUNCTION = 8'h01,      
+               SET_FUNCTION = 8'h38,
                DISP_OFF = 8'h03,
-               DISP_CLEAR = 8'h02,
+               DISP_CLEAR = 8'h01,
                ENTRY_MODE = 8'h06,
                DISP_ON = 8'h07,
                ROW1_ADDR = 8'h05,      
@@ -1160,8 +1168,8 @@ module lcd_controller #(parameter clk_div = 24_000)(
                ROW2_F = 8'h34;
 
     assign delay_done = (cnt_20ms==TIME_20MS-1) ? 1'b1 : 1'b0;
-    always @(posedge clk) begin
-        if (!rst) begin
+    always_ff @(posedge clk, posedge rst) begin
+        if (rst) begin
             cnt_20ms <= 0;
         end
         else if (cnt_20ms == TIME_20MS-1) begin
@@ -1172,8 +1180,8 @@ module lcd_controller #(parameter clk_div = 24_000)(
     end
 
     //500HZ for lcd
-    always  @(posedge clk) begin
-        if(!rst)begin
+    always_ff  @(posedge clk, posedge rst) begin
+        if(rst)begin
             cnt_500hz <= 0;
         end
         else if(delay_done)begin
@@ -1189,8 +1197,8 @@ module lcd_controller #(parameter clk_div = 24_000)(
     assign lcd_en = (cnt_500hz > (TIME_500HZ-1)/2)? 1'b0 : 1'b1;
     assign lcd_ctrl = (cnt_500hz == TIME_500HZ - 1) ? 1'b1 : 1'b0;
 
-    always  @(posedge clk) begin
-        if(!rst)
+    always_ff  @(posedge clk, posedge rst) begin
+        if(rst)
             currentState <= LCD_IDLE;
         else if (lcd_ctrl)
             currentState <= nextState;
@@ -1198,7 +1206,7 @@ module lcd_controller #(parameter clk_div = 24_000)(
             currentState <= currentState;
     end
 
-    always  @(*) begin
+    always_comb begin
         case (currentState)
             LCD_IDLE: nextState = SET_FUNCTION;
             SET_FUNCTION: nextState = DISP_OFF;
@@ -1246,8 +1254,8 @@ module lcd_controller #(parameter clk_div = 24_000)(
 
     // LCD control sigal
     assign lcd_rw = 1'b0;
-    always  @(posedge clk) begin
-        if(!rst) begin
+    always_ff  @(posedge clk, posedge rst) begin
+        if(rst) begin
             lcd_rs <= 1'b0;   //order or data  0: order 1:data
         end
         else if (lcd_ctrl) begin
@@ -1262,8 +1270,8 @@ module lcd_controller #(parameter clk_div = 24_000)(
         end    
     end                  
 
-    always  @(posedge clk) begin
-        if (!rst) begin
+    always_ff @(posedge clk, posedge rst) begin
+        if (rst) begin
             lcd_data <= 8'h00;
         end
         else if(lcd_ctrl) begin
@@ -1273,7 +1281,7 @@ module lcd_controller #(parameter clk_div = 24_000)(
                 DISP_OFF: lcd_data <= 8'h08;
                 DISP_CLEAR: lcd_data <= 8'h01;
                 ENTRY_MODE: lcd_data <= 8'h06;
-                DISP_ON: lcd_data <= 8'h0C;  //Display ON, cursor OFF
+                DISP_ON: lcd_data <= 8'h0F;  //Display ON, cursor OFF
                 ROW1_ADDR: lcd_data <= 8'h80; //Force cursor to beginning of first line
                 ROW1_0: lcd_data <= row_1 [127:120];
                 ROW1_1: lcd_data <= row_1 [119:112];

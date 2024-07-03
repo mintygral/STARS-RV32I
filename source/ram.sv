@@ -5,7 +5,8 @@ module ram (
     input logic write_enable,
     input logic [7:0] keyboard_in,
     output logic [31:0] addr_out,
-    output logic [31:0] instr_out
+    output logic [31:0] instr_out,
+    output logic [255:0] lcd_data_out
 );
 
 reg[31:0] memory [4095:0]; //6 bytes of reserved data
@@ -24,10 +25,11 @@ always_comb begin
     if(address_instr != 12'd25) begin
         output_word = memory[address_instr];
     end else begin
-        case(address_in)
-            (12'd25): output_word = {24'b0, keyboard_in}
+        case(address_instr)
+            (12'd25): output_word = {24'b0, keyboard_in};
         endcase
     end
+    lcd_data_out = {memory[42], memory[43], memory[44], memory[45], memory[46], memory[47], memory[48], memory[49]};
 end
 
 always_ff @(posedge clk) begin
