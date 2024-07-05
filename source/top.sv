@@ -37,6 +37,7 @@ module top (
   );
 
     logic temp1, temp2, temp3, temp4;
+    logic data_write;
   cpu_core core0(
     .data_in_BUS(data_in_BUS),
     .pc_data(pc_data),
@@ -55,16 +56,17 @@ module top (
     .register_out_x(register_out),
     .register_out_x_2(register_out_2),
     .imm_32_x(imm_32_x),
-    .branch_ff(branch_ff)
+    .branch_ff(branch_ff),
+    .data_write(data_write)
   );
 
-  logic [10:0] address_real;
+  logic [12:0] address_real;
 
   always_comb begin
     if(address_out[11] == 1'b1) begin
-      address_real = {1'b1, address_out[11:2]};
+      address_real = address_out[14:2];
     end else begin
-      address_real = {1'b0, address_out[11:2]};
+      address_real = address_out[14:2];
     end
   end
     logic [255:0] lcd_data_out;
@@ -74,13 +76,15 @@ module top (
                         .binary_in(data_out_BUS),
                         .address(address_out),
                         .LCD_out(mem_data));
+
   ram mem(
     .clk(strobe),
+    .rst(reset),
     .address_data(address_real),
     .address_instr(address_real),
     .data_in(mem_data),
     .keyboard_in(key_out_bin),
-    .write_enable(1'b0),
+    .write_enable(data_write),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS),
     .lcd_data_out(lcd_data_out)
@@ -200,8 +204,8 @@ module display(
 endmodule
 
 module ram (
-    input logic clk,
-    input logic [10:0] address_data, address_instr,
+    input logic clk, rst,
+    input logic [12:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
     input logic [15:0] keyboard_in,
@@ -210,40 +214,82 @@ module ram (
     output logic [255:0] lcd_data_out
 );
 
-reg[31:0] memory [2047:0]; //6 bytes of reserved data
+reg[31:0] memory [0:4095]; //6 bytes of reserved data
 logic [31:0] output_word;
+reg [31:0] keyboard_data;
+reg [31:0] lcd_data [7:0];
+reg [31:0] write_data;
+
 
 //reserved memory for I/O
 //[4095:4092] -> LCD screen data out
 //[4091] -> keyboard inputs
 //[4090] -> temp input
 
+// 2047
+
 initial begin
     $readmemh("cpu.mem", memory);
 end
 
 always_comb begin
-    if(address_instr != 11'd25) begin
-        output_word = memory[address_instr];
-    end else begin
-        case(address_instr)
-            (11'd25): output_word = {16'b0, keyboard_in};
-            default: output_word = memory[address_instr];
-        endcase
-    end
+    // if(address_instr != 12'd25) begin
+    //output_word = memory[address_instr[11:0]];
+    // end else begin
+    //     case(address_instr)
+    //         (12'd25): output_word = {16'b0, keyboard_in};
+    //         default: output_word = memory[address_instr];
+    //     endcase
+    // end
     // lcd_data_out = {memory[42], memory[43], memory[44], memory[45], memory[46], memory[47], memory[48], memory[49]};
 
-    lcd_data_out = {memory[49], memory[48], memory[47], memory[46], memory[45], memory[44], memory[43], memory[42]};
-end
+    lcd_data_out = {memory[4095], memory[4094], memory[4093], memory[4092], memory[4091], memory[4090], memory[4089], memory[4088]};
 
+    // lcd_data_out = {lcd_data[7], lcd_data[6], lcd_data[5], lcd_data[4], lcd_data[3], lcd_data[2], lcd_data[1], lcd_data[0]};
+
+    keyboard_data = {16'b0, keyboard_in};
+
+    if (address_instr == 13'd4096) begin
+         output_word = keyboard_data;
+    end
+    else begin
+        output_word = memory[address_instr[11:0]];
+    end
+
+
+    if (write_enable) begin
+        // if (address_data > 13'd4096) begin
+        //     lcd_data[address_data - 4096] = data_in;
+        // end else begin
+            write_data = data_in;
+    end else begin
+        write_data = memory[address_instr[11:0]];
+    end
+
+    // lcd_data_out = 256'b0;
+end
 
 always_ff @(posedge clk) begin
-    if(write_enable) begin
-        memory[address_data] <= data_in;
-    end
-    addr_out <= memory[address_data];
-    instr_out <= output_word;
+    // if(rst) begin
+    //     // if (address_data > 13'd4096) begin
+    //     //     lcd_data[address_data - 4096] <= data_in;
+    //     // end else begin
+    //         // memory[address_data[11:0]] <= data_in;
+    //     // end
+    //     lcd_data[0] <= 0;
+    // end else begin 
+        addr_out <= memory[address_data[11:0]];
+        instr_out <= output_word;
+        memory[address_instr[11:0]] <= write_data;
+    // end
+    // if (address_instr == 13'd4096) begin 
+    //     instr_out <= keyboard_data;
+    // end else begin
+    //end
+    // memory[25] <= {16'b0, keyboard_in};
+    // lcd_data_out <= {memory[49], memory[48], memory[47], memory[46], memory[45], memory[44], memory[43], memory[42]};
 end
+
 
 endmodule
 
@@ -277,7 +323,7 @@ module cpu_core(
     output logic data_good_x, instr_fetch_x, instr_wait_x, reg_write_en_x, //input from memory bus
     input logic clk, rst, //external clock, reset
     output logic [31:0] data_out_BUS, address_out, reg_write, result, instruction_x, register_out_x, register_out_x_2, imm_32_x, //output data +address to memory bus
-    output logic branch_ff
+    output logic branch_ff, data_write
 );
 
     assign {data_good_x, instr_fetch_x, instr_wait_x} = {data_good, instr_fetch, instr_wait};
@@ -336,7 +382,7 @@ module cpu_core(
     //Data Memory
     logic [31:0] data_read_adr_i, data_write_adr_i, data_bus_i;
     logic data_good, bus_full_CPU;
-    logic data_read, data_write;
+    logic data_read;
     logic [31:0] data_adr_o, data_bus_o, data_cpu_o;
 
     //(ALU or external reset) -> Program Counter 
