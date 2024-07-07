@@ -60,13 +60,13 @@ module top (
     .data_write(data_write)
   );
 
-  logic [12:0] address_real;
+  logic [10:0] address_real;
 
   always_comb begin
-    if(address_out[11] == 1'b1) begin
-      address_real = address_out[14:2];
+    if(address_out[12] == 1'b1) begin
+      address_real = address_out[12:2];
     end else begin
-      address_real = address_out[14:2];
+      address_real = address_out[12:2];
     end
   end
     logic [255:0] lcd_data_out;
@@ -79,12 +79,11 @@ module top (
 
   ram mem(
     .clk(strobe),
-    .rst(reset),
     .address_data(address_real),
     .address_instr(address_real),
     .data_in(mem_data),
-    .keyboard_in(key_out_bin),
     .write_enable(data_write),
+    .keyboard_in(key_out_bin),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS),
     .lcd_data_out(lcd_data_out)
@@ -125,7 +124,7 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({key_out_bin, data_in_BUS[15:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({address_real[7:0], result[11:0], imm_32_x[11:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -204,8 +203,8 @@ module display(
 endmodule
 
 module ram (
-    input logic clk, rst,
-    input logic [12:0] address_data, address_instr,
+    input logic clk,
+    input logic [10:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
     input logic [15:0] keyboard_in,
@@ -214,82 +213,41 @@ module ram (
     output logic [255:0] lcd_data_out
 );
 
-reg[31:0] memory [0:4095]; //6 bytes of reserved data
-logic [31:0] output_word;
-reg [31:0] keyboard_data;
-reg [31:0] lcd_data [7:0];
-reg [31:0] write_data;
-
-
-//reserved memory for I/O
-//[4095:4092] -> LCD screen data out
-//[4091] -> keyboard inputs
-//[4090] -> temp input
-
-// 2047
+reg[31:0] memory [1023:0];
+reg[31:0] lcd_data [7:0];
+reg[31:0] keyboard_data;
+reg[31:0] mem_reg;
+logic[31:0] output_data;
 
 initial begin
     $readmemh("cpu.mem", memory);
 end
 
 always_comb begin
-    // if(address_instr != 12'd25) begin
-    //output_word = memory[address_instr[11:0]];
-    // end else begin
-    //     case(address_instr)
-    //         (12'd25): output_word = {16'b0, keyboard_in};
-    //         default: output_word = memory[address_instr];
-    //     endcase
-    // end
-    // lcd_data_out = {memory[42], memory[43], memory[44], memory[45], memory[46], memory[47], memory[48], memory[49]};
-
-    lcd_data_out = {memory[4095], memory[4094], memory[4093], memory[4092], memory[4091], memory[4090], memory[4089], memory[4088]};
-
-    // lcd_data_out = {lcd_data[7], lcd_data[6], lcd_data[5], lcd_data[4], lcd_data[3], lcd_data[2], lcd_data[1], lcd_data[0]};
-
+    lcd_data_out = {lcd_data[0], lcd_data[1], lcd_data[2], lcd_data[3], lcd_data[4], lcd_data[5], lcd_data[6], lcd_data[7]};
     keyboard_data = {16'b0, keyboard_in};
-
-    if (address_instr == 13'd4096) begin
-         output_word = keyboard_data;
-    end
-    else begin
-        output_word = memory[address_instr[11:0]];
-    end
-
-
-    if (write_enable) begin
-        // if (address_data > 13'd4096) begin
-        //     lcd_data[address_data - 4096] = data_in;
-        // end else begin
-            write_data = data_in;
+    if(address_instr == 11'd8) begin
+        output_data = keyboard_data;
     end else begin
-        write_data = memory[address_instr[11:0]];
+        output_data = mem_reg;
+    end
+    instr_out = output_data;
+end
+
+always @(posedge clk) begin
+    if(write_enable & address_instr > 8) begin
+        memory[address_instr[9:0] - 10'd9] <= data_in;
+    end else begin
+        lcd_data[address_instr[2:0]] <= data_in;
+    end 
+    addr_out <= memory[address_data[9:0]];
+    if (address_instr > 8) begin 
+        mem_reg <= memory[address_data[9:0] - 10'd9];
+    end else begin
+        mem_reg <= mem_reg;
     end
 
-    // lcd_data_out = 256'b0;
 end
-
-always_ff @(posedge clk) begin
-    // if(rst) begin
-    //     // if (address_data > 13'd4096) begin
-    //     //     lcd_data[address_data - 4096] <= data_in;
-    //     // end else begin
-    //         // memory[address_data[11:0]] <= data_in;
-    //     // end
-    //     lcd_data[0] <= 0;
-    // end else begin 
-        addr_out <= memory[address_data[11:0]];
-        instr_out <= output_word;
-        memory[address_instr[11:0]] <= write_data;
-    // end
-    // if (address_instr == 13'd4096) begin 
-    //     instr_out <= keyboard_data;
-    // end else begin
-    //end
-    // memory[25] <= {16'b0, keyboard_in};
-    // lcd_data_out <= {memory[49], memory[48], memory[47], memory[46], memory[45], memory[44], memory[43], memory[42]};
-end
-
 
 endmodule
 
@@ -402,8 +360,8 @@ module cpu_core(
     logic mem_read;
     
     always_comb begin
-        mem_adr_i = (data_adr_o == 32'b0) ? instruction_adr_o : data_adr_o;
         data_en = data_read | data_write;
+        mem_adr_i = (!data_en) ? (instruction_adr_o + 32'd36) : data_adr_o;
         mem_read = data_read | instr_fetch;
         instr_wait = ((~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good);
     end
@@ -916,10 +874,10 @@ module memcontrol(
             IDLE: begin
                 if (memRead) begin
                     next_state = Read;
-                    prev_state = Read;
+                    prev_state = IDLE;
                 end else if (memWrite) begin
                     next_state = Write;
-                    prev_state = Write;
+                    prev_state = IDLE;
                 end else if (prev_state == Read | prev_state == Write) begin
                     address_out = address_in;
                     prev_state = IDLE;
@@ -941,7 +899,11 @@ module memcontrol(
                     data_out_CPU = 32'b0;
                     data_out_INSTR = data_in_BUS; // going to CU
                 end
-                next_state = IDLE;
+                if (prev_state == IDLE) begin
+                    next_state = Read; 
+                end else begin
+                    next_state = IDLE;
+                end
             end
             
             Write: begin 
@@ -949,7 +911,11 @@ module memcontrol(
                 data_out_BUS = data_in_CPU;
                 data_out_INSTR = 32'b0;
                 data_out_CPU = 32'b0;
-                next_state = IDLE; 
+                if (prev_state == IDLE) begin 
+                    next_state = Write; 
+                end else begin
+                    next_state = IDLE;
+                end 
             end
 
             Wait: begin 
@@ -1471,7 +1437,7 @@ module bin_to_LCD(
 
     always_comb begin
         BCD_interim = 16'b0;
-        if(binary_in[31:16] == 16'h0000 & address <= 32'd49 & address >= 32'd42) begin
+        if(binary_in[31:16] == 16'h0000 & address <= 32'd28) begin
             for(integer i = 0; i < 14; i = i + 1) begin
                 if(BCD_interim[3:0] >= 5) BCD_interim[3:0] = BCD_interim[3:0] + 3;
                 if(BCD_interim[7:4] >= 5) BCD_interim[7:4] = BCD_interim[7:4] + 3;
