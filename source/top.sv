@@ -1443,10 +1443,10 @@ module bin_to_LCD(
                 if(BCD_interim[7:4] >= 5) BCD_interim[7:4] = BCD_interim[7:4] + 3;
                 if(BCD_interim[11:8] >= 5) BCD_interim[11:8] = BCD_interim[11:8] + 3;
                 if(BCD_interim[15:12] >= 5) BCD_interim[15:12] = BCD_interim[15:12] + 3;
-                BCD_interim = {BCD_interim[14:0], binary_in[15-i]};
+                BCD_interim = {BCD_interim[14:0], binary_in[13-i]}; 
             end
 
-            case(BCD_interim[15:12])
+            case(BCD_interim[15:12]) 
                 4'b0000: LCD_out[31:24] = 8'b00110000;
                 4'b0001: LCD_out[31:24] = 8'b00110001;
                 4'b0010: LCD_out[31:24] = 8'b00110010;
