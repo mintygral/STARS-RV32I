@@ -130,7 +130,7 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({data_in_BUS}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({address_out}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
   assign right[0] = temp3;
 
 endmodule
@@ -221,7 +221,7 @@ module ram (
     output logic bus_full
 );
 
-reg next_bus_full, key_bus_full;
+reg next_bus_full;
 reg[31:0] memory [1023:0];
 reg[31:0] lcd_data [7:0];
 reg[31:0] keyboard_data;
@@ -238,13 +238,12 @@ always_comb begin
     lcd_data_out = {lcd_data[0], lcd_data[1], lcd_data[2], lcd_data[3], lcd_data[4], lcd_data[5], lcd_data[6], lcd_data[7]};
     keyboard_data = {keyboard_in};
     if(int_address == 11'd8) begin
+        next_bus_full = !key_confirm;
         output_data = keyboard_data;
     end else begin
+        next_bus_full = 1'b0;
         output_data = mem_reg;
     end
-    key_bus_full = !key_confirm;
-    next_bus_full = 1'b0;
-    bus_full = key_bus_full; //need to find some way to actually decide this based on address, currently issues with comb loop
     instr_out = output_data;
 end
 
@@ -270,7 +269,7 @@ always @(posedge clk) begin
       lcd_data[6] <= lcd_data[6];
       lcd_data[7] <= lcd_data[7];
     end
-    //bus_full <= next_bus_full;
+    bus_full <= next_bus_full;
 end
 
 endmodule
