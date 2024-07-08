@@ -90,7 +90,7 @@ module top (
   );
 
     logic [15:0] next_out;
-    logic[15:0] key_out_bin;
+    logic[31:0] key_out_bin;
   keypad_interface keypad0(
     .clk(hz100),
     .rst(reset),
@@ -124,7 +124,7 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({temp}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({address_out}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -207,7 +207,7 @@ module ram (
     input logic [10:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
-    input logic [15:0] keyboard_in,
+    input logic [31:0] keyboard_in,
     output logic [31:0] addr_out,
     output logic [31:0] instr_out,
     output logic [255:0] lcd_data_out
@@ -227,7 +227,7 @@ end
 always_comb begin
     int_address = address_instr - 11'd1;
     lcd_data_out = {lcd_data[0], lcd_data[1], lcd_data[2], lcd_data[3], lcd_data[4], lcd_data[5], lcd_data[6], lcd_data[7]};
-    keyboard_data = {16'b0, keyboard_in};
+    keyboard_data = {keyboard_in};
     if(int_address == 11'd8) begin
         output_data = keyboard_data;
     end else begin
@@ -694,9 +694,9 @@ module control_unit(
                     rs1 = instruction[19:15];
                     rs2 = instruction[24:20];
                     if(instruction[31] == 1'b0) begin
-                      imm_32 = {20'b0, instruction[31], instruction[7], instruction[30:25], instruction[11:8]};
+                      imm_32 = ({20'b0, instruction[31], instruction[7], instruction[30:25], instruction[11:8]} << 1) - 32'd4;
                     end else begin
-                      imm_32 = {20'hfffff, instruction[31], instruction[7], instruction[30:25], instruction[11:8]};
+                      imm_32 = ({20'hfffff, instruction[31], instruction[7], instruction[30:25], instruction[11:8]} << 1) - 32'd4;
                     end 
                     funct7 = 7'b0;
                     rd = 5'b0;
@@ -710,7 +710,7 @@ module control_unit(
                     if(instruction[31] == 1'b0) begin
                       imm_32 = ({12'b0, instruction[31], instruction[19:12], instruction[20], instruction[30:21]} << 1) - 32'd4;
                     end else begin
-                      imm_32 = ({12'hfff, instruction[31], instruction[19:12], instruction[20], instruction[30:21]<< 1}) - 32'd4;
+                      imm_32 = ({12'hfff, instruction[31], instruction[19:12], instruction[20], instruction[30:21]} << 1) - 32'd4;
                     end 
                     rs1 = 5'b0;
                     rs2 = 5'b0;
@@ -1054,7 +1054,7 @@ module keypad_interface(
     output logic [3:0] out,
     output logic [15:0] key_out,
     output logic [15:0] next_out,
-    output logic [15:0] key_out_bin
+    output logic [31:0] key_out_bin
 );
 
     logic [7:0] code;
@@ -1413,11 +1413,18 @@ module bcd2bin
     input logic [3:0] bcd1, // 10
     input logic [3:0] bcd0, // 1
     // output logic [31:0] bin
-    output logic [15:0] bin
+    output logic [31:0] bin
    );
 
 //    assign bin = (bcd7 * 24'd10000000) + (bcd6 * 20'd1000000) + (bcd5 * 17'd100000) + (bcd4 * 14'd10000) + (bcd3 * 10'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1);
-        assign bin = (bcd3 * 10'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1);
+
+    always_comb begin
+      if(bcd3 < 4'b1010 & bcd2 < 4'b1010 & bcd1 < 4'b1010 & bcd0 < 4'b1010) begin
+        bin = {22'h0000, (bcd3 * 10'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1)};
+      end else begin
+        bin = {28'h000000f, bcd0};
+      end
+    end
 
 endmodule
 
@@ -1453,7 +1460,9 @@ module bin_to_LCD(
 
     always_comb begin
         BCD_interim = 16'b0;
-        if(binary_in[31:16] == 16'h0000 & address <= 32'd28) begin
+        if(binary_in[31:4] == 28'h000000f & address <= 32'd32) begin
+          BCD_interim = {12'b0,binary_in[3:0]};
+        end else if(binary_in[31:16] == 16'h0000 & address <= 32'd32) begin
             for(integer i = 0; i < 14; i = i + 1) begin
                 if(BCD_interim[3:0] >= 5) BCD_interim[3:0] = BCD_interim[3:0] + 3;
                 if(BCD_interim[7:4] >= 5) BCD_interim[7:4] = BCD_interim[7:4] + 3;
@@ -1461,7 +1470,8 @@ module bin_to_LCD(
                 if(BCD_interim[15:12] >= 5) BCD_interim[15:12] = BCD_interim[15:12] + 3;
                 BCD_interim = {BCD_interim[14:0], binary_in[13-i]}; 
             end
-
+        end
+        if(address <= 32'd32 & (binary_in[31:16] == 16'h5f5f | binary_in[31:16] == 16'h0000))  begin
             case(BCD_interim[15:12]) 
                 4'b0000: LCD_out[31:24] = 8'b00110000;
                 4'b0001: LCD_out[31:24] = 8'b00110001;
@@ -1476,7 +1486,7 @@ module bin_to_LCD(
                 4'b1010: LCD_out[31:24] = 8'b00101011;
                 4'b1011: LCD_out[31:24] = 8'b00101101;
                 4'b1100: LCD_out[31:24] = 8'b00101010;
-                4'b1101: LCD_out[31:24] = 8'b11111101;
+                4'b1101: LCD_out[31:24] = 8'b00101111;
                 default: LCD_out[31:24] = 8'b01011111; //underscore - default/blank value
             endcase
             case(BCD_interim[11:8])
@@ -1493,7 +1503,7 @@ module bin_to_LCD(
                 4'b1010: LCD_out[23:16] = 8'b00101011;
                 4'b1011: LCD_out[23:16] = 8'b00101101;
                 4'b1100: LCD_out[23:16] = 8'b00101010;
-                4'b1101: LCD_out[23:16] = 8'b11111101;
+                4'b1101: LCD_out[23:16] = 8'b00101111;
                 default: LCD_out[23:16] = 8'b01011111; //underscore - default/blank value
             endcase
             case(BCD_interim[7:4])
@@ -1510,7 +1520,7 @@ module bin_to_LCD(
                 4'b1010: LCD_out[15:8] = 8'b00101011;
                 4'b1011: LCD_out[15:8] = 8'b00101101;
                 4'b1100: LCD_out[15:8] = 8'b00101010;
-                4'b1101: LCD_out[15:8] = 8'b11111101;
+                4'b1101: LCD_out[15:8] = 8'b00101111;
                 default: LCD_out[15:8] = 8'b01011111; //underscore - default/blank value
             endcase
             case(BCD_interim[3:0])
@@ -1527,7 +1537,7 @@ module bin_to_LCD(
                 4'b1010: LCD_out[7:0] = 8'b00101011;
                 4'b1011: LCD_out[7:0] = 8'b00101101;
                 4'b1100: LCD_out[7:0] = 8'b00101010;
-                4'b1101: LCD_out[7:0] = 8'b11111101;
+                4'b1101: LCD_out[7:0] = 8'b00101111;
                 default: LCD_out[7:0] = 8'b01011111; //underscore - default/blank value
             endcase
         end else begin
