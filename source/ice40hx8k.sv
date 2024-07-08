@@ -9,10 +9,10 @@ module ice40hx8k (hwclk,pb,ss7,ss6,ss5,ss4,ss3,ss2,ss1,ss0,left,right,red,green,
     input Rx;
     output Tx, CTSn, DCDn;
 
-    reg [15:0] ctr = 0;
+    reg [23:0] ctr = 0;
     reg hz100 = 0;
     always @ (posedge hwclk)
-      if (ctr == 250)
+      if (ctr == 500) //250
         begin
           ctr <= 0;
           hz100 <= ~hz100;

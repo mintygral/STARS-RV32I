@@ -22,6 +22,8 @@ module top (
   logic [31:0] memory_address_out, imm_32_x;
   logic [3:0] key_button;
 
+  logic bus_full, key_confirm;
+
   /**edge_detector dec(
     .button_sync(pb[0]),
     .clk(hz100),
@@ -41,8 +43,8 @@ module top (
   cpu_core core0(
     .data_in_BUS(data_in_BUS),
     .pc_data(pc_data),
-    .bus_full(1'b0),
-    .clk(strobe),
+    .bus_full(bus_full), //bus_full from ram module
+    .clk(hz100),
     .rst(reset),
     .data_out_BUS(data_out_BUS),
     .address_out(address_out),
@@ -78,7 +80,8 @@ module top (
                         .LCD_out(mem_data));
 
   ram mem(
-    .clk(strobe),
+    .clk(hz100),
+    .key_confirm(key_confirm),
     .address_data(address_real),
     .address_instr(address_real),
     .data_in(mem_data),
@@ -86,11 +89,13 @@ module top (
     .keyboard_in(key_out_bin),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS),
-    .lcd_data_out(lcd_data_out)
+    .lcd_data_out(lcd_data_out),
+    .bus_full(bus_full)
   );
 
     logic [15:0] next_out;
     logic[31:0] key_out_bin;
+
   keypad_interface keypad0(
     .clk(hz100),
     .rst(reset),
@@ -99,7 +104,8 @@ module top (
     .out(key_button),
     .key_out(key_out),
     .next_out(next_out),
-    .key_out_bin(key_out_bin)
+    .key_out_bin(key_out_bin),
+    .key_confirm(key_confirm)
   );
 
   logic [127:0] row_1, row_2;
@@ -124,7 +130,8 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({address_out}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({data_in_BUS}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  assign right[0] = temp3;
 
 endmodule
 
@@ -203,16 +210,18 @@ module display(
 endmodule
 
 module ram (
-    input logic clk,
+    input logic clk, key_confirm,
     input logic [10:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
     input logic [31:0] keyboard_in,
     output logic [31:0] addr_out,
     output logic [31:0] instr_out,
-    output logic [255:0] lcd_data_out
+    output logic [255:0] lcd_data_out,
+    output logic bus_full
 );
 
+reg next_bus_full, key_bus_full;
 reg[31:0] memory [1023:0];
 reg[31:0] lcd_data [7:0];
 reg[31:0] keyboard_data;
@@ -233,6 +242,9 @@ always_comb begin
     end else begin
         output_data = mem_reg;
     end
+    key_bus_full = !key_confirm;
+    next_bus_full = 1'b0;
+    bus_full = key_bus_full; //need to find some way to actually decide this based on address, currently issues with comb loop
     instr_out = output_data;
 end
 
@@ -258,7 +270,7 @@ always @(posedge clk) begin
       lcd_data[6] <= lcd_data[6];
       lcd_data[7] <= lcd_data[7];
     end
-
+    //bus_full <= next_bus_full;
 end
 
 endmodule
@@ -373,9 +385,9 @@ module cpu_core(
     
     always_comb begin
         data_en = data_read | data_write;
-        mem_adr_i = (!data_en) ? (instruction_adr_o + 32'd36) : data_adr_o;
+        mem_adr_i = (!data_en) ? (instruction_adr_o + 32'd40) : data_adr_o;
         mem_read = data_read | instr_fetch;
-        instr_wait = ((~(read_address == 32'b0) | ~(write_address == 32'b0)) & ~data_good);
+        instr_wait = ((read_address != 32'b0 | write_address != 32'b0) & ~data_good);
     end
 
     logic [31:0] load_data_flipflop, reg_write_flipflop;
@@ -1054,20 +1066,24 @@ module keypad_interface(
     output logic [3:0] out,
     output logic [15:0] key_out,
     output logic [15:0] next_out,
-    output logic [31:0] key_out_bin
+    output logic [31:0] key_out_bin,
+    output logic key_confirm
 );
-
+    logic next_confirm, key_confirm_hold, debounce;
     logic [7:0] code;
     key_state state, next_state;
     logic [3:0] next_rows;
     // logic [15:0] next_out;
     logic [9:0] counter;
     logic key_clk;
+    logic [3:0] key_counter, next_key_counter;
 
     always_comb begin
         code = {columns, rows};
         next_rows = rows;
         next_out = key_out;
+        next_confirm = 1'b0;
+        next_key_counter = key_counter;
         /**if(state == KEY_IDLE) begin
             if(columns != 4'b0000) begin
                 next_state = SCAN;
@@ -1079,11 +1095,32 @@ module keypad_interface(
                 4'b1110:
                     begin
                         case(columns)
-                            4'b0001: next_out = {key_out[11:0], 4'b0001};
-                            4'b0010: next_out = {key_out[11:0], 4'b0010};
-                            4'b0100: next_out = {key_out[11:0], 4'b0011};
-                            4'b1000: next_out = {key_out[11:0], 4'b1010};
-                            default: next_out = key_out;
+                            4'b0001: begin
+                              next_confirm = 1'b0;
+                              if(key_out[3:0] != 4'b0001 | (key_out[3:0] == 4'b0001 & key_counter == 15)) begin
+                                next_out = {key_out[11:0], 4'b0001};
+                                next_key_counter = 0;
+                              end else begin
+                                next_out = key_out;
+                                next_key_counter = key_counter + 1;
+                              end
+                            end
+                            4'b0010: begin
+                              next_out = {key_out[11:0], 4'b0010};
+                              next_confirm = 1'b0;
+                            end
+                            4'b0100: begin
+                              next_out = {key_out[11:0], 4'b0011};
+                              next_confirm = 1'b0;
+                            end
+                            4'b1000: begin
+                              next_out = {key_out[11:0], 4'b1010};
+                              next_confirm = 1'b0;
+                            end
+                            default: begin
+                              next_out = key_out;
+                              next_confirm = 1'b0;
+                            end
                         endcase
                         next_rows = 4'b1101;
                         next_state = SCAN;
@@ -1091,11 +1128,26 @@ module keypad_interface(
                 4'b1101:
                     begin
                         case(columns)
-                            4'b0001: next_out = {key_out[11:0], 4'b0100};
-                            4'b0010: next_out = {key_out[11:0], 4'b0101};
-                            4'b0100: next_out = {key_out[11:0], 4'b0110};
-                            4'b1000: next_out = {key_out[11:0], 4'b1011};
-                            default: next_out = key_out;
+                            4'b0001: begin
+                              next_out = {key_out[11:0], 4'b0100};
+                              next_confirm = 1'b0;
+                            end
+                            4'b0010: begin
+                              next_out = {key_out[11:0], 4'b0101};
+                              next_confirm = 1'b0;
+                            end
+                            4'b0100: begin
+                              next_out = {key_out[11:0], 4'b0110};
+                              next_confirm = 1'b0;
+                            end
+                            4'b1000: begin
+                              next_out = {key_out[11:0], 4'b1011};
+                              next_confirm = 1'b0;
+                            end
+                            default: begin 
+                              next_out = key_out;
+                              next_confirm = 1'b0;
+                            end
                         endcase
                         next_rows = 4'b1011;
                         next_state = SCAN;
@@ -1103,11 +1155,26 @@ module keypad_interface(
                 4'b1011:
                     begin
                         case(columns)
-                            4'b0001: next_out = {key_out[11:0], 4'b0111};
-                            4'b0010: next_out = {key_out[11:0], 4'b1000};
-                            4'b0100: next_out = {key_out[11:0], 4'b1001};
-                            4'b1000: next_out = {key_out[11:0], 4'b1100};
-                            default: next_out = key_out;
+                            4'b0001: begin
+                              next_out = {key_out[11:0], 4'b0111};
+                              next_confirm = 1'b0;
+                            end
+                            4'b0010: begin
+                              next_out = {key_out[11:0], 4'b1000};
+                              next_confirm = 1'b0;
+                            end
+                            4'b0100: begin
+                              next_out = {key_out[11:0], 4'b1001};
+                              next_confirm = 1'b0;
+                            end
+                            4'b1000: begin
+                              next_out = {key_out[11:0], 4'b1100};
+                              next_confirm = 1'b0;
+                            end
+                            default: begin
+                              next_out = key_out;
+                              next_confirm = 1'b0;
+                            end
                         endcase
                         next_rows = 4'b0111;
                         next_state = SCAN;
@@ -1115,11 +1182,34 @@ module keypad_interface(
                 4'b0111:
                     begin
                         case(columns)
-                            4'b0001: next_out = {key_out[11:0], 4'b1110};
-                            4'b0010: next_out = {key_out[11:0], 4'b0000};
-                            4'b0100: next_out = {key_out[11:0], 4'b1111};
-                            4'b1000: next_out = {key_out[11:0], 4'b1101};
-                            default: next_out = key_out;
+                            4'b0001: 
+                              begin
+                                //if(key_confirm == 1'b0 | (key_confirm == 1'b1 & key_counter == 4'd15)) begin
+                                  next_out = {key_out}; //would be E, is instead confirm button
+                                  next_confirm = 1'b1;
+                                  next_key_counter = 0;
+                                /**end else begin
+                                  next_out = key_out;
+                                  next_confirm = 1'b0;
+                                  next_key_counter = key_counter + 1;
+                                end*/
+                              end
+                            4'b0010: begin
+                              next_out = {key_out[11:0], 4'b0000};
+                              next_confirm = 1'b0;
+                            end
+                            4'b0100: begin
+                              next_out = {key_out[11:0], 4'b1111};
+                              next_confirm = 1'b0;
+                            end
+                            4'b1000: begin
+                              next_out = {key_out[11:0], 4'b1101};
+                              next_confirm = 1'b0;
+                            end
+                            default: begin
+                              next_out = key_out;
+                              next_confirm = 1'b0;
+                            end
                         endcase
                         next_rows = 4'b1110;
                         next_state = SCAN;
@@ -1149,6 +1239,8 @@ module keypad_interface(
     always_ff @ (posedge clk, posedge rst) begin
         if (rst) begin
             counter = 0;
+            key_confirm <= 1'b0;
+            key_counter <= 4'b0;
         end
         else begin
             counter = counter + 1;
@@ -1157,6 +1249,14 @@ module keypad_interface(
                 counter = 0;
                 key_clk = 1;
             end
+            if(key_confirm) begin
+              key_confirm <= 1'b0;
+            end else if(counter < 2) begin
+              key_confirm <= next_confirm;
+            end else begin
+              key_confirm <= 1'b0;
+            end
+            key_counter <= next_key_counter;
         end
     end
     
