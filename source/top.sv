@@ -124,7 +124,7 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({5'b0, address_real, data_out_BUS[15:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({temp}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
 
 endmodule
 
@@ -241,12 +241,22 @@ always @(posedge clk) begin
         memory[int_address[9:0] - 10'd9] <= data_in;
     end else begin
         lcd_data[int_address[2:0]] <= data_in;
-    end 
+    end
     addr_out <= memory[int_address[9:0]];
-    if (int_address > 8) begin 
+    if (int_address > 8) begin
         mem_reg <= memory[int_address[9:0] - 10'd9];
     end else begin
         mem_reg <= mem_reg;
+    end
+    if(!write_enable) begin
+      lcd_data[0] <= lcd_data[0];
+      lcd_data[1] <= lcd_data[1];
+      lcd_data[2] <= lcd_data[2];
+      lcd_data[3] <= lcd_data[3];
+      lcd_data[4] <= lcd_data[4];
+      lcd_data[5] <= lcd_data[5];
+      lcd_data[6] <= lcd_data[6];
+      lcd_data[7] <= lcd_data[7];
     end
 
 end
@@ -1051,7 +1061,7 @@ module keypad_interface(
     key_state state, next_state;
     logic [3:0] next_rows;
     // logic [15:0] next_out;
-    logic [8:0] counter;
+    logic [9:0] counter;
     logic key_clk;
 
     always_comb begin
@@ -1143,7 +1153,7 @@ module keypad_interface(
         else begin
             counter = counter + 1;
             key_clk = 0;
-            if (counter == 480) begin
+            if (counter == 960) begin
                 counter = 0;
                 key_clk = 1;
             end
