@@ -23,7 +23,7 @@ module top (
   logic [3:0] key_button;
 
   logic bus_full, key_confirm, display_confirm;
-  logic [11:0] counter;
+  logic [18:0] counter;
 
   /**edge_detector dec(
     .button_sync(pb[0]),
@@ -140,7 +140,7 @@ module top (
       display_confirm <= 0;
     end else if(key_confirm) begin
       display_confirm <= key_confirm;
-    end else if(counter == 3000) begin
+    end else if(counter == 300000) begin
       display_confirm <= 1'b0;
     end
   end
@@ -1095,7 +1095,7 @@ module keypad_interface(
     key_state state, next_state;
     logic [3:0] next_rows;
     // logic [15:0] next_out;
-    logic [11:0] counter;
+    logic [18:0] counter;
     logic key_clk;
     logic [3:0] key_counter, next_key_counter;
 
@@ -1266,7 +1266,7 @@ module keypad_interface(
         else begin
             counter = counter + 1;
             key_clk = 0;
-            if (counter == 3000) begin
+            if (counter == 150000) begin
                 counter = 0;
                 key_clk = 1;
             end
