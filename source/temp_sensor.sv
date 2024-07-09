@@ -1,12 +1,12 @@
 typedef enum logic [2:0] {
-    IDLE_TEMP = 0,
+    IDLE = 0,
     SKIP_ROM = 1,
     CONVERT_TEMP = 2,
     SKIP_ROM2 = 3,
     READ_SCRATCH = 4,
     READ = 5,
     RESET = 6
-} state_temp;
+} state_t;
 
 module temp_sensor (
     // inputs
@@ -14,7 +14,7 @@ module temp_sensor (
     input logic read_request,
     // outputs
     output logic out_wire,
-    output state_temp state,
+    output state_t state,
     output logic [3:0] count_read, // read state
     output logic [3:0] next_read,
     output logic [2:0] count_index, // index
@@ -27,7 +27,7 @@ module temp_sensor (
     // logic [2:0] count_index; // index
     // logic [2:0] count_reg; // every clk cycle
     // logic [6:0] clk_divider; // writing state, when count_reg == 7
-    state_temp next_state, prev_state;
+    state_t next_state, prev_state;
 
     logic [7:0] skip_rom = 8'hCC;
     logic [7:0] convert_t = 8'h44;
@@ -49,7 +49,7 @@ module temp_sensor (
 
     always_ff @ (posedge strobe, posedge rst) begin : clk_divide
         if (rst) begin
-            state <= IDLE_TEMP;
+            state <= IDLE;
         end else begin
             state <= next_state;
             count_index <= next_index;
@@ -66,14 +66,14 @@ module temp_sensor (
         // count_reg = 0;
         out_wire = 0;
         case(state)
-            IDLE_TEMP: begin
+            IDLE: begin
                 // count_read = 0;
                 if (read_request) begin
                     next_state = SKIP_ROM;
                     next_index = 0;
                 end
                 else begin
-                    next_state = IDLE_TEMP;
+                    next_state = IDLE;
                     next_read = 0;
                 end
             end
@@ -130,7 +130,7 @@ module temp_sensor (
             end
             RESET: begin
                 if (count_read == 15) begin
-                    next_state = IDLE_TEMP;
+                    next_state = IDLE;
                 end
                 else begin 
                     next_read = count_read + 1;
@@ -138,7 +138,7 @@ module temp_sensor (
                 end
             end
             default: begin
-                next_state = IDLE_TEMP;
+                next_state = IDLE;
                 next_read = 0;
                 // count_index = 0;
             end
