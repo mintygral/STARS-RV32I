@@ -22,7 +22,8 @@ module top (
   logic [31:0] memory_address_out, imm_32_x;
   logic [3:0] key_button;
 
-  logic bus_full, key_confirm;
+  logic bus_full, key_confirm, display_confirm;
+  logic [11:0] counter;
 
   /**edge_detector dec(
     .button_sync(pb[0]),
@@ -118,7 +119,7 @@ module top (
     logic [15:0] key_out;
 
 
-  lcd_controller lcd_display(.clk(hz100), 
+  lcd_controller lcd_display(.clk(hz100),
                                .rst(reset),
                                .row_1(lcd_data_out[255:128]),
                                .row_2(lcd_data_out[127:0]),
@@ -130,8 +131,29 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({address_out}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  display displaying(.seq({key_out[15:0], address_out[15:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
   assign right[0] = temp3;
+  assign green = display_confirm;
+
+  always_ff @(posedge hz100, posedge reset) begin
+    if(reset) begin
+      display_confirm <= 0;
+    end else if(key_confirm) begin
+      display_confirm <= key_confirm;
+    end else if(counter == 3000) begin
+      display_confirm <= 1'b0;
+    end
+  end
+
+  always_ff @(posedge hz100, posedge reset) begin
+    if(reset) begin
+      counter <= 0;
+    end else if(display_confirm) begin
+      counter <= counter + 1;
+    end else begin
+      counter <= 0;
+    end
+  end
 
 endmodule
 
@@ -1073,7 +1095,7 @@ module keypad_interface(
     key_state state, next_state;
     logic [3:0] next_rows;
     // logic [15:0] next_out;
-    logic [9:0] counter;
+    logic [11:0] counter;
     logic key_clk;
     logic [3:0] key_counter, next_key_counter;
 
@@ -1198,7 +1220,7 @@ module keypad_interface(
                               next_confirm = 1'b0;
                             end
                             4'b0100: begin
-                              next_out = {key_out[11:0], 4'b1111};
+                              next_out = 16'h0000;
                               next_confirm = 1'b0;
                             end
                             4'b1000: begin
@@ -1244,7 +1266,7 @@ module keypad_interface(
         else begin
             counter = counter + 1;
             key_clk = 0;
-            if (counter == 960) begin
+            if (counter == 3000) begin
                 counter = 0;
                 key_clk = 1;
             end
@@ -1570,9 +1592,15 @@ module bin_to_LCD(
                 BCD_interim = {BCD_interim[14:0], binary_in[13-i]}; 
             end
         end
-        if(address <= 32'd32 & (binary_in[31:16] == 16'h5f5f | binary_in[31:16] == 16'h0000))  begin
+        if(address <= 32'd32 & (binary_in[31:16] == 16'h0000))  begin
             case(BCD_interim[15:12]) 
-                4'b0000: LCD_out[31:24] = 8'b00110000;
+                4'b0000: begin
+                  if(BCD_interim[11:0] == 12'h000) begin
+                    LCD_out[31:24] = 8'b00110000;
+                  end else begin
+                    LCD_out[31:24] = 8'h5f;
+                  end
+                end
                 4'b0001: LCD_out[31:24] = 8'b00110001;
                 4'b0010: LCD_out[31:24] = 8'b00110010;
                 4'b0011: LCD_out[31:24] = 8'b00110011;
@@ -1589,7 +1617,13 @@ module bin_to_LCD(
                 default: LCD_out[31:24] = 8'b01011111; //underscore - default/blank value
             endcase
             case(BCD_interim[11:8])
-                4'b0000: LCD_out[23:16] = 8'b00110000;
+                4'b0000: begin
+                  if(BCD_interim[7:0] == 8'h00) begin
+                    LCD_out[23:16] = 8'b00110000;
+                  end else begin
+                    LCD_out[23:16] = 8'h5f;
+                  end
+                end
                 4'b0001: LCD_out[23:16] = 8'b00110001;
                 4'b0010: LCD_out[23:16] = 8'b00110010;
                 4'b0011: LCD_out[23:16] = 8'b00110011;
@@ -1606,7 +1640,13 @@ module bin_to_LCD(
                 default: LCD_out[23:16] = 8'b01011111; //underscore - default/blank value
             endcase
             case(BCD_interim[7:4])
-                4'b0000: LCD_out[15:8] = 8'b00110000;
+                4'b0000: begin
+                  if(BCD_interim[3:0] == 4'h0) begin
+                    LCD_out[15:8] = 8'b00110000;
+                  end else begin
+                    LCD_out[15:8] = 8'h5f;
+                  end
+                end
                 4'b0001: LCD_out[15:8] = 8'b00110001;
                 4'b0010: LCD_out[15:8] = 8'b00110010;
                 4'b0011: LCD_out[15:8] = 8'b00110011;
