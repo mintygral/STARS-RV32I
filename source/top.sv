@@ -80,18 +80,24 @@ module top (
                         .address(address_out),
                         .LCD_out(mem_data));
 
+    logic [31:0] temperature_read;
+    logic [15:0] temperature_data;
+    logic temp_data_ready;
   ram mem(
     .clk(hz100),
     .key_confirm(key_confirm),
     .address_data(address_real),
     .address_instr(address_real),
     .data_in(mem_data),
+    .temp_data_ready(temp_data_ready),
     .write_enable(data_write),
     .keyboard_in(key_out_bin),
+    .temperature_data(temperature_data),
     .addr_out(memory_address_out),
     .instr_out(data_in_BUS),
     .lcd_data_out(lcd_data_out),
-    .bus_full(bus_full)
+    .bus_full(bus_full),
+    .temperature_read(temperature_read)
   );
 
     logic [15:0] next_out;
@@ -131,8 +137,8 @@ module top (
   //assign right[7:0] = address_real[7:0];
 //   assign left[6:3] = key_button;
   //{result[7:0], register_out[7:0], register_out_2[7:0], imm_32_x[7:0]}
-  display displaying(.seq({key_out[15:0], address_out[15:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
-  assign right[0] = temp3;
+  display displaying(.seq({9'b0, temperature_data[10:4], address_out[15:0]}), .ssds({ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0}));
+  assign right[0] = out_wire;
   assign green = display_confirm;
 
   always_ff @(posedge hz100, posedge reset) begin
@@ -154,6 +160,14 @@ module top (
       counter <= 0;
     end
   end
+
+    logic out_wire;
+  temp_sensor tempsensor(.clk(hz100),
+             .rst(reset),
+             .read_request(temperature_read[0]),
+             .out_wire(out_wire),
+             .temperature_data(temperature_data),
+             .data_ready(temp_data_ready));
 
 endmodule
 
@@ -232,18 +246,22 @@ module display(
 endmodule
 
 module ram (
-    input logic clk, key_confirm,
+    input logic clk, key_confirm, temp_data_ready,
     input logic [10:0] address_data, address_instr,
     input logic [31:0] data_in,
     input logic write_enable,
     input logic [31:0] keyboard_in,
+    input logic [15:0] temperature_data,
     output logic [31:0] addr_out,
     output logic [31:0] instr_out,
     output logic [255:0] lcd_data_out,
-    output logic bus_full
+    output logic bus_full,
+    output logic [31:0] temperature_read
 );
 
 reg next_bus_full;
+reg [31:0] temperature_data_reg;
+reg [31:0] temperature_req;
 reg[31:0] memory [1023:0];
 reg[31:0] lcd_data [7:0];
 reg[31:0] keyboard_data;
@@ -259,9 +277,14 @@ always_comb begin
     int_address = address_instr - 11'd1;
     lcd_data_out = {lcd_data[0], lcd_data[1], lcd_data[2], lcd_data[3], lcd_data[4], lcd_data[5], lcd_data[6], lcd_data[7]};
     keyboard_data = {keyboard_in};
+    temperature_data_reg = {25'b0, temperature_data[10:4]};
+    temperature_read = temperature_req;
     if(int_address == 11'd8) begin
         next_bus_full = !key_confirm;
         output_data = keyboard_data;
+    end else if (int_address == 11'd9) begin
+        next_bus_full = temp_data_ready;
+        output_data = temperature_data_reg;
     end else begin
         next_bus_full = 1'b0;
         output_data = mem_reg;
@@ -270,14 +293,16 @@ always_comb begin
 end
 
 always @(posedge clk) begin
-    if(write_enable & int_address > 8) begin
-        memory[int_address[9:0] - 10'd9] <= data_in;
+    if(write_enable & int_address > 10) begin
+        memory[int_address[9:0] - 10'd11] <= data_in;
+    end else if (write_enable & int_address == 10) begin
+        temperature_req <= data_in;
     end else begin
         lcd_data[int_address[2:0]] <= data_in;
     end
     addr_out <= memory[int_address[9:0]];
-    if (int_address > 8) begin
-        mem_reg <= memory[int_address[9:0] - 10'd9];
+    if (int_address > 10) begin
+        mem_reg <= memory[int_address[9:0] - 10'd11];
     end else begin
         mem_reg <= mem_reg;
     end
@@ -1685,3 +1710,193 @@ module bin_to_LCD(
     end
 
 endmodule
+
+typedef enum logic [2:0] {
+    IDLE_TEMP = 0,
+    SKIP_ROM = 1,
+    CONVERT_TEMP = 2,
+    SKIP_ROM2 = 3,
+    READ_SCRATCH = 4,
+    READ = 5,
+    RESET = 6
+} state_temp;
+
+module temp_sensor (
+    // inputs
+    input logic clk, rst,
+    input logic read_request,
+    // outputs
+    output logic out_wire,
+    output logic [15:0] temperature_data,
+    output logic data_ready
+    );
+
+    // logic [3:0] count_read; // read state
+    // logic [2:0] count_index; // index
+    // logic [2:0] count_reg; // every clk cycle
+    // logic [6:0] clk_divider; // writing state, when count_reg == 7
+
+    state_temp state;
+    logic [15:0] next_temperature_data;
+    logic [3:0] count_read; // read state
+    logic [3:0] next_read;
+    logic [2:0] count_index; // index
+    logic [2:0] next_index; // every clk cycle
+    logic [8:0] clk_divider; // writing state, when count_reg == 7
+    logic strobe, wire_data;
+    state_temp next_state, prev_state;
+
+    logic [7:0] skip_rom;
+    logic [7:0] convert_t;
+    logic [7:0] read_scratch;
+    logic high_imp;
+
+    assign skip_rom = 8'hCC;
+    assign convert_t = 8'h44;
+    assign read_scratch = 8'hBE;
+    assign high_imp = 1'bZ;
+
+    // assign temperature_data = {16{out_wire}};
+
+    always_ff @(posedge clk, posedge rst) begin : startFSM
+        if (rst) begin
+            clk_divider <= 0;
+            strobe <= 0;
+        end else begin
+            clk_divider <= clk_divider + 1;
+            strobe <= 0;
+            out_wire <= 1'b1;
+            if (clk_divider == 40 & state != RESET) begin
+                clk_divider <= 0;
+                strobe <= 1;
+                out_wire <= 1'b0;
+            end else if(clk_divider >= 6 & clk_divider < 9 & state != RESET) begin
+                out_wire <= high_imp;
+            end else if(clk_divider >= 9 & state != RESET) begin
+                out_wire <= wire_data;
+            end else if(clk_divider < 480 & state == RESET) begin
+                out_wire <= 1'b0;
+            end else if(clk_divider >= 480 & clk_divider < 432 & state == RESET) begin
+                out_wire <= high_imp; 
+            end else if(clk_divider == 432 & state == RESET) begin
+                clk_divider <= 0;
+                strobe <= 1;
+                out_wire <= 1'b0;
+            end
+        end
+    end
+
+    always_ff @ (posedge strobe, posedge rst) begin : clk_divide
+        if (rst) begin
+            state <= IDLE_TEMP;
+        end else begin
+            state <= next_state;
+            count_index <= next_index;
+            count_read <= next_read;
+            if (state == READ) begin 
+                temperature_data <= next_temperature_data;
+            end
+        end
+    end
+
+    always_comb begin : changeState
+        next_index = 0;
+        next_state = state;
+        prev_state = state;
+        next_read = 0;
+        next_temperature_data = temperature_data;
+        data_ready = 1'b0;
+        // count_index = 0;
+        // count_reg = 0;
+        wire_data = 0;
+        case(state)
+            IDLE_TEMP: begin
+                // count_read = 0;
+                if (read_request) begin
+                    next_state = SKIP_ROM;
+                    next_index = 0;
+                end
+                else begin
+                    next_state = IDLE_TEMP;
+                    next_read = 0;
+                end
+            end
+            SKIP_ROM: begin
+                if (count_index == 7) begin
+                    // clk_divider++;
+                    next_state = CONVERT_TEMP;
+                    next_index = 0;
+                end
+                else begin
+                    wire_data = skip_rom[count_index]; 
+                    next_index = count_index + 1;
+                    next_state = SKIP_ROM;
+                end
+            end
+            CONVERT_TEMP: begin
+                if (count_index == 7) begin
+                    next_state = SKIP_ROM2;
+                end
+                else begin
+                    wire_data = convert_t[count_index]; 
+                    next_index = count_index + 1;
+                    next_state = CONVERT_TEMP;
+                end
+            end
+            SKIP_ROM2: begin 
+                if (count_index == 7) begin
+                    // clk_divider++;
+                    next_state = READ_SCRATCH;
+                end
+                else begin 
+                    wire_data = convert_t[count_index]; 
+                    next_index = count_index + 1;
+                    next_state = SKIP_ROM2;
+                end
+            end
+            READ_SCRATCH: begin
+                if (count_index == 7) begin
+                    next_state = READ;
+                end
+                else begin 
+                    wire_data = read_scratch[count_index]; 
+                    next_index = count_index + 1;
+                    next_state = READ_SCRATCH;
+                end
+            end
+            READ: begin
+                if (count_read == 15) begin
+                    next_state = RESET;
+                    data_ready = 1'b1;
+                end
+                else begin 
+                    wire_data = 1'bZ;
+                    next_read = count_read + 1;
+                    next_state = READ;
+                    if(clk_divider >= 18 & clk_divider < 35) begin
+                        next_temperature_data = temperature_data;
+                        next_temperature_data[count_read] = out_wire;
+                    end else begin
+                        next_temperature_data = next_temperature_data;
+                    end
+                end
+            end
+            RESET: begin
+                if (count_read == 15) begin
+                    next_state = IDLE_TEMP;
+                end
+                else begin 
+                    next_read = count_read + 1;
+                    next_state = RESET;
+                end
+            end
+            default: begin
+                next_state = IDLE_TEMP;
+                next_read = 0;
+                // count_index = 0;
+            end
+
+        endcase
+    end
+
+endmodule 
