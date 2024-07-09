@@ -1541,7 +1541,7 @@ module bcd2bin
 
     always_comb begin
       if(bcd3 < 4'b1010 & bcd2 < 4'b1010 & bcd1 < 4'b1010 & bcd0 < 4'b1010) begin
-        bin = {20'h0000, (bcd3 * 12'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1)};
+        bin = {16'h0000, (bcd3 * 16'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1)};
       end else begin
         bin = {28'h000000f, bcd0};
       end
