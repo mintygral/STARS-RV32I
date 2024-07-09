@@ -1541,7 +1541,7 @@ module bcd2bin
 
     always_comb begin
       if(bcd3 < 4'b1010 & bcd2 < 4'b1010 & bcd1 < 4'b1010 & bcd0 < 4'b1010) begin
-        bin = {22'h0000, (bcd3 * 10'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1)};
+        bin = {20'h0000, (bcd3 * 12'd1000) + (bcd2*7'd100) + (bcd1*4'd10) + (bcd0 * 1'd1)};
       end else begin
         bin = {28'h000000f, bcd0};
       end
@@ -1618,7 +1618,7 @@ module bin_to_LCD(
             endcase
             case(BCD_interim[11:8])
                 4'b0000: begin
-                  if(BCD_interim[7:0] == 8'h00) begin
+                  if(BCD_interim[7:0] == 8'h00 | BCD_interim[15:12] != 4'h00) begin
                     LCD_out[23:16] = 8'b00110000;
                   end else begin
                     LCD_out[23:16] = 8'h5f;
@@ -1641,7 +1641,7 @@ module bin_to_LCD(
             endcase
             case(BCD_interim[7:4])
                 4'b0000: begin
-                  if(BCD_interim[3:0] == 4'h0) begin
+                  if(BCD_interim[3:0] == 4'h0 | BCD_interim[15:8] != 8'h00) begin
                     LCD_out[15:8] = 8'b00110000;
                   end else begin
                     LCD_out[15:8] = 8'h5f;
