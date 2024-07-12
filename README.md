@@ -9,6 +9,7 @@
 * Peer Mentor: Pranav Wadhwa
 
 ## Demo Video
+Click on the thumbnail to go to the youtube video of our demo!
 [![YouTube](http://i.ytimg.com/vi/anySU9C3ncY/hqdefault.jpg)](https://www.youtube.com/watch?v=anySU9C3ncY)
 
 ## Project Type
