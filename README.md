@@ -19,10 +19,15 @@ Our project was to create a 32-bit single-cycle RISC-V CPU. We integrated this w
 ## Supporting Equipment
 
 #### 4x4 keypad
+For our calculator program:
+
 * 0-9 for entering numbers
 * "*" for confirming input
 * "#" for clearing input
-  
+* A for adding
+* B for subtraction
+* C for multiplication
+* D for division
 ![keypad](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/io_components/keypad.jpeg)
 
 #### 16x2 GDM1602K LCD screen
