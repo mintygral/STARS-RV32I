@@ -58,7 +58,7 @@ For our calculator program:
 
 ![tb_reg_file](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/sub_modules/tb_sub_modules/tb_reg_file.png)
 
-#### PC
+#### Program Counter (PC)
 ![pc_1](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/sub_modules/pc_1.png)
 
 ![pc_2](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/sub_modules/pc_2.png)
