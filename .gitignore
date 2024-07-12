@@ -1,0 +1,4 @@
+# Ignore specific files in the source/build directory
+source/build/32bitcpu.asc
+source/build/32bitcpu.bin
+source/build/32bitcpu.json
