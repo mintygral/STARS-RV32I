@@ -8,6 +8,9 @@
 * Alex Tauriainen
 * Peer Mentor: Pranav Wadhwa
 
+## Demo Video
+[![Watch the video]]([https://youtu.be/vt5fpE0bzSY](https://drive.google.com/file/d/1dyLN9n84p0jgqZ-qQt25WJPKPVuC3dVu/view?usp=sharing))
+
 ## Project Type
 Our project was to create a 32-bit single-cycle RISC-V CPU. We integrated this with a 4x4 keypad for inputs and a 16x2 LCD screen for outputs. 
 
