@@ -28,6 +28,7 @@ For our calculator program:
 * B for subtraction
 * C for multiplication
 * D for division
+  
 ![keypad](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/io_components/keypad.jpeg)
 
 #### 16x2 GDM1602K LCD screen
