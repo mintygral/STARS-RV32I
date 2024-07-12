@@ -9,7 +9,7 @@
 * Peer Mentor: Pranav Wadhwa
 
 ## Demo Video
-[![Watch the video]]([https://youtu.be/vt5fpE0bzSY](https://drive.google.com/file/d/1dyLN9n84p0jgqZ-qQt25WJPKPVuC3dVu/view?usp=sharing))
+[![YouTube](http://i.ytimg.com/vi/anySU9C3ncY/hqdefault.jpg)](https://www.youtube.com/watch?v=anySU9C3ncY)
 
 ## Project Type
 Our project was to create a 32-bit single-cycle RISC-V CPU. We integrated this with a 4x4 keypad for inputs and a 16x2 LCD screen for outputs. 
@@ -61,6 +61,4 @@ Our project was to create a 32-bit single-cycle RISC-V CPU. We integrated this w
 
 ![tb_mem_control](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/sub_modules/tb_sub_modules/tb_memcontrol.png)
 
-## Statement from Purdue
-Pending
 
