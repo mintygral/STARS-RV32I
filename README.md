@@ -38,6 +38,8 @@ For our calculator program:
 
 ### Top level RTLs
 
+*Note*: These top-level RTLs include a temperature sensor input that is not included in our final demo video. This is because we faced space constraints due to the FPGA so we were not able to fully integrate the temperature sensor as we were planning to.
+
 #### General
 ![top_general](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/top_level/top_general.png)
 
