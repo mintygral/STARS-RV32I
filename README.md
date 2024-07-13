@@ -1,5 +1,23 @@
 # STARS 2024 Design Final Project
 
+- [STARS 2024 Design Final Project](#stars-2024-design-final-project)
+  - [CPU TEAM 5](#cpu-team-5)
+  - [Demo Video](#demo-video)
+  - [Project Type](#project-type)
+  - [Supporting Equipment](#supporting-equipment)
+      - [4x4 keypad](#4x4-keypad)
+      - [16x2 GDM1602K LCD screen](#16x2-gdm1602k-lcd-screen)
+  - [RTL Diagrams](#rtl-diagrams)
+    - [Top level RTLs](#top-level-rtls)
+      - [General](#general)
+      - [Detailed](#detailed)
+    - [Sub-Modules](#sub-modules)
+      - [Control unit](#control-unit)
+      - [Register file](#register-file)
+      - [Program counter (PC)](#program-counter-pc)
+      - [Arithmetic logic unit (ALU)](#arithmetic-logic-unit-alu)
+      - [Memory control (request unit)](#memory-control-request-unit)
+
 ## CPU TEAM 5
 * Berin Celik
 * Shrienidhi Gopalakrishnan
