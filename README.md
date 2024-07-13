@@ -1,7 +1,7 @@
 # STARS 2024 Design Final Project
 
-- [STARS 2024 Design Final Project](#stars-2024-design-final-project)
-  - [CPU TEAM 5](#cpu-team-5)
+- [Table of Contents](#stars-2024-design-final-project)
+  - [CPU Team 5 Members](#cpu-team-5)
   - [Demo Video](#demo-video)
   - [Project Type](#project-type)
   - [Supporting Equipment](#supporting-equipment)
