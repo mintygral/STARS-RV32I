@@ -1,2 +1,2 @@
 *.ags linguist-language=AGS
-*.ags linguist-vendored
+*.ags linguist-vendored=true
