@@ -1,2 +1,3 @@
 *.ags linguist-language=AGS
-*.ags linguist-vendored=true
+build/*.asc linguist-vendored=true
+source/build/*.asc linguist-vendored=true
