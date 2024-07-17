@@ -42,7 +42,7 @@ For our calculator program:
 * 0-9 for entering numbers
 * "*" for confirming input
 * "#" for clearing input
-* A for adding
+* A for addition
 * B for subtraction
 * C for multiplication
 * D for division
