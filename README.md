@@ -55,6 +55,9 @@ For our calculator program:
 #### 16x2 GDM1602K LCD screen
 ![lcd_screen](https://github.com/STARS-Design-Track-2024/nebula-ii-team-05/blob/main/docs/team_05/io_components/lcd_screen.jpg)
 
+#### GDSII Image
+![image](https://github.com/user-attachments/assets/c9b98c74-36cc-4ddd-bc61-5db633397994)
+
 ## Repository Tree
 ```
 📦 
